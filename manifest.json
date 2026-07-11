@@ -1,9 +1,9 @@
 {
-  "name": "Zepbound Progress Tracker",
-  "short_name": "Zepbound Tracker",
+  "name": "Zepbound Health & Meal Planner",
+  "short_name": "Zepbound Planner",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#f4f7f6",
   "theme_color": "#1f6f5f",
-  "description": "A private weekly weight-loss and Zepbound progress tracker."
+  "description": "A private Zepbound health dashboard with a weekly meal planner."
 }

@@ -1,29 +1,70 @@
-# Zepbound Progress Tracker
+# Zepbound Health Dashboard v3
 
-A simple mobile-friendly tracker for GitHub Pages.
+This version expands the original tracker into a health dashboard.
 
-## Features
+## New in v3
 
-- Weekly weight and dose tracking
-- Water, protein, exercise, appetite, and side-effect tracking
-- Weight-loss summary and 10% goal progress
-- Weight trend chart
+- 7-day editable meal planner
+- Balanced, higher-protein, simple, and gentle-on-the-stomach suggestions
+- 3-meal or 3-meal-plus-snack options
+- Automatically generated shopping list
+- Copyable and printable shopping list
+- Meal-plan CSV export
+- Protein-first and smaller-portion prompts
+
+## Health dashboard features
+
+- Weight, BMI, waist, and milestone tracking
+- Zepbound dose, injection site, injection schedule, and pens remaining
+- Refill-date alerts
+- Blood pressure, glucose, A1C, water, protein, exercise, and sleep
+- Side-effect history and most-common symptom
 - CSV export
+- Printable doctor report
+- Optional Google Sheets backup
 - Offline support
-- Data stored only in the browser using localStorage
+- Mobile-friendly layout
 
-## Publish with GitHub Pages
+## Replace the files in GitHub
 
-1. Create a new GitHub repository.
-2. Upload all files from this folder to the repository.
-3. Open the repository's **Settings**.
-4. Select **Pages**.
-5. Under **Build and deployment**, choose **Deploy from a branch**.
-6. Select the **main** branch and the **/root** folder.
-7. Save. GitHub will display the website address after publishing.
+Upload these files to the root of your existing `zepbound-tracker` repository:
+
+- `index.html`
+- `app.js`
+- `styles.css`
+- `manifest.json`
+- `service-worker.js`
+- `README.md`
+
+When GitHub asks whether to replace existing files, confirm the replacement and commit the changes.
+
+## Google Sheets setup
+
+1. Create a blank Google Sheet.
+2. In the sheet, open **Extensions → Apps Script**.
+3. Delete the sample code.
+4. Copy everything from `google-apps-script.gs` into the editor.
+5. Replace `REPLACE_WITH_YOUR_PRIVATE_KEY` with a long private phrase. Keep the quotation marks.
+6. Click **Deploy → New deployment**.
+7. Select **Web app**.
+8. Set **Execute as** to **Me**.
+9. Set **Who has access** to **Anyone**.
+10. Deploy and approve the requested Google permissions.
+11. Copy the web-app URL ending in `/exec`.
+12. Open the tracker, choose **Settings**, and enter:
+    - The Apps Script web-app URL
+    - The same private sync key used in the script
+13. Select **Test Connection**.
+
+The spreadsheet itself stays private. The web app accepts data only when the private key matches.
 
 ## Important
 
-Your tracker data is stored in the browser on the device where you enter it. Clearing browser data, switching browsers, or changing devices will not carry the information over automatically. Use **Export CSV** regularly as a backup.
+Entries are always saved locally first. If Google Sheets is temporarily unavailable, entries remain marked `Pending` and are retried later.
 
-This app is for personal organization only and does not replace medical advice.
+This dashboard is for personal organization and does not replace medical advice.
+
+
+## Meal-planner note
+
+Meal suggestions are general examples rather than a prescribed medical diet. Adjust foods for allergies, kidney disease, diabetes treatment, swallowing problems, or other clinician-directed restrictions.

@@ -3,221 +3,152 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#1f6f5f" />
-  <title>Zepbound Health Dashboard</title>
+  <meta name="theme-color" content="#6c8a5a" />
+  <title>My Zepbound Journey</title>
   <link rel="manifest" href="manifest.json" />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <header class="app-header">
-    <div>
-      <h1>Zepbound Health Dashboard</h1>
-      <p>Weight, medication, health, and progress tracking in one place.</p>
+  <header class="hero">
+    <div class="hero-copy">
+      <p class="eyebrow">My Zepbound Journey</p>
+      <h1>Focus on the process.</h1>
+      <p class="hero-subtitle">Small steps, steady habits, and one good day at a time.</p>
     </div>
-    <div class="header-actions">
-      <button id="installBtn" class="secondary hidden">Install App</button>
-      <button id="settingsBtn" class="secondary">Settings</button>
-    </div>
+    <button id="settingsBtn" class="ghost-btn">Settings</button>
   </header>
 
   <main>
-    <section id="alertBox" class="alert hidden"></section>
-
-    <section class="card">
-      <div class="section-heading">
-        <h2>Progress Summary</h2>
-        <span id="syncBadge" class="badge neutral">Local only</span>
+    <section class="focus-card">
+      <div>
+        <p class="eyebrow light">Today's focus</p>
+        <h2>Do the simple things that move you forward.</h2>
       </div>
-
-      <div class="summary-grid">
-        <div><span>Starting weight</span><strong id="startWeight">328.0 lb</strong></div>
-        <div><span>Current weight</span><strong id="currentWeight">—</strong></div>
-        <div><span>Total lost</span><strong id="totalLost">—</strong></div>
-        <div><span>Percent lost</span><strong id="percentLost">—</strong></div>
-        <div><span>Current BMI</span><strong id="currentBmi">—</strong></div>
-        <div><span>Waist change</span><strong id="waistChange">—</strong></div>
-        <div><span>Next injection</span><strong id="nextInjection">—</strong></div>
-        <div><span>Pens remaining</span><strong id="pensRemainingSummary">—</strong></div>
+      <div class="focus-grid">
+        <button class="focus-item" data-focus="water">
+          <span class="icon">💧</span>
+          <span>Hydrate</span>
+          <strong id="waterFocus">0 / 80 oz</strong>
+        </button>
+        <button class="focus-item" data-focus="protein">
+          <span class="icon">🌿</span>
+          <span>Protein</span>
+          <strong id="proteinFocus">0 / 100 g</strong>
+        </button>
+        <button class="focus-item" data-focus="activity">
+          <span class="icon">👟</span>
+          <span>Move</span>
+          <strong id="activityFocus">0 / 30 min</strong>
+        </button>
+        <button class="focus-item" data-focus="meals">
+          <span class="icon">🥣</span>
+          <span>Plan meals</span>
+          <strong id="mealsFocus">0 / 3</strong>
+        </button>
+        <button class="focus-item" data-focus="shot">
+          <span class="icon">💉</span>
+          <span>Take your shot</span>
+          <strong id="shotFocus">Not logged</strong>
+        </button>
       </div>
-
-      <div class="goal-wrap">
-        <div class="goal-label">
-          <span>Progress toward first 10% goal</span>
-          <span id="goalText">0%</span>
-        </div>
-        <div class="progress-track"><div id="goalBar" class="progress-bar"></div></div>
-      </div>
-
-      <div id="milestones" class="milestones"></div>
     </section>
 
-    <section class="card">
-      <h2>Add Weekly Entry</h2>
-      <form id="entryForm">
-        <div class="form-grid">
-          <label>Date
-            <input id="date" type="date" required />
-          </label>
-          <label>Weight (lb)
-            <input id="weight" type="number" step="0.1" min="100" max="700" required />
-          </label>
-          <label>Waist (inches)
-            <input id="waist" type="number" step="0.1" min="20" max="100" />
-          </label>
-          <label>Zepbound dose
-            <select id="dose">
-              <option value="2.5 mg">2.5 mg</option>
-              <option value="5 mg">5 mg</option>
-              <option value="7.5 mg">7.5 mg</option>
-              <option value="10 mg">10 mg</option>
-              <option value="12.5 mg">12.5 mg</option>
-              <option value="15 mg">15 mg</option>
-              <option value="Skipped">Skipped</option>
-            </select>
-          </label>
-          <label>Injection site
-            <select id="site">
-              <option>Abdomen</option>
-              <option>Thigh</option>
-              <option>Upper arm</option>
-            </select>
-          </label>
-          <label>Injection taken?
-            <select id="injectionTaken">
-              <option value="Yes">Yes</option>
-              <option value="No">No</option>
-            </select>
-          </label>
-          <label>Blood pressure systolic
-            <input id="systolic" type="number" min="60" max="250" placeholder="120" />
-          </label>
-          <label>Blood pressure diastolic
-            <input id="diastolic" type="number" min="30" max="150" placeholder="70" />
-          </label>
-          <label>Blood glucose (optional)
-            <input id="glucose" type="number" min="30" max="600" />
-          </label>
-          <label>A1C % (optional)
-            <input id="a1c" type="number" step="0.1" min="3" max="20" />
-          </label>
-          <label>Water (oz/day average)
-            <input id="water" type="number" min="0" max="300" />
-          </label>
-          <label>Protein (g/day average)
-            <input id="protein" type="number" min="0" max="400" />
-          </label>
-          <label>Exercise days this week
-            <input id="exercise" type="number" min="0" max="7" />
-          </label>
-          <label>Sleep (hours/night average)
-            <input id="sleep" type="number" step="0.1" min="0" max="24" />
-          </label>
-          <label>Appetite level
-            <select id="appetite">
-              <option value="1">1 — Very low</option>
-              <option value="2">2 — Low</option>
-              <option value="3" selected>3 — Moderate</option>
-              <option value="4">4 — High</option>
-              <option value="5">5 — Very high</option>
-            </select>
-          </label>
-          <label>Pens remaining
-            <input id="pensRemaining" type="number" min="0" max="100" />
-          </label>
-          <label>Refill date
-            <input id="refillDate" type="date" />
-          </label>
-          <label>Goal weight
-            <input id="goalWeight" type="number" step="0.1" min="100" max="700" />
-          </label>
-        </div>
-
-        <fieldset>
-          <legend>Side effects</legend>
-          <div class="check-grid">
-            <label><input type="checkbox" value="Nausea" class="sideEffect"> Nausea</label>
-            <label><input type="checkbox" value="Constipation" class="sideEffect"> Constipation</label>
-            <label><input type="checkbox" value="Diarrhea" class="sideEffect"> Diarrhea</label>
-            <label><input type="checkbox" value="Vomiting" class="sideEffect"> Vomiting</label>
-            <label><input type="checkbox" value="Heartburn" class="sideEffect"> Heartburn</label>
-            <label><input type="checkbox" value="Fatigue" class="sideEffect"> Fatigue</label>
-            <label><input type="checkbox" value="Injection-site reaction" class="sideEffect"> Injection-site reaction</label>
-            <label><input type="checkbox" value="None" class="sideEffect"> None</label>
+    <section class="dashboard-grid">
+      <article class="card daily-card">
+        <div class="card-heading">
+          <div>
+            <p class="eyebrow">Daily check-in</p>
+            <h2>How did today go?</h2>
           </div>
-        </fieldset>
+          <span id="todayDate" class="date-pill"></span>
+        </div>
 
-        <label>Notes
-          <textarea id="notes" rows="4" placeholder="How you felt, food changes, activity, questions for your doctor..."></textarea>
+        <form id="dailyForm">
+          <div class="daily-grid">
+            <label>Water
+              <div class="input-wrap"><input id="water" type="number" min="0" max="300" placeholder="0"><span>oz</span></div>
+            </label>
+            <label>Protein
+              <div class="input-wrap"><input id="protein" type="number" min="0" max="400" placeholder="0"><span>g</span></div>
+            </label>
+            <label>Activity
+              <div class="input-wrap"><input id="activity" type="number" min="0" max="300" placeholder="0"><span>min</span></div>
+            </label>
+            <label>Sleep
+              <div class="input-wrap"><input id="sleep" type="number" step="0.1" min="0" max="24" placeholder="0"><span>hr</span></div>
+            </label>
+            <label>Meals planned
+              <select id="mealsPlanned">
+                <option value="0">Not yet</option>
+                <option value="1">1 meal</option>
+                <option value="2">2 meals</option>
+                <option value="3">3 meals</option>
+              </select>
+            </label>
+            <label>Energy
+              <select id="energy">
+                <option value="">Choose</option>
+                <option>Low</option>
+                <option>Okay</option>
+                <option>Good</option>
+                <option>Great</option>
+              </select>
+            </label>
+          </div>
+
+          <div class="shot-row">
+            <label class="check-card"><input id="shotTaken" type="checkbox"> <span>Injection taken today</span></label>
+            <label>Current dose
+              <select id="dose">
+                <option>2.5 mg</option>
+                <option>5 mg</option>
+                <option>7.5 mg</option>
+                <option>10 mg</option>
+                <option>12.5 mg</option>
+                <option>15 mg</option>
+              </select>
+            </label>
+          </div>
+
+          <label>Quick note
+            <textarea id="notes" rows="3" placeholder="What went well? What felt hard?"></textarea>
+          </label>
+
+          <div class="button-row">
+            <button type="submit">Save Today</button>
+            <button type="button" id="clearDailyBtn" class="secondary">Clear</button>
+          </div>
+        </form>
+      </article>
+
+      <article class="card victory-card">
+        <p class="eyebrow">Non-scale victories</p>
+        <h2>Notice what is getting better.</h2>
+        <div class="victory-options">
+          <label><input type="checkbox" value="More energy"> More energy</label>
+          <label><input type="checkbox" value="Sleeping better"> Sleeping better</label>
+          <label><input type="checkbox" value="Less hungry"> Less hunger</label>
+          <label><input type="checkbox" value="Clothes fit better"> Clothes fit better</label>
+          <label><input type="checkbox" value="Moving easier"> Moving easier</label>
+          <label><input type="checkbox" value="Better choices"> Better choices</label>
+        </div>
+        <label>Add your own
+          <input id="customVictory" type="text" placeholder="Example: walked farther today">
         </label>
+        <button id="saveVictoriesBtn">Save Victories</button>
+        <div id="victoryList" class="victory-list"></div>
+      </article>
+    </section>
 
-        <div class="button-row">
-          <button type="submit">Save Entry</button>
-          <button type="button" id="clearFormBtn" class="secondary">Clear Form</button>
+    <section class="card meal-card">
+      <div class="card-heading">
+        <div>
+          <p class="eyebrow">Meal planner</p>
+          <h2>Simple meals that make the week easier.</h2>
         </div>
-      </form>
-    </section>
-
-    <section class="card">
-      <div class="section-heading">
-        <h2>Weight Trend</h2>
         <div class="button-cluster">
-          <button id="printBtn" class="secondary">Print Doctor Report</button>
-          <button id="exportBtn" class="secondary">Export CSV</button>
-        </div>
-      </div>
-      <canvas id="weightChart" width="1000" height="380" aria-label="Weight trend chart"></canvas>
-    </section>
-
-    <section class="card">
-      <h2>Health Snapshot</h2>
-      <div class="summary-grid">
-        <div><span>Latest blood pressure</span><strong id="latestBp">—</strong></div>
-        <div><span>Latest glucose</span><strong id="latestGlucose">—</strong></div>
-        <div><span>Latest A1C</span><strong id="latestA1c">—</strong></div>
-        <div><span>Average sleep</span><strong id="avgSleep">—</strong></div>
-        <div><span>Average water</span><strong id="avgWater">—</strong></div>
-        <div><span>Average protein</span><strong id="avgProtein">—</strong></div>
-        <div><span>Exercise average</span><strong id="avgExercise">—</strong></div>
-        <div><span>Most common symptom</span><strong id="commonSymptom">—</strong></div>
-      </div>
-    </section>
-
-    <section class="card">
-      <div class="section-heading">
-        <h2>History</h2>
-        <button id="resetBtn" class="danger">Delete All Data</button>
-      </div>
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Date</th>
-              <th>Weight</th>
-              <th>Waist</th>
-              <th>Dose</th>
-              <th>BP</th>
-              <th>Water</th>
-              <th>Protein</th>
-              <th>Exercise</th>
-              <th>Sleep</th>
-              <th>Side effects</th>
-              <th>Sync</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody id="historyBody"></tbody>
-        </table>
-      </div>
-    </section>
-
-
-    <section class="card">
-      <div class="section-heading">
-        <h2>7-Day Meal Planner</h2>
-        <div class="button-cluster">
-          <button id="generateMealsBtn" class="secondary">Suggest a Week</button>
-          <button id="shoppingListBtn" class="secondary">Build Shopping List</button>
-          <button id="clearMealsBtn" class="danger">Clear Plan</button>
+          <button id="suggestMealsBtn" class="secondary">Suggest a Week</button>
+          <button id="shoppingListBtn" class="secondary">Shopping List</button>
         </div>
       </div>
 
@@ -230,13 +161,6 @@
             <option value="gentle">Gentle on the stomach</option>
           </select>
         </label>
-        <label>Daily protein goal
-          <select id="mealProteinGoal">
-            <option value="90">About 90 g</option>
-            <option value="110" selected>About 110 g</option>
-            <option value="130">About 130 g</option>
-          </select>
-        </label>
         <label>Meals per day
           <select id="mealsPerDay">
             <option value="3">3 meals</option>
@@ -245,23 +169,7 @@
         </label>
       </div>
 
-      <p class="small">Suggestions favor smaller portions, protein-first meals, vegetables, and foods that are often easier to tolerate while taking Zepbound. Adjust portions to your appetite and clinician’s advice.</p>
-
-      <div class="table-wrap">
-        <table class="meal-table">
-          <thead>
-            <tr>
-              <th>Day</th>
-              <th>Breakfast</th>
-              <th>Lunch</th>
-              <th>Dinner</th>
-              <th>Snack</th>
-              <th>Notes</th>
-            </tr>
-          </thead>
-          <tbody id="mealPlanBody"></tbody>
-        </table>
-      </div>
+      <div class="meal-week" id="mealWeek"></div>
 
       <div class="button-row">
         <button id="saveMealsBtn">Save Meal Plan</button>
@@ -269,71 +177,81 @@
       </div>
     </section>
 
-    <dialog id="shoppingDialog">
-      <form method="dialog" class="settings-form">
-        <div class="section-heading">
-          <h2>Shopping List</h2>
-          <button value="cancel" class="secondary">Close</button>
+    <section class="card history-card">
+      <div class="card-heading">
+        <div>
+          <p class="eyebrow">Recent habits</p>
+          <h2>Your consistency is the story.</h2>
         </div>
-        <div id="shoppingList" class="shopping-list"></div>
-        <div class="button-row">
-          <button type="button" id="copyShoppingBtn">Copy List</button>
-          <button type="button" id="printShoppingBtn" class="secondary">Print</button>
-        </div>
-      </form>
-    </dialog>
+        <button id="exportBtn" class="secondary">Export Data</button>
+      </div>
+      <div id="habitHistory" class="habit-history"></div>
+    </section>
 
-    <section class="card notice">
-      <h2>Safety Reminder</h2>
-      <p>This tracker is for personal organization and does not replace medical advice. Contact your clinician for severe or persistent abdominal pain, repeated vomiting, dehydration, yellowing of the skin or eyes, or any urgent concern.</p>
+    <section class="card progress-card">
+      <div class="card-heading">
+        <div>
+          <p class="eyebrow">Progress, when you want to see it</p>
+          <h2>Weight trend</h2>
+        </div>
+        <button id="toggleProgressBtn" class="secondary">Show Progress</button>
+      </div>
+      <div id="progressPanel" class="hidden">
+        <div class="progress-summary">
+          <div><span>Starting</span><strong id="startWeight">328.0 lb</strong></div>
+          <div><span>Current</span><strong id="currentWeight">—</strong></div>
+          <div><span>Change</span><strong id="totalChange">—</strong></div>
+        </div>
+        <form id="weightForm" class="weight-form">
+          <label>Date
+            <input id="weightDate" type="date">
+          </label>
+          <label>Weight
+            <div class="input-wrap"><input id="weight" type="number" step="0.1" min="100" max="700"><span>lb</span></div>
+          </label>
+          <button type="submit">Add Weight</button>
+        </form>
+        <canvas id="weightChart" width="1000" height="340"></canvas>
+      </div>
+    </section>
+
+    <section class="encouragement">
+      <p>“You do not have to be perfect. You just have to keep showing up.”</p>
     </section>
   </main>
 
-  <dialog id="settingsDialog">
-    <form method="dialog" class="settings-form">
-      <div class="section-heading">
-        <h2>Settings</h2>
+  <dialog id="shoppingDialog">
+    <form method="dialog" class="dialog-card">
+      <div class="card-heading">
+        <h2>Shopping List</h2>
         <button value="cancel" class="secondary">Close</button>
       </div>
-
-      <label>Starting weight (lb)
-        <input id="settingStartWeight" type="number" step="0.1" min="100" max="700" />
-      </label>
-      <label>Height (feet)
-        <input id="heightFeet" type="number" min="3" max="8" />
-      </label>
-      <label>Height (inches)
-        <input id="heightInches" type="number" min="0" max="11" />
-      </label>
-      <label>Injection weekday
-        <select id="injectionWeekday">
-          <option value="0">Sunday</option>
-          <option value="1">Monday</option>
-          <option value="2">Tuesday</option>
-          <option value="3">Wednesday</option>
-          <option value="4">Thursday</option>
-          <option value="5">Friday</option>
-          <option value="6">Saturday</option>
-        </select>
-      </label>
-      <label>Google Apps Script web-app URL
-        <input id="sheetUrl" type="url" placeholder="https://script.google.com/macros/s/.../exec" />
-      </label>
-      <label>Private sync key
-        <input id="syncKey" type="password" placeholder="Create a long private key" />
-      </label>
-
-      <div class="button-row">
-        <button type="button" id="saveSettingsBtn">Save Settings</button>
-        <button type="button" id="testSyncBtn" class="secondary">Test Connection</button>
-      </div>
-      <p class="small">Your web-app URL and sync key are stored only in this browser. Existing unsynced entries will be retried when you save a new entry or test the connection.</p>
+      <div id="shoppingList"></div>
+      <button type="button" id="copyShoppingBtn">Copy List</button>
     </form>
   </dialog>
 
-  <footer>
-    <p>Your records remain in this browser and can optionally be copied to your private Google Sheet.</p>
-  </footer>
+  <dialog id="settingsDialog">
+    <form method="dialog" class="dialog-card">
+      <div class="card-heading">
+        <h2>Settings</h2>
+        <button value="cancel" class="secondary">Close</button>
+      </div>
+      <label>Starting weight
+        <input id="settingStartWeight" type="number" step="0.1" min="100" max="700">
+      </label>
+      <label>Water goal
+        <input id="settingWaterGoal" type="number" min="0" max="300">
+      </label>
+      <label>Protein goal
+        <input id="settingProteinGoal" type="number" min="0" max="400">
+      </label>
+      <label>Activity goal
+        <input id="settingActivityGoal" type="number" min="0" max="300">
+      </label>
+      <button type="button" id="saveSettingsBtn">Save Settings</button>
+    </form>
+  </dialog>
 
   <script src="app.js"></script>
 </body>

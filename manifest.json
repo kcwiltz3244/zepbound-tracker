@@ -1,9 +1,9 @@
 {
-  "name": "Zepbound Health & Meal Planner",
-  "short_name": "Zepbound Planner",
+  "name": "My Zepbound Journey",
+  "short_name": "My Journey",
   "start_url": "./",
   "display": "standalone",
-  "background_color": "#f4f7f6",
-  "theme_color": "#1f6f5f",
-  "description": "A private Zepbound health dashboard with a weekly meal planner."
+  "background_color": "#fbf7ef",
+  "theme_color": "#6c8a5a",
+  "description": "A calm, process-focused Zepbound wellness and meal planning dashboard."
 }

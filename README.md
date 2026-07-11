@@ -1,26 +1,24 @@
-# My Zepbound Journey — Process Dashboard v5
+# My Zepbound Journey — Version 6
 
-This version shifts the app away from a clinical health dashboard and toward a calmer, habit-based journey.
+A complete rebuild focused on the process instead of the scale.
 
-## What changed
+## Highlights
 
-- Progress summary moved to the bottom and hidden until requested
-- Removed blood pressure
-- Removed blood glucose
-- Removed A1C
-- Removed pens remaining
-- Removed refill date
-- Removed BP from history
-- Added a process-first daily focus
-- Added daily habit check-ins
-- Added non-scale victories
-- Added a warmer, softer visual design
-- Kept the 7-day meal planner and shopping list
-- Kept optional weight tracking without making it the main focus
+- App-style bottom navigation
+- Blue-centered design with aqua, indigo, orange, purple, teal, and gold accents
+- Daily habit progress cards
+- Daily check-in for water, protein, movement, sleep, mood, appetite, dose, and notes
+- Today's wins and non-scale victories
+- Swipeable 7-day meal planner
+- Automatic shopping list
+- Personal journey timeline
+- Weight tracking moved to its own Progress tab
+- Mobile-friendly and installable
+- Data stored privately in the browser
 
-## Update GitHub Pages
+## Update your GitHub repository
 
-Upload these files to the root of your existing repository and replace the old versions:
+Upload these files to the root of your existing repository and replace the previous versions:
 
 - `index.html`
 - `styles.css`
@@ -29,18 +27,8 @@ Upload these files to the root of your existing repository and replace the old v
 - `service-worker.js`
 - `README.md`
 
-After committing, wait about a minute and refresh your GitHub Pages site.
+After committing the changes, GitHub Pages or Netlify will redeploy automatically.
 
-Your saved data from older versions may not automatically appear because this redesign uses a new process-focused data structure.
+## Important
 
-
-## Visual polish in v5
-
-- Softer layered background
-- Richer green focus section
-- More elegant typography
-- Decorative card accents
-- Improved meal-plan cards
-- Better spacing and shadows
-- Prettier buttons, chips, and inputs
-- Added a welcoming consistency message
+Version 6 uses a new data structure. Data saved in previous versions will not automatically appear in this rebuild.

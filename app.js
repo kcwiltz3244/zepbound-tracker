@@ -1,23 +1,26 @@
 
-const DAILY_KEY = "zepboundProcessDailyV1";
-const WEIGHT_KEY = "zepboundProcessWeightsV1";
-const MEAL_KEY = "zepboundProcessMealsV1";
-const VICTORY_KEY = "zepboundProcessVictoriesV1";
-const SETTINGS_KEY = "zepboundProcessSettingsV1";
+const DAILY_KEY = "mzjV6Daily";
+const WINS_KEY = "mzjV6Wins";
+const MEALS_KEY = "mzjV6Meals";
+const WEIGHTS_KEY = "mzjV6Weights";
+const SETTINGS_KEY = "mzjV6Settings";
 
 const defaults = {
+  name: "Kev",
+  startDate: new Date().toISOString().split("T")[0],
   startingWeight: 328,
   waterGoal: 80,
   proteinGoal: 100,
-  activityGoal: 30
+  movementGoal: 30,
+  sleepGoal: 8
 };
 
 const days = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"];
 
 const mealSuggestions = {
   balanced: {
-    breakfast: ["Greek yogurt with berries","Eggs and whole-grain toast","Oatmeal with peanut butter","Cottage cheese and fruit","Egg and turkey wrap","Protein smoothie","Scrambled eggs and avocado"],
-    lunch: ["Grilled chicken salad","Turkey wrap and fruit","Tuna with crackers","Chicken soup and half sandwich","Leftover protein and vegetables","Chicken and bean bowl","Cottage cheese plate"],
+    breakfast: ["Greek yogurt and berries","Eggs and toast","Oatmeal and peanut butter","Cottage cheese and fruit","Egg and turkey wrap","Protein smoothie","Scrambled eggs and avocado"],
+    lunch: ["Chicken salad","Turkey wrap and fruit","Tuna and crackers","Chicken soup and half sandwich","Leftover protein and vegetables","Chicken and bean bowl","Cottage cheese plate"],
     dinner: ["Baked chicken, green beans, potato","Salmon, vegetables, rice","Turkey meatballs and vegetables","Beef and vegetable stir-fry","Pork tenderloin and sweet potato","Turkey chili and salad","Shrimp tacos and slaw"],
     snack: ["Cheese stick and apple","Protein shake","Greek yogurt","Cottage cheese","Turkey roll-ups","Egg and fruit","Small handful of nuts"]
   },
@@ -46,33 +49,64 @@ function todayString() {
   const offset = now.getTimezoneOffset();
   return new Date(now.getTime() - offset * 60000).toISOString().split("T")[0];
 }
-
-function read(key, fallback = []) {
-  try { return JSON.parse(localStorage.getItem(key)) || fallback; }
+function read(key, fallback) {
+  try { return JSON.parse(localStorage.getItem(key)) ?? fallback; }
   catch { return fallback; }
 }
-function write(key, value) {
-  localStorage.setItem(key, JSON.stringify(value));
-}
-function settings() {
-  return { ...defaults, ...read(SETTINGS_KEY, {}) };
-}
+function write(key, value) { localStorage.setItem(key, JSON.stringify(value)); }
+function settings() { return {...defaults, ...read(SETTINGS_KEY, {})}; }
 function escapeHtml(value = "") {
   return String(value).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;");
 }
+function downloadCsv(filename, rows) {
+  const csv = rows.map(row => row.map(v => `"${String(v ?? "").replaceAll('"','""')}"`).join(",")).join("\n");
+  const blob = new Blob([csv], {type:"text/csv"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = filename; a.click();
+  URL.revokeObjectURL(url);
+}
+function progress(value, goal) {
+  return Math.max(0, Math.min(100, goal ? (Number(value) / Number(goal)) * 100 : 0));
+}
 
-document.getElementById("todayDate").textContent = new Date().toLocaleDateString(undefined, {weekday:"long", month:"long", day:"numeric"});
-document.getElementById("weightDate").value = todayString();
+function setGreeting() {
+  const hour = new Date().getHours();
+  const word = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
+  const s = settings();
+  document.getElementById("greeting").textContent = `${word}, ${s.name}`;
+  document.getElementById("todayLabel").textContent = new Date().toLocaleDateString(undefined,{weekday:"short",month:"short",day:"numeric"});
+  const start = new Date(s.startDate + "T00:00:00");
+  const daysSince = Math.max(0, Math.floor((new Date() - start) / 86400000));
+  document.getElementById("journeyWeek").textContent = Math.floor(daysSince / 7) + 1;
+}
 
 function loadToday() {
   const daily = read(DAILY_KEY, []);
   const today = daily.find(d => d.date === todayString());
   if (!today) return;
-  ["water","protein","activity","sleep","mealsPlanned","energy","dose","notes"].forEach(id => {
+  ["water","protein","movement","sleep","mood","appetite","dose","notes"].forEach(id => {
     const el = document.getElementById(id);
     if (el && today[id] !== undefined) el.value = today[id];
   });
   document.getElementById("shotTaken").checked = Boolean(today.shotTaken);
+}
+
+function renderToday() {
+  const s = settings();
+  const daily = read(DAILY_KEY, []);
+  const today = daily.find(d => d.date === todayString()) || {};
+  document.getElementById("waterValue").textContent = `${today.water || 0} / ${s.waterGoal} oz`;
+  document.getElementById("proteinValue").textContent = `${today.protein || 0} / ${s.proteinGoal} g`;
+  document.getElementById("movementValue").textContent = `${today.movement || 0} / ${s.movementGoal} min`;
+  document.getElementById("sleepValue").textContent = `${today.sleep || 0} / ${s.sleepGoal} hr`;
+  document.getElementById("shotValue").textContent = today.shotTaken ? "Complete" : "Not logged";
+  document.getElementById("currentDose").textContent = today.dose || document.getElementById("dose").value || "2.5 mg";
+  document.getElementById("waterMeter").style.width = `${progress(today.water, s.waterGoal)}%`;
+  document.getElementById("proteinMeter").style.width = `${progress(today.protein, s.proteinGoal)}%`;
+  document.getElementById("movementMeter").style.width = `${progress(today.movement, s.movementGoal)}%`;
+  document.getElementById("sleepMeter").style.width = `${progress(today.sleep, s.sleepGoal)}%`;
+  document.getElementById("shotMeter").style.width = today.shotTaken ? "100%" : "0%";
 }
 
 document.getElementById("dailyForm").addEventListener("submit", event => {
@@ -81,59 +115,76 @@ document.getElementById("dailyForm").addEventListener("submit", event => {
     date: todayString(),
     water: Number(document.getElementById("water").value) || 0,
     protein: Number(document.getElementById("protein").value) || 0,
-    activity: Number(document.getElementById("activity").value) || 0,
+    movement: Number(document.getElementById("movement").value) || 0,
     sleep: Number(document.getElementById("sleep").value) || 0,
-    mealsPlanned: Number(document.getElementById("mealsPlanned").value) || 0,
-    energy: document.getElementById("energy").value,
+    mood: document.getElementById("mood").value,
+    appetite: document.getElementById("appetite").value,
     shotTaken: document.getElementById("shotTaken").checked,
     dose: document.getElementById("dose").value,
     notes: document.getElementById("notes").value.trim()
   };
   const daily = read(DAILY_KEY, []);
-  const idx = daily.findIndex(d => d.date === entry.date);
-  if (idx >= 0) daily[idx] = entry; else daily.push(entry);
+  const index = daily.findIndex(d => d.date === entry.date);
+  if (index >= 0) daily[index] = entry; else daily.push(entry);
   daily.sort((a,b) => new Date(a.date)-new Date(b.date));
   write(DAILY_KEY, daily);
   renderAll();
-  alert("Today's check-in was saved.");
+  alert("Today was saved.");
 });
 
-document.getElementById("clearDailyBtn").addEventListener("click", () => {
-  document.getElementById("dailyForm").reset();
-  renderFocus();
+let selectedWins = new Set();
+document.querySelectorAll("[data-win]").forEach(button => {
+  button.addEventListener("click", () => {
+    const win = button.dataset.win;
+    if (selectedWins.has(win)) {
+      selectedWins.delete(win);
+      button.classList.remove("selected");
+    } else {
+      selectedWins.add(win);
+      button.classList.add("selected");
+    }
+  });
+});
+document.getElementById("saveWinBtn").addEventListener("click", () => {
+  const custom = document.getElementById("customWin").value.trim();
+  const wins = read(WINS_KEY, []);
+  let today = wins.find(w => w.date === todayString());
+  if (!today) {
+    today = {date: todayString(), wins: []};
+    wins.push(today);
+  }
+  today.wins = [...new Set([...today.wins, ...selectedWins, ...(custom ? [custom] : [])])];
+  write(WINS_KEY, wins);
+  selectedWins = new Set();
+  document.querySelectorAll("[data-win]").forEach(b => b.classList.remove("selected"));
+  document.getElementById("customWin").value = "";
+  renderWins();
 });
 
-function renderFocus() {
-  const s = settings();
-  const daily = read(DAILY_KEY, []);
-  const today = daily.find(d => d.date === todayString()) || {};
-  document.getElementById("waterFocus").textContent = `${today.water || 0} / ${s.waterGoal} oz`;
-  document.getElementById("proteinFocus").textContent = `${today.protein || 0} / ${s.proteinGoal} g`;
-  document.getElementById("activityFocus").textContent = `${today.activity || 0} / ${s.activityGoal} min`;
-  document.getElementById("mealsFocus").textContent = `${today.mealsPlanned || 0} / 3`;
-  document.getElementById("shotFocus").textContent = today.shotTaken ? "Done" : "Not logged";
+function renderWins() {
+  const wins = read(WINS_KEY, []);
+  const today = wins.find(w => w.date === todayString());
+  document.getElementById("winsList").innerHTML = today?.wins?.map(win => `<span class="win-chip">⭐ ${escapeHtml(win)}</span>`).join("") || "";
 }
 
 function blankMeals() {
   return days.map(day => ({day, breakfast:"", lunch:"", dinner:"", snack:""}));
 }
-function mealPlan() {
-  return read(MEAL_KEY, blankMeals());
-}
+function mealPlan() { return read(MEALS_KEY, blankMeals()); }
 function renderMeals(plan = mealPlan()) {
-  document.getElementById("mealWeek").innerHTML = plan.map((m, i) => `
+  document.getElementById("mealCarousel").innerHTML = plan.map((meal, index) => `
     <article class="meal-day">
-      <h3>${m.day}</h3>
-      <textarea data-day="${i}" data-meal="breakfast" placeholder="Breakfast">${escapeHtml(m.breakfast)}</textarea>
-      <textarea data-day="${i}" data-meal="lunch" placeholder="Lunch">${escapeHtml(m.lunch)}</textarea>
-      <textarea data-day="${i}" data-meal="dinner" placeholder="Dinner">${escapeHtml(m.dinner)}</textarea>
-      <textarea data-day="${i}" data-meal="snack" placeholder="Snack">${escapeHtml(m.snack)}</textarea>
+      <h3>${meal.day}</h3>
+      <textarea data-day="${index}" data-meal="breakfast" placeholder="Breakfast">${escapeHtml(meal.breakfast)}</textarea>
+      <textarea data-day="${index}" data-meal="lunch" placeholder="Lunch">${escapeHtml(meal.lunch)}</textarea>
+      <textarea data-day="${index}" data-meal="dinner" placeholder="Dinner">${escapeHtml(meal.dinner)}</textarea>
+      <textarea data-day="${index}" data-meal="snack" placeholder="Snack">${escapeHtml(meal.snack)}</textarea>
     </article>
   `).join("");
 }
 function collectMeals() {
   const plan = blankMeals();
-  document.querySelectorAll("#mealWeek textarea").forEach(el => {
+  document.querySelectorAll("#mealCarousel textarea").forEach(el => {
     plan[Number(el.dataset.day)][el.dataset.meal] = el.value.trim();
   });
   return plan;
@@ -141,23 +192,22 @@ function collectMeals() {
 document.getElementById("suggestMealsBtn").addEventListener("click", () => {
   const style = document.getElementById("mealStyle").value;
   const includeSnack = document.getElementById("mealsPerDay").value === "4";
-  const src = mealSuggestions[style];
-  const plan = days.map((day,i) => ({
+  const source = mealSuggestions[style];
+  renderMeals(days.map((day,index) => ({
     day,
-    breakfast: src.breakfast[i],
-    lunch: src.lunch[i],
-    dinner: src.dinner[i],
-    snack: includeSnack ? src.snack[i] : ""
-  }));
-  renderMeals(plan);
+    breakfast: source.breakfast[index],
+    lunch: source.lunch[index],
+    dinner: source.dinner[index],
+    snack: includeSnack ? source.snack[index] : ""
+  })));
 });
 document.getElementById("saveMealsBtn").addEventListener("click", () => {
-  write(MEAL_KEY, collectMeals());
+  write(MEALS_KEY, collectMeals());
   alert("Meal plan saved.");
 });
 document.getElementById("exportMealsBtn").addEventListener("click", () => {
   const rows = [["Day","Breakfast","Lunch","Dinner","Snack"], ...collectMeals().map(m => [m.day,m.breakfast,m.lunch,m.dinner,m.snack])];
-  downloadCsv("zepbound-meal-plan.csv", rows);
+  downloadCsv("my-zepbound-meal-plan.csv", rows);
 });
 
 function shoppingGroups(plan) {
@@ -168,167 +218,169 @@ function shoppingGroups(plan) {
     Dairy: [["yogurt","Greek yogurt"],["cottage cheese","Cottage cheese"],["cheese","Cheese"]],
     Pantry: [["oatmeal","Oatmeal"],["rice","Rice"],["toast","Whole-grain bread"],["wrap","Whole-grain wraps"],["cracker","Crackers"],["bean","Beans"],["nuts","Nuts"],["peanut butter","Peanut butter"],["protein shake","Protein shakes"]]
   };
-  const out = {};
-  Object.entries(map).forEach(([group, items]) => {
-    out[group] = items.filter(([key]) => text.includes(key)).map(([,label]) => label);
-  });
-  return out;
+  const output = {};
+  Object.entries(map).forEach(([group, items]) => output[group] = items.filter(([key]) => text.includes(key)).map(([,label]) => label));
+  return output;
 }
 document.getElementById("shoppingListBtn").addEventListener("click", () => {
   const groups = shoppingGroups(collectMeals());
-  document.getElementById("shoppingList").innerHTML = Object.entries(groups).map(([group,items]) => `
+  document.getElementById("shoppingList").innerHTML = Object.entries(groups).map(([group, items]) => `
     <section class="shopping-group"><strong>${group}</strong><div>${items.length ? items.map(i => `• ${i}`).join("<br>") : "Nothing added yet"}</div></section>
   `).join("");
   document.getElementById("shoppingDialog").showModal();
 });
 document.getElementById("copyShoppingBtn").addEventListener("click", async () => {
   const groups = shoppingGroups(collectMeals());
-  const text = Object.entries(groups).map(([g,items]) => `${g}\n${items.map(i=>`- ${i}`).join("\n")}`).join("\n\n");
+  const text = Object.entries(groups).map(([group,items]) => `${group}\n${items.map(i => `- ${i}`).join("\n")}`).join("\n\n");
   await navigator.clipboard.writeText(text);
   alert("Shopping list copied.");
 });
 
-document.getElementById("saveVictoriesBtn").addEventListener("click", () => {
-  const selected = [...document.querySelectorAll(".victory-options input:checked")].map(i => i.value);
-  const custom = document.getElementById("customVictory").value.trim();
-  const existing = read(VICTORY_KEY, []);
-  const all = [...new Set([...existing, ...selected, ...(custom ? [custom] : [])])];
-  write(VICTORY_KEY, all);
-  document.querySelectorAll(".victory-options input").forEach(i => i.checked = false);
-  document.getElementById("customVictory").value = "";
-  renderVictories();
-});
-function renderVictories() {
-  const victories = read(VICTORY_KEY, []);
-  document.getElementById("victoryList").innerHTML = victories.map(v => `<span class="victory-chip">${escapeHtml(v)}</span>`).join("");
-}
-
-function renderHistory() {
-  const daily = [...read(DAILY_KEY, [])].reverse().slice(0, 7);
+function renderStory() {
+  const daily = [...read(DAILY_KEY, [])].reverse();
+  const wins = read(WINS_KEY, []);
   if (!daily.length) {
-    document.getElementById("habitHistory").innerHTML = "<p>No check-ins yet. Your recent habits will appear here.</p>";
+    document.getElementById("storyTimeline").innerHTML = "<p>No entries yet. Your journey will appear here as you check in.</p>";
     return;
   }
-  document.getElementById("habitHistory").innerHTML = daily.map(d => `
-    <div class="habit-row">
-      <strong>${new Date(d.date+"T00:00:00").toLocaleDateString(undefined,{month:"short",day:"numeric"})}</strong>
-      <span>💧 ${d.water || 0} oz</span>
-      <span>🌿 ${d.protein || 0} g</span>
-      <span>👟 ${d.activity || 0} min</span>
-      <span>🌙 ${d.sleep || 0} hr</span>
-      <span>${d.shotTaken ? "💉 Done" : "💉 —"}</span>
-    </div>
-  `).join("");
+  document.getElementById("storyTimeline").innerHTML = daily.map(day => {
+    const dayWins = wins.find(w => w.date === day.date)?.wins || [];
+    return `
+      <article class="timeline-card">
+        <div class="timeline-date">${new Date(day.date+"T00:00:00").toLocaleDateString(undefined,{month:"short",day:"numeric"})}</div>
+        <div>
+          <div class="timeline-details">
+            <span class="timeline-pill">💧 ${day.water || 0} oz</span>
+            <span class="timeline-pill">🥩 ${day.protein || 0} g</span>
+            <span class="timeline-pill">👟 ${day.movement || 0} min</span>
+            <span class="timeline-pill">🌙 ${day.sleep || 0} hr</span>
+            ${day.mood ? `<span class="timeline-pill">🙂 ${escapeHtml(day.mood)}</span>` : ""}
+            ${day.shotTaken ? `<span class="timeline-pill">💉 ${escapeHtml(day.dose)}</span>` : ""}
+            ${dayWins.map(win => `<span class="timeline-pill">⭐ ${escapeHtml(win)}</span>`).join("")}
+          </div>
+          ${day.notes ? `<p class="timeline-note">${escapeHtml(day.notes)}</p>` : ""}
+        </div>
+      </article>
+    `;
+  }).join("");
 }
 
+document.getElementById("exportDataBtn").addEventListener("click", () => {
+  const daily = read(DAILY_KEY, []);
+  const rows = [["Date","Water","Protein","Movement","Sleep","Mood","Appetite","Shot Taken","Dose","Notes"],
+    ...daily.map(d => [d.date,d.water,d.protein,d.movement,d.sleep,d.mood,d.appetite,d.shotTaken?"Yes":"No",d.dose,d.notes])];
+  downloadCsv("my-zepbound-journey-data.csv", rows);
+});
+
+document.getElementById("weightDate").value = todayString();
 document.getElementById("weightForm").addEventListener("submit", event => {
   event.preventDefault();
-  const weight = Number(document.getElementById("weight").value);
   const date = document.getElementById("weightDate").value;
-  if (!weight || !date) return;
-  const weights = read(WEIGHT_KEY, []);
+  const weight = Number(document.getElementById("weight").value);
+  if (!date || !weight) return;
+  const weights = read(WEIGHTS_KEY, []);
   weights.push({date, weight});
-  weights.sort((a,b)=>new Date(a.date)-new Date(b.date));
-  write(WEIGHT_KEY, weights);
+  weights.sort((a,b) => new Date(a.date)-new Date(b.date));
+  write(WEIGHTS_KEY, weights);
   document.getElementById("weight").value = "";
   renderProgress();
 });
-document.getElementById("toggleProgressBtn").addEventListener("click", () => {
-  const panel = document.getElementById("progressPanel");
-  panel.classList.toggle("hidden");
-  document.getElementById("toggleProgressBtn").textContent = panel.classList.contains("hidden") ? "Show Progress" : "Hide Progress";
-  if (!panel.classList.contains("hidden")) renderProgress();
-});
 function renderProgress() {
   const s = settings();
-  const weights = read(WEIGHT_KEY, []);
+  const weights = read(WEIGHTS_KEY, []);
   document.getElementById("startWeight").textContent = `${Number(s.startingWeight).toFixed(1)} lb`;
   if (!weights.length) {
     document.getElementById("currentWeight").textContent = "—";
-    document.getElementById("totalChange").textContent = "—";
+    document.getElementById("weightChange").textContent = "—";
     drawChart([]);
     return;
   }
-  const latest = weights[weights.length-1].weight;
-  const change = s.startingWeight - latest;
-  document.getElementById("currentWeight").textContent = `${latest.toFixed(1)} lb`;
-  document.getElementById("totalChange").textContent = `${change >= 0 ? change.toFixed(1)+" lb down" : Math.abs(change).toFixed(1)+" lb up"}`;
+  const current = weights[weights.length - 1].weight;
+  const change = Number(s.startingWeight) - current;
+  document.getElementById("currentWeight").textContent = `${current.toFixed(1)} lb`;
+  document.getElementById("weightChange").textContent = change >= 0 ? `${change.toFixed(1)} lb down` : `${Math.abs(change).toFixed(1)} lb up`;
   drawChart(weights);
 }
 function drawChart(weights) {
   const canvas = document.getElementById("weightChart");
   const ctx = canvas.getContext("2d");
-  const w = canvas.width, h = canvas.height;
-  ctx.clearRect(0,0,w,h);
+  const width = canvas.width, height = canvas.height;
+  ctx.clearRect(0,0,width,height);
   ctx.fillStyle = "#fff";
-  ctx.fillRect(0,0,w,h);
+  ctx.fillRect(0,0,width,height);
   if (!weights.length) {
-    ctx.fillStyle = "#756f68";
+    ctx.fillStyle = "#6b7280";
     ctx.font = "20px system-ui";
     ctx.textAlign = "center";
-    ctx.fillText("Add a weight entry when you are ready.", w/2, h/2);
+    ctx.fillText("Add a weight entry whenever you are ready.", width/2, height/2);
     return;
   }
-  const pad = {l:60,r:30,t:25,b:55};
-  const vals = weights.map(x=>x.weight);
-  let min = Math.min(...vals)-3, max = Math.max(...vals)+3;
-  if (min===max){min-=5;max+=5;}
-  const x = i => pad.l + (weights.length===1 ? (w-pad.l-pad.r)/2 : i*(w-pad.l-pad.r)/(weights.length-1));
-  const y = v => pad.t + (max-v)*(h-pad.t-pad.b)/(max-min);
-  ctx.strokeStyle = "#e7dfd4";
-  for(let i=0;i<=4;i++){
-    const py = pad.t + i*(h-pad.t-pad.b)/4;
-    ctx.beginPath(); ctx.moveTo(pad.l,py); ctx.lineTo(w-pad.r,py); ctx.stroke();
+  const padding = {left:60,right:30,top:25,bottom:50};
+  const values = weights.map(w => w.weight);
+  let min = Math.min(...values)-3, max = Math.max(...values)+3;
+  if (min === max) { min -= 5; max += 5; }
+  const x = i => padding.left + (weights.length === 1 ? (width-padding.left-padding.right)/2 : i*(width-padding.left-padding.right)/(weights.length-1));
+  const y = value => padding.top + (max-value)*(height-padding.top-padding.bottom)/(max-min);
+  ctx.strokeStyle = "#e6ebf3";
+  for (let i=0;i<=4;i++) {
+    const py = padding.top + i*(height-padding.top-padding.bottom)/4;
+    ctx.beginPath(); ctx.moveTo(padding.left,py); ctx.lineTo(width-padding.right,py); ctx.stroke();
   }
-  ctx.strokeStyle = "#6c8a5a";
-  ctx.lineWidth = 4;
+  const gradient = ctx.createLinearGradient(0,0,width,0);
+  gradient.addColorStop(0,"#2563eb");
+  gradient.addColorStop(1,"#8b5cf6");
+  ctx.strokeStyle = gradient;
+  ctx.lineWidth = 5;
   ctx.beginPath();
-  weights.forEach((p,i)=> i===0 ? ctx.moveTo(x(i),y(p.weight)) : ctx.lineTo(x(i),y(p.weight)));
+  weights.forEach((point,index) => index === 0 ? ctx.moveTo(x(index),y(point.weight)) : ctx.lineTo(x(index),y(point.weight)));
   ctx.stroke();
-  weights.forEach((p,i)=>{
-    ctx.fillStyle="#6c8a5a"; ctx.beginPath(); ctx.arc(x(i),y(p.weight),6,0,Math.PI*2); ctx.fill();
+  weights.forEach((point,index) => {
+    ctx.fillStyle = "#2563eb";
+    ctx.beginPath(); ctx.arc(x(index),y(point.weight),6,0,Math.PI*2); ctx.fill();
   });
 }
 
-function downloadCsv(filename, rows) {
-  const csv = rows.map(row => row.map(v => `"${String(v).replaceAll('"','""')}"`).join(",")).join("\n");
-  const blob = new Blob([csv], {type:"text/csv"});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url; a.download = filename; a.click();
-  URL.revokeObjectURL(url);
-}
-document.getElementById("exportBtn").addEventListener("click", () => {
-  const daily = read(DAILY_KEY, []);
-  const rows = [["Date","Water","Protein","Activity","Sleep","Meals Planned","Energy","Shot Taken","Dose","Notes"],
-    ...daily.map(d=>[d.date,d.water,d.protein,d.activity,d.sleep,d.mealsPlanned,d.energy,d.shotTaken?"Yes":"No",d.dose,d.notes])];
-  downloadCsv("zepbound-process-data.csv", rows);
+document.querySelectorAll(".nav-item").forEach(button => {
+  button.addEventListener("click", () => {
+    document.querySelectorAll(".nav-item").forEach(b => b.classList.remove("active"));
+    document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
+    button.classList.add("active");
+    document.getElementById(button.dataset.view).classList.add("active");
+    window.scrollTo({top:0,behavior:"smooth"});
+  });
 });
 
 document.getElementById("settingsBtn").addEventListener("click", () => {
   const s = settings();
+  document.getElementById("settingName").value = s.name;
+  document.getElementById("settingStartDate").value = s.startDate;
   document.getElementById("settingStartWeight").value = s.startingWeight;
   document.getElementById("settingWaterGoal").value = s.waterGoal;
   document.getElementById("settingProteinGoal").value = s.proteinGoal;
-  document.getElementById("settingActivityGoal").value = s.activityGoal;
+  document.getElementById("settingMovementGoal").value = s.movementGoal;
+  document.getElementById("settingSleepGoal").value = s.sleepGoal;
   document.getElementById("settingsDialog").showModal();
 });
 document.getElementById("saveSettingsBtn").addEventListener("click", () => {
   write(SETTINGS_KEY, {
+    name: document.getElementById("settingName").value.trim() || "Kev",
+    startDate: document.getElementById("settingStartDate").value || todayString(),
     startingWeight: Number(document.getElementById("settingStartWeight").value) || 328,
     waterGoal: Number(document.getElementById("settingWaterGoal").value) || 80,
     proteinGoal: Number(document.getElementById("settingProteinGoal").value) || 100,
-    activityGoal: Number(document.getElementById("settingActivityGoal").value) || 30
+    movementGoal: Number(document.getElementById("settingMovementGoal").value) || 30,
+    sleepGoal: Number(document.getElementById("settingSleepGoal").value) || 8
   });
   document.getElementById("settingsDialog").close();
   renderAll();
 });
 
 function renderAll() {
-  renderFocus();
+  setGreeting();
+  renderToday();
+  renderWins();
   renderMeals();
-  renderVictories();
-  renderHistory();
+  renderStory();
   renderProgress();
 }
 

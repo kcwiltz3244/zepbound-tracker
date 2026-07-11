@@ -3,265 +3,348 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#6c8a5a" />
+  <meta name="theme-color" content="#2563eb" />
   <title>My Zepbound Journey</title>
   <link rel="manifest" href="manifest.json" />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <header class="hero">
-    <div class="hero-copy">
-      <div class="hero-badge">🌿 My wellness journey</div>
-      <p class="eyebrow">My Zepbound Journey</p>
-      <h1>Focus on the process.</h1>
-      <p class="hero-subtitle">Small steps, steady habits, and one good day at a time.</p>
-    </div>
-    <button id="settingsBtn" class="ghost-btn">Settings</button>
-  </header>
-
-  <main>
-    <section class="welcome-strip">
+  <div class="app-shell">
+    <header class="topbar">
       <div>
-        <span class="welcome-icon">☀️</span>
-        <div>
-          <strong>One good choice at a time.</strong>
-          <span>Consistency beats perfection.</span>
-        </div>
+        <p class="brand-kicker">My Zepbound Journey</p>
+        <h1 id="greeting">Good morning, Kev</h1>
       </div>
-      <span class="soft-quote">You’ve got this.</span>
-    </section>
+      <button id="settingsBtn" class="icon-button" aria-label="Open settings">⚙️</button>
+    </header>
 
-    <section class="focus-card">
-      <div>
-        <p class="eyebrow light">Today's focus</p>
-        <h2>Do the simple things that move you forward.</h2>
-      </div>
-      <div class="focus-grid">
-        <button class="focus-item" data-focus="water">
-          <span class="icon">💧</span>
-          <span>Hydrate</span>
-          <strong id="waterFocus">0 / 80 oz</strong>
-        </button>
-        <button class="focus-item" data-focus="protein">
-          <span class="icon">🌿</span>
-          <span>Protein</span>
-          <strong id="proteinFocus">0 / 100 g</strong>
-        </button>
-        <button class="focus-item" data-focus="activity">
-          <span class="icon">👟</span>
-          <span>Move</span>
-          <strong id="activityFocus">0 / 30 min</strong>
-        </button>
-        <button class="focus-item" data-focus="meals">
-          <span class="icon">🥣</span>
-          <span>Plan meals</span>
-          <strong id="mealsFocus">0 / 3</strong>
-        </button>
-        <button class="focus-item" data-focus="shot">
-          <span class="icon">💉</span>
-          <span>Take your shot</span>
-          <strong id="shotFocus">Not logged</strong>
-        </button>
-      </div>
-    </section>
-
-    <section class="dashboard-grid">
-      <article class="card daily-card">
-        <div class="card-heading">
-          <div>
-            <p class="eyebrow">Daily check-in</p>
-            <h2>How did today go?</h2>
+    <main>
+      <section id="homeView" class="view active">
+        <section class="hero-card">
+          <div class="hero-copy">
+            <span class="pill">Week <span id="journeyWeek">1</span> • <span id="currentDose">2.5 mg</span></span>
+            <h2>Just win today.</h2>
+            <p>Small habits become lasting change.</p>
           </div>
-          <span id="todayDate" class="date-pill"></span>
-        </div>
+          <div class="hero-art">
+            <div class="sun"></div>
+            <div class="hill hill-one"></div>
+            <div class="hill hill-two"></div>
+          </div>
+        </section>
 
-        <form id="dailyForm">
-          <div class="daily-grid">
-            <label>Water
-              <div class="input-wrap"><input id="water" type="number" min="0" max="300" placeholder="0"><span>oz</span></div>
+        <section class="section-block">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Today's journey</p>
+              <h2>Focus on the process</h2>
+            </div>
+            <span id="todayLabel" class="date-chip"></span>
+          </div>
+
+          <div class="journey-grid">
+            <article class="journey-card aqua">
+              <div class="journey-icon">💧</div>
+              <div class="journey-copy">
+                <span>Water</span>
+                <strong id="waterValue">0 / 80 oz</strong>
+              </div>
+              <div class="meter"><span id="waterMeter"></span></div>
+            </article>
+
+            <article class="journey-card indigo">
+              <div class="journey-icon">🥩</div>
+              <div class="journey-copy">
+                <span>Protein</span>
+                <strong id="proteinValue">0 / 100 g</strong>
+              </div>
+              <div class="meter"><span id="proteinMeter"></span></div>
+            </article>
+
+            <article class="journey-card orange">
+              <div class="journey-icon">👟</div>
+              <div class="journey-copy">
+                <span>Movement</span>
+                <strong id="movementValue">0 / 30 min</strong>
+              </div>
+              <div class="meter"><span id="movementMeter"></span></div>
+            </article>
+
+            <article class="journey-card purple">
+              <div class="journey-icon">🌙</div>
+              <div class="journey-copy">
+                <span>Sleep</span>
+                <strong id="sleepValue">0 / 8 hr</strong>
+              </div>
+              <div class="meter"><span id="sleepMeter"></span></div>
+            </article>
+
+            <article class="journey-card teal">
+              <div class="journey-icon">💉</div>
+              <div class="journey-copy">
+                <span>Injection</span>
+                <strong id="shotValue">Not logged</strong>
+              </div>
+              <div class="meter"><span id="shotMeter"></span></div>
+            </article>
+          </div>
+        </section>
+
+        <section class="content-grid">
+          <article class="panel checkin-panel">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow">Daily check-in</p>
+                <h2>How did today go?</h2>
+              </div>
+              <span class="mini-icon">☀️</span>
+            </div>
+
+            <form id="dailyForm">
+              <div class="form-grid">
+                <label>Water
+                  <div class="input-with-unit"><input id="water" type="number" min="0" max="300"><span>oz</span></div>
+                </label>
+                <label>Protein
+                  <div class="input-with-unit"><input id="protein" type="number" min="0" max="400"><span>g</span></div>
+                </label>
+                <label>Movement
+                  <div class="input-with-unit"><input id="movement" type="number" min="0" max="300"><span>min</span></div>
+                </label>
+                <label>Sleep
+                  <div class="input-with-unit"><input id="sleep" type="number" step="0.1" min="0" max="24"><span>hr</span></div>
+                </label>
+              </div>
+
+              <div class="feeling-grid">
+                <label>How do you feel?
+                  <select id="mood">
+                    <option value="">Choose</option>
+                    <option>Great</option>
+                    <option>Good</option>
+                    <option>Okay</option>
+                    <option>Tired</option>
+                    <option>Rough day</option>
+                  </select>
+                </label>
+                <label>Appetite
+                  <select id="appetite">
+                    <option value="">Choose</option>
+                    <option>Very low</option>
+                    <option>Low</option>
+                    <option>Normal</option>
+                    <option>Hungry</option>
+                  </select>
+                </label>
+              </div>
+
+              <div class="shot-box">
+                <label class="toggle-row">
+                  <input id="shotTaken" type="checkbox">
+                  <span>Injection taken today</span>
+                </label>
+                <label>Dose
+                  <select id="dose">
+                    <option>2.5 mg</option>
+                    <option>5 mg</option>
+                    <option>7.5 mg</option>
+                    <option>10 mg</option>
+                    <option>12.5 mg</option>
+                    <option>15 mg</option>
+                  </select>
+                </label>
+              </div>
+
+              <label>Quick note
+                <textarea id="notes" rows="3" placeholder="What went well today?"></textarea>
+              </label>
+
+              <button type="submit" class="primary-button">Save today</button>
+            </form>
+          </article>
+
+          <article class="panel wins-panel">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow">Today's wins</p>
+                <h2>Celebrate the good stuff</h2>
+              </div>
+              <span class="mini-icon gold">⭐</span>
+            </div>
+
+            <div class="win-options">
+              <button type="button" data-win="Planned my meals">🍽️ Planned meals</button>
+              <button type="button" data-win="Met my protein goal">💪 Protein goal</button>
+              <button type="button" data-win="Moved my body">👟 Moved my body</button>
+              <button type="button" data-win="Stopped when full">😊 Stopped when full</button>
+              <button type="button" data-win="Made a better choice">🏆 Better choice</button>
+              <button type="button" data-win="Stayed consistent">🔥 Stayed consistent</button>
+            </div>
+
+            <label>Add your own win
+              <input id="customWin" type="text" placeholder="Example: walked farther today">
             </label>
-            <label>Protein
-              <div class="input-wrap"><input id="protein" type="number" min="0" max="400" placeholder="0"><span>g</span></div>
+            <button id="saveWinBtn" class="gold-button">Add win</button>
+
+            <div id="winsList" class="wins-list"></div>
+          </article>
+        </section>
+
+        <section class="quote-card">
+          <span>“</span>
+          <p>The scale can wait. Today is about showing up.</p>
+        </section>
+      </section>
+
+      <section id="mealsView" class="view">
+        <section class="view-hero meals-hero">
+          <p class="eyebrow light">Meal planner</p>
+          <h2>Simple food. Less thinking.</h2>
+          <p>Plan the week once, then make the next good choice easier.</p>
+        </section>
+
+        <section class="panel">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">This week</p>
+              <h2>Your meal plan</h2>
+            </div>
+            <div class="button-group">
+              <button id="suggestMealsBtn" class="secondary-button">Suggest a week</button>
+              <button id="shoppingListBtn" class="secondary-button">Shopping list</button>
+            </div>
+          </div>
+
+          <div class="meal-controls">
+            <label>Meal style
+              <select id="mealStyle">
+                <option value="balanced">Balanced</option>
+                <option value="highProtein">Higher protein</option>
+                <option value="simple">Simple and quick</option>
+                <option value="gentle">Gentle on the stomach</option>
+              </select>
             </label>
-            <label>Activity
-              <div class="input-wrap"><input id="activity" type="number" min="0" max="300" placeholder="0"><span>min</span></div>
-            </label>
-            <label>Sleep
-              <div class="input-wrap"><input id="sleep" type="number" step="0.1" min="0" max="24" placeholder="0"><span>hr</span></div>
-            </label>
-            <label>Meals planned
-              <select id="mealsPlanned">
-                <option value="0">Not yet</option>
-                <option value="1">1 meal</option>
-                <option value="2">2 meals</option>
+            <label>Meals per day
+              <select id="mealsPerDay">
                 <option value="3">3 meals</option>
-              </select>
-            </label>
-            <label>Energy
-              <select id="energy">
-                <option value="">Choose</option>
-                <option>Low</option>
-                <option>Okay</option>
-                <option>Good</option>
-                <option>Great</option>
+                <option value="4" selected>3 meals + snack</option>
               </select>
             </label>
           </div>
 
-          <div class="shot-row">
-            <label class="check-card"><input id="shotTaken" type="checkbox"> <span>Injection taken today</span></label>
-            <label>Current dose
-              <select id="dose">
-                <option>2.5 mg</option>
-                <option>5 mg</option>
-                <option>7.5 mg</option>
-                <option>10 mg</option>
-                <option>12.5 mg</option>
-                <option>15 mg</option>
-              </select>
+          <div id="mealCarousel" class="meal-carousel"></div>
+
+          <div class="button-group bottom-actions">
+            <button id="saveMealsBtn" class="primary-button">Save meal plan</button>
+            <button id="exportMealsBtn" class="secondary-button">Export plan</button>
+          </div>
+        </section>
+      </section>
+
+      <section id="storyView" class="view">
+        <section class="view-hero story-hero">
+          <p class="eyebrow light">My story</p>
+          <h2>Every day adds a page.</h2>
+          <p>Your habits, feelings, and wins—without turning life into a spreadsheet.</p>
+        </section>
+
+        <section class="panel">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">Journey timeline</p>
+              <h2>Your recent days</h2>
+            </div>
+            <button id="exportDataBtn" class="secondary-button">Export data</button>
+          </div>
+          <div id="storyTimeline" class="timeline"></div>
+        </section>
+      </section>
+
+      <section id="progressView" class="view">
+        <section class="view-hero progress-hero">
+          <p class="eyebrow light">My progress</p>
+          <h2>Look when it helps.</h2>
+          <p>Your weight journey lives here—not on the home screen.</p>
+        </section>
+
+        <section class="panel">
+          <div class="progress-cards">
+            <article>
+              <span>Starting weight</span>
+              <strong id="startWeight">328.0 lb</strong>
+            </article>
+            <article>
+              <span>Current weight</span>
+              <strong id="currentWeight">—</strong>
+            </article>
+            <article>
+              <span>Change</span>
+              <strong id="weightChange">—</strong>
+            </article>
+          </div>
+
+          <form id="weightForm" class="weight-form">
+            <label>Date
+              <input id="weightDate" type="date">
             </label>
-          </div>
+            <label>Weight
+              <div class="input-with-unit"><input id="weight" type="number" step="0.1" min="100" max="700"><span>lb</span></div>
+            </label>
+            <button type="submit" class="primary-button">Add weight</button>
+          </form>
 
-          <label>Quick note
-            <textarea id="notes" rows="3" placeholder="What went well? What felt hard?"></textarea>
-          </label>
+          <canvas id="weightChart" width="1000" height="340"></canvas>
+        </section>
+      </section>
+    </main>
 
-          <div class="button-row">
-            <button type="submit">Save Today</button>
-            <button type="button" id="clearDailyBtn" class="secondary">Clear</button>
-          </div>
-        </form>
-      </article>
-
-      <article class="card victory-card decorated-card"><span class="corner-blob blob-sage"></span>
-        <p class="eyebrow">Non-scale victories</p>
-        <h2>Notice what is getting better.</h2>
-        <div class="victory-options">
-          <label><input type="checkbox" value="More energy"> More energy</label>
-          <label><input type="checkbox" value="Sleeping better"> Sleeping better</label>
-          <label><input type="checkbox" value="Less hungry"> Less hunger</label>
-          <label><input type="checkbox" value="Clothes fit better"> Clothes fit better</label>
-          <label><input type="checkbox" value="Moving easier"> Moving easier</label>
-          <label><input type="checkbox" value="Better choices"> Better choices</label>
-        </div>
-        <label>Add your own
-          <input id="customVictory" type="text" placeholder="Example: walked farther today">
-        </label>
-        <button id="saveVictoriesBtn">Save Victories</button>
-        <div id="victoryList" class="victory-list"></div>
-      </article>
-    </section>
-
-    <section class="card meal-card decorated-card"><span class="corner-blob blob-gold"></span>
-      <div class="card-heading">
-        <div>
-          <p class="eyebrow">Meal planner</p>
-          <h2>Simple meals that make the week easier.</h2>
-        </div>
-        <div class="button-cluster">
-          <button id="suggestMealsBtn" class="secondary">Suggest a Week</button>
-          <button id="shoppingListBtn" class="secondary">Shopping List</button>
-        </div>
-      </div>
-
-      <div class="meal-controls">
-        <label>Meal style
-          <select id="mealStyle">
-            <option value="balanced">Balanced</option>
-            <option value="highProtein">Higher protein</option>
-            <option value="simple">Simple and quick</option>
-            <option value="gentle">Gentle on the stomach</option>
-          </select>
-        </label>
-        <label>Meals per day
-          <select id="mealsPerDay">
-            <option value="3">3 meals</option>
-            <option value="4" selected>3 meals + snack</option>
-          </select>
-        </label>
-      </div>
-
-      <div class="meal-week" id="mealWeek"></div>
-
-      <div class="button-row">
-        <button id="saveMealsBtn">Save Meal Plan</button>
-        <button id="exportMealsBtn" class="secondary">Export Meal Plan</button>
-      </div>
-    </section>
-
-    <section class="card history-card decorated-card"><span class="corner-blob blob-lavender"></span>
-      <div class="card-heading">
-        <div>
-          <p class="eyebrow">Recent habits</p>
-          <h2>Your consistency is the story.</h2>
-        </div>
-        <button id="exportBtn" class="secondary">Export Data</button>
-      </div>
-      <div id="habitHistory" class="habit-history"></div>
-    </section>
-
-    <section class="card progress-card">
-      <div class="card-heading">
-        <div>
-          <p class="eyebrow">Progress, when you want to see it</p>
-          <h2>Weight trend</h2>
-        </div>
-        <button id="toggleProgressBtn" class="secondary">Show Progress</button>
-      </div>
-      <div id="progressPanel" class="hidden">
-        <div class="progress-summary">
-          <div><span>Starting</span><strong id="startWeight">328.0 lb</strong></div>
-          <div><span>Current</span><strong id="currentWeight">—</strong></div>
-          <div><span>Change</span><strong id="totalChange">—</strong></div>
-        </div>
-        <form id="weightForm" class="weight-form">
-          <label>Date
-            <input id="weightDate" type="date">
-          </label>
-          <label>Weight
-            <div class="input-wrap"><input id="weight" type="number" step="0.1" min="100" max="700"><span>lb</span></div>
-          </label>
-          <button type="submit">Add Weight</button>
-        </form>
-        <canvas id="weightChart" width="1000" height="340"></canvas>
-      </div>
-    </section>
-
-    <section class="encouragement">
-      <p>“You do not have to be perfect. You just have to keep showing up.”</p>
-    </section>
-  </main>
+    <nav class="bottom-nav">
+      <button class="nav-item active" data-view="homeView"><span>🏠</span><strong>Home</strong></button>
+      <button class="nav-item" data-view="mealsView"><span>🍽️</span><strong>Meals</strong></button>
+      <button class="nav-item" data-view="storyView"><span>📖</span><strong>My Story</strong></button>
+      <button class="nav-item" data-view="progressView"><span>📈</span><strong>Progress</strong></button>
+    </nav>
+  </div>
 
   <dialog id="shoppingDialog">
     <form method="dialog" class="dialog-card">
-      <div class="card-heading">
-        <h2>Shopping List</h2>
-        <button value="cancel" class="secondary">Close</button>
+      <div class="panel-heading">
+        <h2>Shopping list</h2>
+        <button value="cancel" class="secondary-button">Close</button>
       </div>
       <div id="shoppingList"></div>
-      <button type="button" id="copyShoppingBtn">Copy List</button>
+      <button type="button" id="copyShoppingBtn" class="primary-button">Copy list</button>
     </form>
   </dialog>
 
   <dialog id="settingsDialog">
     <form method="dialog" class="dialog-card">
-      <div class="card-heading">
+      <div class="panel-heading">
         <h2>Settings</h2>
-        <button value="cancel" class="secondary">Close</button>
+        <button value="cancel" class="secondary-button">Close</button>
       </div>
+      <label>Name
+        <input id="settingName" type="text">
+      </label>
+      <label>Journey start date
+        <input id="settingStartDate" type="date">
+      </label>
       <label>Starting weight
-        <input id="settingStartWeight" type="number" step="0.1" min="100" max="700">
+        <input id="settingStartWeight" type="number" step="0.1">
       </label>
       <label>Water goal
-        <input id="settingWaterGoal" type="number" min="0" max="300">
+        <input id="settingWaterGoal" type="number">
       </label>
       <label>Protein goal
-        <input id="settingProteinGoal" type="number" min="0" max="400">
+        <input id="settingProteinGoal" type="number">
       </label>
-      <label>Activity goal
-        <input id="settingActivityGoal" type="number" min="0" max="300">
+      <label>Movement goal
+        <input id="settingMovementGoal" type="number">
       </label>
-      <button type="button" id="saveSettingsBtn">Save Settings</button>
+      <label>Sleep goal
+        <input id="settingSleepGoal" type="number" step="0.1">
+      </label>
+      <button type="button" id="saveSettingsBtn" class="primary-button">Save settings</button>
     </form>
   </dialog>
 

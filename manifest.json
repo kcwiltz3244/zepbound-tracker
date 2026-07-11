@@ -1,9 +1,9 @@
 {
-  "name": "My Zepbound Journey \u2014 Process First",
+  "name": "My Zepbound Journey",
   "short_name": "My Journey",
   "start_url": "./",
   "display": "standalone",
-  "background_color": "#fbf7ef",
-  "theme_color": "#6c8a5a",
-  "description": "A calm, process-focused Zepbound wellness and meal planning dashboard."
+  "background_color": "#f4f7fb",
+  "theme_color": "#2563eb",
+  "description": "A colorful, process-first Zepbound wellness journey app."
 }

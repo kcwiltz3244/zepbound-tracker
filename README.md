@@ -1,34 +1,28 @@
-# My Zepbound Journey — Version 6
+# My Zepbound Journey — Version 7
 
-A complete rebuild focused on the process instead of the scale.
+Default profile name: **Kevin Wiltz**
 
-## Highlights
+## New in Version 7
 
-- App-style bottom navigation
-- Blue-centered design with aqua, indigo, orange, purple, teal, and gold accents
-- Daily habit progress cards
-- Daily check-in for water, protein, movement, sleep, mood, appetite, dose, and notes
-- Today's wins and non-scale victories
-- Swipeable 7-day meal planner
-- Automatic shopping list
-- Personal journey timeline
-- Weight tracking moved to its own Progress tab
-- Mobile-friendly and installable
-- Data stored privately in the browser
+- Dedicated Journey Journal
+- Daily story, adventure, gratitude, and tomorrow's focus
+- Life tags such as Drone, Family, Exercise, Home, Travel, and Work
+- Journal search
+- Journal entries merged into My Story
+- Five-section bottom navigation
+- Process-first dashboard
+- Meal planner and shopping list
+- Progress section kept separate from the home screen
 
-## Update your GitHub repository
+## Deploy
 
-Upload these files to the root of your existing repository and replace the previous versions:
+Replace these files in the root of your GitHub repository:
 
-- `index.html`
-- `styles.css`
-- `app.js`
-- `manifest.json`
-- `service-worker.js`
-- `README.md`
+- index.html
+- styles.css
+- app.js
+- manifest.json
+- service-worker.js
+- README.md
 
-After committing the changes, GitHub Pages or Netlify will redeploy automatically.
-
-## Important
-
-Version 6 uses a new data structure. Data saved in previous versions will not automatically appear in this rebuild.
+GitHub Pages and Netlify should redeploy automatically after the commit.

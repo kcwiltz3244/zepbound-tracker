@@ -13,7 +13,7 @@
     <header class="topbar">
       <div>
         <p class="brand-kicker">My Zepbound Journey</p>
-        <h1 id="greeting">Good morning, Kev</h1>
+        <h1 id="greeting">Good morning, Kevin Wiltz</h1>
       </div>
       <button id="settingsBtn" class="icon-button" aria-label="Open settings">⚙️</button>
     </header>
@@ -24,7 +24,7 @@
           <div class="hero-copy">
             <span class="pill">Week <span id="journeyWeek">1</span> • <span id="currentDose">2.5 mg</span></span>
             <h2>Just win today.</h2>
-            <p>Small habits become lasting change.</p>
+            <p>Building a healthier life, one day at a time.</p>
           </div>
           <div class="hero-art">
             <div class="sun"></div>
@@ -45,53 +45,39 @@
           <div class="journey-grid">
             <article class="journey-card aqua">
               <div class="journey-icon">💧</div>
-              <div class="journey-copy">
-                <span>Water</span>
-                <strong id="waterValue">0 / 80 oz</strong>
-              </div>
+              <span>Water</span>
+              <strong id="waterValue">0 / 80 oz</strong>
               <div class="meter"><span id="waterMeter"></span></div>
             </article>
-
             <article class="journey-card indigo">
               <div class="journey-icon">🥩</div>
-              <div class="journey-copy">
-                <span>Protein</span>
-                <strong id="proteinValue">0 / 100 g</strong>
-              </div>
+              <span>Protein</span>
+              <strong id="proteinValue">0 / 100 g</strong>
               <div class="meter"><span id="proteinMeter"></span></div>
             </article>
-
             <article class="journey-card orange">
               <div class="journey-icon">👟</div>
-              <div class="journey-copy">
-                <span>Movement</span>
-                <strong id="movementValue">0 / 30 min</strong>
-              </div>
+              <span>Movement</span>
+              <strong id="movementValue">0 / 30 min</strong>
               <div class="meter"><span id="movementMeter"></span></div>
             </article>
-
             <article class="journey-card purple">
               <div class="journey-icon">🌙</div>
-              <div class="journey-copy">
-                <span>Sleep</span>
-                <strong id="sleepValue">0 / 8 hr</strong>
-              </div>
+              <span>Sleep</span>
+              <strong id="sleepValue">0 / 8 hr</strong>
               <div class="meter"><span id="sleepMeter"></span></div>
             </article>
-
             <article class="journey-card teal">
               <div class="journey-icon">💉</div>
-              <div class="journey-copy">
-                <span>Injection</span>
-                <strong id="shotValue">Not logged</strong>
-              </div>
+              <span>Injection</span>
+              <strong id="shotValue">Not logged</strong>
               <div class="meter"><span id="shotMeter"></span></div>
             </article>
           </div>
         </section>
 
         <section class="content-grid">
-          <article class="panel checkin-panel">
+          <article class="panel">
             <div class="panel-heading">
               <div>
                 <p class="eyebrow">Daily check-in</p>
@@ -117,7 +103,7 @@
               </div>
 
               <div class="feeling-grid">
-                <label>How do you feel?
+                <label>Mood
                   <select id="mood">
                     <option value="">Choose</option>
                     <option>Great</option>
@@ -125,6 +111,15 @@
                     <option>Okay</option>
                     <option>Tired</option>
                     <option>Rough day</option>
+                  </select>
+                </label>
+                <label>Energy
+                  <select id="energy">
+                    <option value="">Choose</option>
+                    <option>High</option>
+                    <option>Good</option>
+                    <option>Okay</option>
+                    <option>Low</option>
                   </select>
                 </label>
                 <label>Appetite
@@ -155,10 +150,6 @@
                 </label>
               </div>
 
-              <label>Quick note
-                <textarea id="notes" rows="3" placeholder="What went well today?"></textarea>
-              </label>
-
               <button type="submit" class="primary-button">Save today</button>
             </form>
           </article>
@@ -185,7 +176,6 @@
               <input id="customWin" type="text" placeholder="Example: walked farther today">
             </label>
             <button id="saveWinBtn" class="gold-button">Add win</button>
-
             <div id="winsList" class="wins-list"></div>
           </article>
         </section>
@@ -193,6 +183,72 @@
         <section class="quote-card">
           <span>“</span>
           <p>The scale can wait. Today is about showing up.</p>
+        </section>
+      </section>
+
+      <section id="journalView" class="view">
+        <section class="view-hero journal-hero">
+          <p class="eyebrow light">My Journey Journal</p>
+          <h2>Tell the story of your day.</h2>
+          <p>Activities, reflections, gratitude, and tomorrow’s focus.</p>
+        </section>
+
+        <section class="journal-layout">
+          <article class="panel journal-editor">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow">Today's journal</p>
+                <h2 id="journalDateHeading"></h2>
+              </div>
+              <span class="mini-icon">📖</span>
+            </div>
+
+            <form id="journalForm">
+              <label>Today's story
+                <textarea id="journalStory" rows="8" placeholder="What did you do today? How did the day feel?"></textarea>
+              </label>
+
+              <label>Today's adventure
+                <textarea id="journalAdventure" rows="3" placeholder="Drone flight, family time, errands, a walk, a project..."></textarea>
+              </label>
+
+              <div class="form-grid">
+                <label>Something I am grateful for
+                  <textarea id="journalGratitude" rows="3"></textarea>
+                </label>
+                <label>Tomorrow's focus
+                  <textarea id="journalTomorrow" rows="3"></textarea>
+                </label>
+              </div>
+
+              <fieldset>
+                <legend>Life tags</legend>
+                <div class="tag-options">
+                  <button type="button" data-tag="Drone">🚁 Drone</button>
+                  <button type="button" data-tag="Family">👨‍👩‍👧 Family</button>
+                  <button type="button" data-tag="Exercise">🚶 Exercise</button>
+                  <button type="button" data-tag="Restaurant">🍽️ Restaurant</button>
+                  <button type="button" data-tag="Home">🏡 Home</button>
+                  <button type="button" data-tag="Travel">🚗 Travel</button>
+                  <button type="button" data-tag="Celebration">🎉 Celebration</button>
+                  <button type="button" data-tag="Work">💼 Work</button>
+                </div>
+              </fieldset>
+
+              <button type="submit" class="primary-button">Save journal entry</button>
+            </form>
+          </article>
+
+          <article class="panel">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow">Journal entries</p>
+                <h2>Recent reflections</h2>
+              </div>
+              <input id="journalSearch" type="search" placeholder="Search journal">
+            </div>
+            <div id="journalTimeline" class="timeline"></div>
+          </article>
         </section>
       </section>
 
@@ -245,7 +301,7 @@
         <section class="view-hero story-hero">
           <p class="eyebrow light">My story</p>
           <h2>Every day adds a page.</h2>
-          <p>Your habits, feelings, and wins—without turning life into a spreadsheet.</p>
+          <p>Your habits, wins, and journal entries together in one timeline.</p>
         </section>
 
         <section class="panel">
@@ -300,8 +356,9 @@
 
     <nav class="bottom-nav">
       <button class="nav-item active" data-view="homeView"><span>🏠</span><strong>Home</strong></button>
+      <button class="nav-item" data-view="journalView"><span>📖</span><strong>Journal</strong></button>
       <button class="nav-item" data-view="mealsView"><span>🍽️</span><strong>Meals</strong></button>
-      <button class="nav-item" data-view="storyView"><span>📖</span><strong>My Story</strong></button>
+      <button class="nav-item" data-view="storyView"><span>🕰️</span><strong>My Story</strong></button>
       <button class="nav-item" data-view="progressView"><span>📈</span><strong>Progress</strong></button>
     </nav>
   </div>

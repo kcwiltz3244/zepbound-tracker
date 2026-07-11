@@ -1,4 +1,4 @@
-# My Zepbound Journey — Process Dashboard v4
+# My Zepbound Journey — Process Dashboard v5
 
 This version shifts the app away from a clinical health dashboard and toward a calmer, habit-based journey.
 
@@ -32,3 +32,15 @@ Upload these files to the root of your existing repository and replace the old v
 After committing, wait about a minute and refresh your GitHub Pages site.
 
 Your saved data from older versions may not automatically appear because this redesign uses a new process-focused data structure.
+
+
+## Visual polish in v5
+
+- Softer layered background
+- Richer green focus section
+- More elegant typography
+- Decorative card accents
+- Improved meal-plan cards
+- Better spacing and shadows
+- Prettier buttons, chips, and inputs
+- Added a welcoming consistency message

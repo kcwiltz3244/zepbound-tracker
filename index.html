@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#1f6f5f" />
+  <title>Zepbound Progress Tracker</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="app-header">
+    <div>
+      <h1>Zepbound Progress Tracker</h1>
+      <p>Private, simple, and stored on this device.</p>
+    </div>
+    <button id="installBtn" class="secondary hidden">Install App</button>
+  </header>
+
+  <main>
+    <section class="card summary-card">
+      <h2>Progress Summary</h2>
+      <div class="summary-grid">
+        <div><span>Starting weight</span><strong id="startWeight">328.0 lb</strong></div>
+        <div><span>Current weight</span><strong id="currentWeight">—</strong></div>
+        <div><span>Total lost</span><strong id="totalLost">—</strong></div>
+        <div><span>Percent lost</span><strong id="percentLost">—</strong></div>
+      </div>
+      <div class="goal-wrap">
+        <div class="goal-label">
+          <span>Progress toward first 10% goal</span>
+          <span id="goalText">0%</span>
+        </div>
+        <div class="progress-track"><div id="goalBar" class="progress-bar"></div></div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Add Weekly Entry</h2>
+      <form id="entryForm">
+        <div class="form-grid">
+          <label>Date
+            <input id="date" type="date" required />
+          </label>
+          <label>Weight (lb)
+            <input id="weight" type="number" step="0.1" min="100" max="700" required />
+          </label>
+          <label>Zepbound dose
+            <select id="dose">
+              <option value="2.5 mg">2.5 mg</option>
+              <option value="5 mg">5 mg</option>
+              <option value="7.5 mg">7.5 mg</option>
+              <option value="10 mg">10 mg</option>
+              <option value="12.5 mg">12.5 mg</option>
+              <option value="15 mg">15 mg</option>
+              <option value="Skipped">Skipped</option>
+            </select>
+          </label>
+          <label>Injection site
+            <select id="site">
+              <option>Abdomen</option>
+              <option>Thigh</option>
+              <option>Upper arm</option>
+            </select>
+          </label>
+          <label>Water (oz/day average)
+            <input id="water" type="number" min="0" max="300" />
+          </label>
+          <label>Protein (g/day average)
+            <input id="protein" type="number" min="0" max="400" />
+          </label>
+          <label>Exercise days this week
+            <input id="exercise" type="number" min="0" max="7" />
+          </label>
+          <label>Appetite level
+            <select id="appetite">
+              <option value="1">1 — Very low</option>
+              <option value="2">2 — Low</option>
+              <option value="3" selected>3 — Moderate</option>
+              <option value="4">4 — High</option>
+              <option value="5">5 — Very high</option>
+            </select>
+          </label>
+        </div>
+
+        <fieldset>
+          <legend>Side effects</legend>
+          <div class="check-grid">
+            <label><input type="checkbox" value="Nausea" class="sideEffect"> Nausea</label>
+            <label><input type="checkbox" value="Constipation" class="sideEffect"> Constipation</label>
+            <label><input type="checkbox" value="Diarrhea" class="sideEffect"> Diarrhea</label>
+            <label><input type="checkbox" value="Vomiting" class="sideEffect"> Vomiting</label>
+            <label><input type="checkbox" value="Heartburn" class="sideEffect"> Heartburn</label>
+            <label><input type="checkbox" value="Fatigue" class="sideEffect"> Fatigue</label>
+            <label><input type="checkbox" value="None" class="sideEffect"> None</label>
+          </div>
+        </fieldset>
+
+        <label>Notes
+          <textarea id="notes" rows="4" placeholder="How you felt, food changes, activity, questions for your doctor..."></textarea>
+        </label>
+
+        <div class="button-row">
+          <button type="submit">Save Entry</button>
+          <button type="button" id="clearFormBtn" class="secondary">Clear Form</button>
+        </div>
+      </form>
+    </section>
+
+    <section class="card">
+      <div class="section-heading">
+        <h2>Weight Trend</h2>
+        <button id="exportBtn" class="secondary">Export CSV</button>
+      </div>
+      <canvas id="weightChart" width="900" height="360" aria-label="Weight trend chart"></canvas>
+    </section>
+
+    <section class="card">
+      <div class="section-heading">
+        <h2>History</h2>
+        <button id="resetBtn" class="danger">Delete All Data</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Weight</th>
+              <th>Dose</th>
+              <th>Water</th>
+              <th>Protein</th>
+              <th>Exercise</th>
+              <th>Side effects</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="historyBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="card notice">
+      <h2>Safety Reminder</h2>
+      <p>This tracker is for personal organization and does not replace medical advice. Contact your clinician for severe or persistent abdominal pain, repeated vomiting, dehydration, yellowing of the skin or eyes, or any urgent concern.</p>
+    </section>
+  </main>
+
+  <footer>
+    <p>Your entries remain in your browser unless you export them.</p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

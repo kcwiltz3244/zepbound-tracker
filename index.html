@@ -187,7 +187,7 @@
       </section>
 
       <section id="journalView" class="view">
-        <section class="view-hero journal-hero">
+        <section class="view-hero journal-hero journal-scene">
           <p class="eyebrow light">My Journey Journal</p>
           <h2>Tell the story of your day.</h2>
           <p>Activities, reflections, gratitude, and tomorrow’s focus.</p>
@@ -204,21 +204,43 @@
             </div>
 
             <form id="journalForm">
-              <label>Today's story
-                <textarea id="journalStory" rows="8" placeholder="What did you do today? How did the day feel?"></textarea>
-              </label>
+              <div class="journal-paper">
+                <div class="journal-date-row">
+                  <label>Entry date
+                    <input id="journalEntryDate" type="date">
+                  </label>
+                  <label class="favorite-toggle">
+                    <input id="journalFavorite" type="checkbox">
+                    <span>⭐ Favorite entry</span>
+                  </label>
+                </div>
 
-              <label>Today's adventure
-                <textarea id="journalAdventure" rows="3" placeholder="Drone flight, family time, errands, a walk, a project..."></textarea>
-              </label>
+                <div class="reflection-prompt">
+                  <span>Today’s prompt</span>
+                  <strong id="dailyPrompt">What made today meaningful?</strong>
+                </div>
 
-              <div class="form-grid">
-                <label>Something I am grateful for
-                  <textarea id="journalGratitude" rows="3"></textarea>
+                <label>Today's story
+                  <textarea id="journalStory" rows="10" placeholder="Write freely about your day..."></textarea>
                 </label>
-                <label>Tomorrow's focus
-                  <textarea id="journalTomorrow" rows="3"></textarea>
-                </label>
+
+                <div class="journal-two-column">
+                  <label>Today's adventure
+                    <textarea id="journalAdventure" rows="4" placeholder="Where did you go? What did you do?"></textarea>
+                  </label>
+                  <label>Something I am proud of
+                    <textarea id="journalProud" rows="4" placeholder="A choice, a habit, or a moment worth celebrating"></textarea>
+                  </label>
+                </div>
+
+                <div class="journal-two-column">
+                  <label>Something I am grateful for
+                    <textarea id="journalGratitude" rows="4"></textarea>
+                  </label>
+                  <label>Tomorrow's focus
+                    <textarea id="journalTomorrow" rows="4"></textarea>
+                  </label>
+                </div>
               </div>
 
               <fieldset>
@@ -235,7 +257,11 @@
                 </div>
               </fieldset>
 
-              <button type="submit" class="primary-button">Save journal entry</button>
+              <div class="button-group">
+                <button type="submit" class="primary-button">Save journal entry</button>
+                <button type="button" id="newJournalBtn" class="secondary-button">New entry</button>
+                <button type="button" id="deleteJournalBtn" class="danger-button">Delete entry</button>
+              </div>
             </form>
           </article>
 
@@ -245,7 +271,13 @@
                 <p class="eyebrow">Journal entries</p>
                 <h2>Recent reflections</h2>
               </div>
-              <input id="journalSearch" type="search" placeholder="Search journal">
+              <div class="journal-tools">
+                <input id="journalSearch" type="search" placeholder="Search journal">
+                <select id="journalFilter">
+                  <option value="all">All entries</option>
+                  <option value="favorites">Favorites</option>
+                </select>
+              </div>
             </div>
             <div id="journalTimeline" class="timeline"></div>
           </article>

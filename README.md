@@ -1,8 +1,8 @@
-# My Zepbound Journey — Version 7
+# My Zepbound Journey — Version 7.1
 
 Default profile name: **Kevin Wiltz**
 
-## New in Version 7
+## New in Version 7.1
 
 - Dedicated Journey Journal
 - Daily story, adventure, gratitude, and tomorrow's focus
@@ -26,3 +26,16 @@ Replace these files in the root of your GitHub repository:
 - README.md
 
 GitHub Pages and Netlify should redeploy automatically after the commit.
+
+
+## New in Version 7.1
+
+- Journal page styled more like a real notebook
+- Editable entry date
+- Edit past journal entries
+- Delete journal entries
+- Favorite important entries
+- Filter journal to favorites
+- Rotating daily reflection prompts
+- New “Something I am proud of” section
+- Improved journal cards and mobile layout

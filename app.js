@@ -31,11 +31,110 @@ exportMealsBtn.onclick=()=>dl("my-zepbound-meal-plan.csv",[["Day","Breakfast","L
 function shopping(plan){const text=plan.flatMap(m=>[m.breakfast,m.lunch,m.dinner,m.snack]).join(" ").toLowerCase(),map={Protein:[["chicken","Chicken"],["turkey","Turkey"],["egg","Eggs"],["tuna","Tuna"],["salmon","Salmon"],["shrimp","Shrimp"],["fish","White fish"],["beef","Lean beef"],["pork","Pork tenderloin"]],Produce:[["berry","Berries"],["banana","Bananas"],["apple","Apples"],["salad","Salad greens"],["broccoli","Broccoli"],["vegetable","Mixed vegetables"],["carrot","Carrots"],["avocado","Avocado"]],Dairy:[["yogurt","Greek yogurt"],["cottage cheese","Cottage cheese"],["cheese","Cheese"]],Pantry:[["oatmeal","Oatmeal"],["rice","Rice"],["toast","Whole-grain bread"],["wrap","Whole-grain wraps"],["cracker","Crackers"],["bean","Beans"],["nuts","Nuts"],["peanut butter","Peanut butter"],["protein shake","Protein shakes"]]};const out={};Object.entries(map).forEach(([g,items])=>out[g]=items.filter(([k])=>text.includes(k)).map(([,l])=>l));return out}
 shoppingListBtn.onclick=()=>{const groups=shopping(collectMeals());shoppingList.innerHTML=Object.entries(groups).map(([g,items])=>`<section class="shopping-group"><strong>${g}</strong><div>${items.length?items.map(i=>`• ${i}`).join("<br>"):"Nothing added yet"}</div></section>`).join("");shoppingDialog.showModal()}
 copyShoppingBtn.onclick=async()=>{const g=shopping(collectMeals()),text=Object.entries(g).map(([k,v])=>`${k}\n${v.map(i=>"- "+i).join("\n")}`).join("\n\n");await navigator.clipboard.writeText(text);alert("Shopping list copied.")}
-let selectedTags=new Set();document.querySelectorAll("[data-tag]").forEach(b=>b.onclick=()=>{selectedTags.has(b.dataset.tag)?(selectedTags.delete(b.dataset.tag),b.classList.remove("selected")):(selectedTags.add(b.dataset.tag),b.classList.add("selected"))})
-function loadJournalToday(){journalDateHeading.textContent=new Date().toLocaleDateString(undefined,{weekday:"long",month:"long",day:"numeric",year:"numeric"});const j=read(KEYS.journal,[]).find(x=>x.date===todayString());if(!j)return;journalStory.value=j.story||"";journalAdventure.value=j.adventure||"";journalGratitude.value=j.gratitude||"";journalTomorrow.value=j.tomorrow||"";selectedTags=new Set(j.tags||[]);document.querySelectorAll("[data-tag]").forEach(b=>b.classList.toggle("selected",selectedTags.has(b.dataset.tag)))}
-journalForm.addEventListener("submit",e=>{e.preventDefault();const entry={date:todayString(),story:journalStory.value.trim(),adventure:journalAdventure.value.trim(),gratitude:journalGratitude.value.trim(),tomorrow:journalTomorrow.value.trim(),tags:[...selectedTags]};const arr=read(KEYS.journal,[]),i=arr.findIndex(x=>x.date===entry.date);i>=0?arr[i]=entry:arr.push(entry);arr.sort((a,b)=>new Date(a.date)-new Date(b.date));write(KEYS.journal,arr);renderJournal();renderStory();alert("Journal entry saved.")})
-journalSearch.addEventListener("input",renderJournal)
-function renderJournal(){const q=(journalSearch?.value||"").toLowerCase(),arr=[...read(KEYS.journal,[])].reverse().filter(j=>!q||JSON.stringify(j).toLowerCase().includes(q));journalTimeline.innerHTML=arr.length?arr.map(j=>`<article class="timeline-card"><div class="timeline-date">${new Date(j.date+"T00:00:00").toLocaleDateString(undefined,{month:"short",day:"numeric"})}</div><div><div class="timeline-details">${(j.tags||[]).map(t=>`<span class="timeline-pill">${esc(t)}</span>`).join("")}</div>${j.story?`<p class="timeline-note">${esc(j.story)}</p>`:""}${j.adventure?`<p class="timeline-note"><strong>Adventure:</strong> ${esc(j.adventure)}</p>`:""}${j.gratitude?`<p class="timeline-note"><strong>Grateful:</strong> ${esc(j.gratitude)}</p>`:""}${j.tomorrow?`<p class="timeline-note"><strong>Tomorrow:</strong> ${esc(j.tomorrow)}</p>`:""}</div></article>`).join(""):"<p>No journal entries yet.</p>"}
+const journalPrompts=[
+  "What made today meaningful?",
+  "What are you proud of today?",
+  "What felt easier today than it used to?",
+  "What challenged you, and how did you respond?",
+  "What small choice moved you forward?",
+  "What made you smile today?",
+  "What do you want to remember about today?"
+];
+let selectedTags=new Set();
+let editingJournalDate=todayString();document.querySelectorAll("[data-tag]").forEach(b=>b.onclick=()=>{selectedTags.has(b.dataset.tag)?(selectedTags.delete(b.dataset.tag),b.classList.remove("selected")):(selectedTags.add(b.dataset.tag),b.classList.add("selected"))})
+function loadJournalEntry(date=todayString()){
+  editingJournalDate=date;
+  journalEntryDate.value=date;
+  const pretty=new Date(date+"T00:00:00").toLocaleDateString(undefined,{weekday:"long",month:"long",day:"numeric",year:"numeric"});
+  journalDateHeading.textContent=pretty;
+  dailyPrompt.textContent=journalPrompts[new Date(date+"T00:00:00").getDay()%journalPrompts.length];
+  const j=read(KEYS.journal,[]).find(x=>x.date===date);
+  journalStory.value=j?.story||"";
+  journalAdventure.value=j?.adventure||"";
+  journalProud.value=j?.proud||"";
+  journalGratitude.value=j?.gratitude||"";
+  journalTomorrow.value=j?.tomorrow||"";
+  journalFavorite.checked=!!j?.favorite;
+  selectedTags=new Set(j?.tags||[]);
+  document.querySelectorAll("[data-tag]").forEach(b=>b.classList.toggle("selected",selectedTags.has(b.dataset.tag)));
+}
+function clearJournalForm(){
+  editingJournalDate=todayString();
+  journalEntryDate.value=todayString();
+  journalStory.value="";
+  journalAdventure.value="";
+  journalProud.value="";
+  journalGratitude.value="";
+  journalTomorrow.value="";
+  journalFavorite.checked=false;
+  selectedTags.clear();
+  document.querySelectorAll("[data-tag]").forEach(b=>b.classList.remove("selected"));
+  loadJournalEntry(todayString());
+}
+journalForm.addEventListener("submit",e=>{
+  e.preventDefault();
+  const date=journalEntryDate.value||editingJournalDate||todayString();
+  const entry={
+    date,
+    story:journalStory.value.trim(),
+    adventure:journalAdventure.value.trim(),
+    proud:journalProud.value.trim(),
+    gratitude:journalGratitude.value.trim(),
+    tomorrow:journalTomorrow.value.trim(),
+    favorite:journalFavorite.checked,
+    tags:[...selectedTags]
+  };
+  const arr=read(KEYS.journal,[]);
+  const i=arr.findIndex(x=>x.date===date);
+  i>=0?arr[i]=entry:arr.push(entry);
+  arr.sort((a,b)=>new Date(a.date)-new Date(b.date));
+  write(KEYS.journal,arr);
+  editingJournalDate=date;
+  renderJournal();
+  renderStory();
+  alert("Journal entry saved.");
+})
+journalSearch.addEventListener("input",renderJournal);
+journalFilter.addEventListener("change",renderJournal);
+journalEntryDate.addEventListener("change",()=>loadJournalEntry(journalEntryDate.value));
+newJournalBtn.addEventListener("click",clearJournalForm);
+deleteJournalBtn.addEventListener("click",()=>{
+  const date=journalEntryDate.value||editingJournalDate;
+  const arr=read(KEYS.journal,[]);
+  if(!arr.some(x=>x.date===date)) return alert("There is no saved entry for this date.");
+  if(confirm("Delete this journal entry?")){
+    write(KEYS.journal,arr.filter(x=>x.date!==date));
+    clearJournalForm();
+    renderJournal();
+    renderStory();
+  }
+});
+window.editJournalEntry=(date)=>loadJournalEntry(date);
+function renderJournal(){
+  const q=(journalSearch?.value||"").toLowerCase();
+  const filter=journalFilter?.value||"all";
+  const arr=[...read(KEYS.journal,[])].reverse().filter(j=>{
+    const matchesSearch=!q||JSON.stringify(j).toLowerCase().includes(q);
+    const matchesFilter=filter==="all"||j.favorite;
+    return matchesSearch&&matchesFilter;
+  });
+  journalTimeline.innerHTML=arr.length?arr.map(j=>`
+    <article class="timeline-card journal-entry-card ${j.favorite?"favorite":""}">
+      <div class="timeline-date">${new Date(j.date+"T00:00:00").toLocaleDateString(undefined,{month:"short",day:"numeric"})}</div>
+      <div>
+        <div class="timeline-details">${(j.tags||[]).map(t=>`<span class="timeline-pill">${esc(t)}</span>`).join("")}</div>
+        ${j.story?`<p class="timeline-note">${esc(j.story)}</p>`:""}
+        ${j.adventure?`<p class="timeline-note"><strong>Adventure:</strong> ${esc(j.adventure)}</p>`:""}
+        ${j.proud?`<p class="timeline-note"><strong>Proud of:</strong> ${esc(j.proud)}</p>`:""}
+        ${j.gratitude?`<p class="timeline-note"><strong>Grateful:</strong> ${esc(j.gratitude)}</p>`:""}
+        ${j.tomorrow?`<p class="timeline-note"><strong>Tomorrow:</strong> ${esc(j.tomorrow)}</p>`:""}
+        <div class="journal-action-row">
+          <button type="button" class="secondary-button" onclick="editJournalEntry('${j.date}')">Edit entry</button>
+        </div>
+      </div>
+    </article>
+  `).join(""):"<p>No journal entries yet.</p>";
+}
 function renderStory(){const daily=[...read(KEYS.daily,[])].reverse(),wins=read(KEYS.wins,[]),journals=read(KEYS.journal,[]);storyTimeline.innerHTML=daily.length?daily.map(d=>{const w=wins.find(x=>x.date===d.date)?.wins||[],j=journals.find(x=>x.date===d.date);return `<article class="timeline-card"><div class="timeline-date">${new Date(d.date+"T00:00:00").toLocaleDateString(undefined,{month:"short",day:"numeric"})}</div><div><div class="timeline-details"><span class="timeline-pill">💧 ${d.water||0} oz</span><span class="timeline-pill">🥩 ${d.protein||0} g</span><span class="timeline-pill">👟 ${d.movement||0} min</span><span class="timeline-pill">🌙 ${d.sleep||0} hr</span>${d.mood?`<span class="timeline-pill">🙂 ${esc(d.mood)}</span>`:""}${d.shotTaken?`<span class="timeline-pill">💉 ${esc(d.dose)}</span>`:""}${w.map(x=>`<span class="timeline-pill">⭐ ${esc(x)}</span>`).join("")}${j?.tags?.map(t=>`<span class="timeline-pill">${esc(t)}</span>`).join("")||""}</div>${j?.story?`<p class="timeline-note">${esc(j.story)}</p>`:""}</div></article>`}).join(""):"<p>No entries yet.</p>"}
 exportDataBtn.onclick=()=>{const d=read(KEYS.daily,[]);dl("my-zepbound-journey-data.csv",[["Date","Water","Protein","Movement","Sleep","Mood","Energy","Appetite","Shot","Dose"],...d.map(x=>[x.date,x.water,x.protein,x.movement,x.sleep,x.mood,x.energy,x.appetite,x.shotTaken?"Yes":"No",x.dose])])}
 weightDate.value=todayString();weightForm.addEventListener("submit",e=>{e.preventDefault();const date=weightDate.value,w=+weight.value;if(!date||!w)return;const arr=read(KEYS.weights,[]);arr.push({date,weight:w});arr.sort((a,b)=>new Date(a.date)-new Date(b.date));write(KEYS.weights,arr);weight.value="";renderProgress()})
@@ -45,4 +144,4 @@ document.querySelectorAll(".nav-item").forEach(b=>b.onclick=()=>{document.queryS
 settingsBtn.onclick=()=>{const s=settings();settingName.value=s.name;settingStartDate.value=s.startDate;settingStartWeight.value=s.startingWeight;settingWaterGoal.value=s.waterGoal;settingProteinGoal.value=s.proteinGoal;settingMovementGoal.value=s.movementGoal;settingSleepGoal.value=s.sleepGoal;settingsDialog.showModal()}
 saveSettingsBtn.onclick=()=>{write(KEYS.settings,{name:settingName.value.trim()||"Kevin Wiltz",startDate:settingStartDate.value||todayString(),startingWeight:+settingStartWeight.value||328,waterGoal:+settingWaterGoal.value||80,proteinGoal:+settingProteinGoal.value||100,movementGoal:+settingMovementGoal.value||30,sleepGoal:+settingSleepGoal.value||8});settingsDialog.close();renderAll()}
 function renderAll(){setGreeting();renderToday();renderWins();renderMeals();renderJournal();renderStory();renderProgress()}
-loadToday();loadJournalToday();renderAll();
+loadToday();loadJournalEntry(todayString());renderAll();

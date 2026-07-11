@@ -55,3 +55,138 @@ dialog{width:min(620px,92vw);border:0;border-radius:26px;padding:0;box-shadow:0 
 fieldset{border:1px solid var(--border);border-radius:18px;margin:1rem 0}legend{font-weight:900;color:var(--blue)}
 @media(max-width:920px){.journey-grid{grid-template-columns:repeat(2,1fr)}.content-grid,.journal-layout{grid-template-columns:1fr}}
 @media(max-width:620px){.hero-card{min-height:320px}.journey-grid,.form-grid,.feeling-grid,.shot-box,.meal-controls,.progress-cards,.weight-form{grid-template-columns:1fr}.win-options,.tag-options{grid-template-columns:1fr}.section-heading,.panel-heading{flex-direction:column}.timeline-card{grid-template-columns:1fr}.bottom-nav{width:96%}.nav-item strong{font-size:.65rem}}
+
+
+/* Version 7.1 Journal polish */
+.journal-scene {
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 82% 18%, rgba(255,255,255,.18), transparent 20%),
+    linear-gradient(135deg, #4f46e5 0%, #7c3aed 45%, #2563eb 100%);
+}
+.journal-scene::after {
+  content: "";
+  position: absolute;
+  width: 220px;
+  height: 220px;
+  right: -65px;
+  bottom: -90px;
+  border-radius: 50%;
+  background: rgba(255,255,255,.09);
+}
+
+.journal-editor {
+  background:
+    linear-gradient(90deg, transparent 44px, rgba(239,68,68,.13) 45px, transparent 46px),
+    repeating-linear-gradient(
+      to bottom,
+      #fffdf8 0,
+      #fffdf8 31px,
+      rgba(59,130,246,.10) 32px
+    );
+}
+
+.journal-paper {
+  background: rgba(255,255,255,.82);
+  border: 1px solid rgba(230,235,243,.95);
+  border-radius: 24px;
+  padding: 1rem;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.9);
+}
+
+.journal-date-row,
+.journal-two-column {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: .85rem;
+}
+
+.favorite-toggle {
+  align-self: end;
+  flex-direction: row;
+  align-items: center;
+  background: #fff8df;
+  border: 1px solid #f9e9aa;
+  border-radius: 18px;
+  padding: .9rem;
+}
+.favorite-toggle input {
+  width: auto;
+}
+
+.reflection-prompt {
+  margin: 1rem 0;
+  padding: 1rem;
+  border-radius: 18px;
+  background: linear-gradient(135deg, #eef4ff, #f7f2ff);
+  border: 1px solid #dce6fb;
+}
+.reflection-prompt span {
+  display: block;
+  color: var(--blue);
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  font-size: .72rem;
+  font-weight: 900;
+}
+.reflection-prompt strong {
+  display: block;
+  margin-top: .3rem;
+  font-size: 1.08rem;
+}
+
+.journal-tools {
+  display: flex;
+  gap: .6rem;
+  width: 100%;
+}
+.journal-tools input {
+  flex: 1;
+}
+
+.journal-entry-card {
+  position: relative;
+  background:
+    linear-gradient(90deg, transparent 34px, rgba(239,68,68,.10) 35px, transparent 36px),
+    repeating-linear-gradient(
+      to bottom,
+      #fffdf8 0,
+      #fffdf8 29px,
+      rgba(59,130,246,.08) 30px
+    );
+}
+.journal-entry-card.favorite::before {
+  content: "⭐";
+  position: absolute;
+  top: .8rem;
+  right: .8rem;
+}
+
+.journal-action-row {
+  display: flex;
+  gap: .5rem;
+  margin-top: .75rem;
+}
+.journal-action-row button {
+  padding: .55rem .75rem;
+  font-size: .82rem;
+}
+
+.danger-button {
+  border-radius: 999px;
+  padding: .85rem 1.15rem;
+  font-weight: 900;
+  color: white;
+  background: linear-gradient(135deg, #dc2626, #ef4444);
+}
+
+@media(max-width:620px){
+  .journal-date-row,
+  .journal-two-column {
+    grid-template-columns: 1fr;
+  }
+  .journal-tools {
+    flex-direction: column;
+  }
+}

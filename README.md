@@ -1,41 +1,23 @@
-# My Zepbound Journey — Version 7.1
+# My Zepbound Journey — Version 8.0
 
-Default profile name: **Kevin Wiltz**
+Day One Edition  
+Created by Kevin Wiltz
 
-## New in Version 7.1
+**One Day. One Choice. One Step at a Time.**
 
-- Dedicated Journey Journal
-- Daily story, adventure, gratitude, and tomorrow's focus
-- Life tags such as Drone, Family, Exercise, Home, Travel, and Work
-- Journal search
-- Journal entries merged into My Story
-- Five-section bottom navigation
-- Process-first dashboard
-- Meal planner and shopping list
-- Progress section kept separate from the home screen
+## New
+- Day One sunrise welcome
+- Begin My Journey ceremony
+- Today's Mission
+- Quick Check-In
+- Letter to Future Me
+- Milestone page
+- Exercise page with gym, gentle-day, and home routines
+- Workout logging: weight, sets, reps/time, feeling, notes
+- Previous exercise settings
+- Weekly gym visit summary
+- Existing journal, meals, story, and progress retained
 
-## Deploy
+Exercise suggestions are general. Use comfortable ranges and stop or modify movements that cause sharp or increasing shoulder or hip pain.
 
-Replace these files in the root of your GitHub repository:
-
-- index.html
-- styles.css
-- app.js
-- manifest.json
-- service-worker.js
-- README.md
-
-GitHub Pages and Netlify should redeploy automatically after the commit.
-
-
-## New in Version 7.1
-
-- Journal page styled more like a real notebook
-- Editable entry date
-- Edit past journal entries
-- Delete journal entries
-- Favorite important entries
-- Filter journal to favorites
-- Rotating daily reflection prompts
-- New “Something I am proud of” section
-- Improved journal cards and mobile layout
+Replace the six repository files and commit. Netlify will redeploy automatically.

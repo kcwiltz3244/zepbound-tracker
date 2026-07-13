@@ -9,6 +9,22 @@
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
+  <section id="dayOneOverlay" class="day-one-overlay hidden">
+    <div class="day-one-sky">
+      <div class="day-one-sun"></div>
+      <div class="day-one-path"></div>
+      <div class="day-one-hill hill-a"></div>
+      <div class="day-one-hill hill-b"></div>
+    </div>
+    <div class="day-one-content">
+      <p class="day-one-brand">My Zepbound Journey</p>
+      <h1>Welcome, Kevin.</h1>
+      <h2>Today is Day One.</h2>
+      <p>One Day. One Choice. One Step at a Time.</p>
+      <button id="beginJourneyBtn" class="day-one-button">Begin My Journey</button>
+      <small>Every journey begins with a single step.</small>
+    </div>
+  </section>
   <div class="app-shell">
     <header class="topbar">
       <div>
@@ -31,6 +47,40 @@
             <div class="hill hill-one"></div>
             <div class="hill hill-two"></div>
           </div>
+        </section>
+
+        
+        <section class="mission-card">
+          <div class="mission-icon" id="missionIcon">💧</div>
+          <div>
+            <p class="eyebrow light">Today's mission</p>
+            <h2 id="missionTitle">Water first.</h2>
+            <p id="missionText">Keep your water nearby and take steady sips throughout the day.</p>
+          </div>
+          <button id="completeMissionBtn" class="mission-button">Mark complete</button>
+        </section>
+
+        <section class="quick-check-panel panel">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">Quick check-in</p>
+              <h2>Thirty seconds is enough.</h2>
+            </div>
+            <span class="mini-icon">⚡</span>
+          </div>
+          <div class="quick-check-grid">
+            <button type="button" data-quick="mood" data-value="Great">😀<span>Great</span></button>
+            <button type="button" data-quick="mood" data-value="Good">🙂<span>Good</span></button>
+            <button type="button" data-quick="mood" data-value="Okay">😐<span>Okay</span></button>
+            <button type="button" data-quick="mood" data-value="Tired">😴<span>Tired</span></button>
+            <button type="button" data-quick="mood" data-value="Rough day">😕<span>Rough</span></button>
+          </div>
+          <div class="quick-actions">
+            <button id="quickWaterBtn" type="button" class="secondary-button">+ 8 oz water</button>
+            <button id="quickProteinBtn" type="button" class="secondary-button">+ 20 g protein</button>
+            <button id="quickMoveBtn" type="button" class="secondary-button">+ 10 min movement</button>
+          </div>
+          <p id="quickCheckMessage" class="gentle-message">Welcome back. Let’s take today’s next step.</p>
         </section>
 
         <section class="section-block">
@@ -193,6 +243,24 @@
           <p>Activities, reflections, gratitude, and tomorrow’s focus.</p>
         </section>
 
+        
+        <section class="panel future-letter-panel">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">Letter to Future Me</p>
+              <h2>Why am I starting?</h2>
+            </div>
+            <span class="mini-icon gold">❤️</span>
+          </div>
+          <p class="letter-intro">Write this once and keep it. This is your message from the beginning of the journey.</p>
+          <textarea id="futureLetter" rows="10" placeholder="Dear Future Kevin..."></textarea>
+          <div class="button-group">
+            <button id="saveFutureLetterBtn" class="primary-button">Save my letter</button>
+            <button id="toggleFutureLetterBtn" class="secondary-button">Hide letter</button>
+          </div>
+          <p id="futureLetterSaved" class="gentle-message hidden">Your Day One letter is safely stored on this device.</p>
+        </section>
+
         <section class="journal-layout">
           <article class="panel journal-editor">
             <div class="panel-heading">
@@ -348,6 +416,74 @@
         </section>
       </section>
 
+
+      <section id="exerciseView" class="view">
+        <section class="view-hero exercise-hero">
+          <p class="eyebrow light">My Gym</p>
+          <h2>Strength is built one workout at a time.</h2>
+          <p>Log what you did, remember your last settings, and choose a routine that fits today.</p>
+        </section>
+
+        <section class="exercise-summary-grid">
+          <article class="summary-tile blue-tile"><span>Gym visits this week</span><strong id="gymVisitsWeek">0 / 2–3</strong></article>
+          <article class="summary-tile purple-tile"><span>Total workouts</span><strong id="totalWorkouts">0</strong></article>
+          <article class="summary-tile orange-tile"><span>Last workout</span><strong id="lastWorkoutDate">—</strong></article>
+        </section>
+
+        <section class="panel">
+          <div class="panel-heading">
+            <div><p class="eyebrow">Recommended routines</p><h2>Choose what fits today.</h2></div>
+            <select id="routineFilter">
+              <option value="all">All routines</option><option value="gym">Gym</option>
+              <option value="gentle">Gentle day</option><option value="home">At home</option>
+            </select>
+          </div>
+          <p class="exercise-note">General suggestions only. Use comfortable ranges, slow control, and stop any exercise that causes sharp or increasing shoulder or hip pain.</p>
+          <div id="routineCards" class="routine-cards"></div>
+        </section>
+
+        <section class="panel workout-editor">
+          <div class="panel-heading">
+            <div><p class="eyebrow">Workout log</p><h2 id="workoutHeading">Start a workout</h2></div>
+            <span class="mini-icon">🏋️</span>
+          </div>
+          <form id="workoutForm">
+            <div class="form-grid">
+              <label>Date<input id="workoutDate" type="date"></label>
+              <label>Workout name<input id="workoutName" type="text" placeholder="YMCA Workout A"></label>
+              <label>How did you feel?
+                <select id="workoutFeeling">
+                  <option value="">Choose</option><option>Great</option><option>Good</option>
+                  <option>Okay</option><option>Tired</option><option>Shoulder sore</option><option>Hip sore</option>
+                </select>
+              </label>
+            </div>
+            <div id="exerciseRows" class="exercise-rows"></div>
+            <div class="button-group">
+              <button id="addExerciseBtn" type="button" class="secondary-button">+ Add exercise</button>
+              <button type="submit" class="primary-button">Finish workout</button>
+              <button id="clearWorkoutBtn" type="button" class="danger-button">Clear</button>
+            </div>
+            <label>Workout notes<textarea id="workoutNotes" rows="3" placeholder="What felt good? Anything to adjust next time?"></textarea></label>
+          </form>
+        </section>
+
+        <section class="panel">
+          <div class="panel-heading"><div><p class="eyebrow">Workout history</p><h2>Your gym notebook</h2></div></div>
+          <div id="workoutHistory" class="workout-history"></div>
+        </section>
+      </section>
+
+
+      <section id="milestonesView" class="view">
+        <section class="view-hero milestone-hero">
+          <p class="eyebrow light">Milestones</p>
+          <h2>Celebrate every victory.</h2>
+          <p>The process deserves recognition, not just the final result.</p>
+        </section>
+        <section class="panel"><div id="milestoneGrid" class="milestone-grid"></div></section>
+      </section>
+
       <section id="progressView" class="view">
         <section class="view-hero progress-hero">
           <p class="eyebrow light">My progress</p>
@@ -384,13 +520,20 @@
           <canvas id="weightChart" width="1000" height="340"></canvas>
         </section>
       </section>
+      <section class="about-card">
+        <strong>My Zepbound Journey — Day One Edition</strong>
+        <span>Created by Kevin Wiltz</span>
+        <small>One Day. One Choice. One Step at a Time.</small>
+      </section>
     </main>
 
     <nav class="bottom-nav">
-      <button class="nav-item active" data-view="homeView"><span>🏠</span><strong>Home</strong></button>
+      <button class="nav-item active" data-view="homeView"><span>🏠</span><strong>Today</strong></button>
       <button class="nav-item" data-view="journalView"><span>📖</span><strong>Journal</strong></button>
       <button class="nav-item" data-view="mealsView"><span>🍽️</span><strong>Meals</strong></button>
-      <button class="nav-item" data-view="storyView"><span>🕰️</span><strong>My Story</strong></button>
+      <button class="nav-item" data-view="exerciseView"><span>🏋️</span><strong>Exercise</strong></button>
+      <button class="nav-item" data-view="milestonesView"><span>🏆</span><strong>Wins</strong></button>
+      <button class="nav-item" data-view="storyView"><span>🕰️</span><strong>Story</strong></button>
       <button class="nav-item" data-view="progressView"><span>📈</span><strong>Progress</strong></button>
     </nav>
   </div>

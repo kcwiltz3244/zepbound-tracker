@@ -210,3 +210,9 @@ fieldset{border:1px solid var(--border);border-radius:18px;margin:1rem 0}legend{
 .bottom-nav{grid-template-columns:repeat(7,1fr);width:min(980px,96%)}.nav-item strong{font-size:.62rem}
 @media(max-width:920px){.routine-cards,.milestone-grid{grid-template-columns:1fr 1fr}}
 @media(max-width:620px){.mission-card{grid-template-columns:1fr}.quick-check-grid{grid-template-columns:repeat(3,1fr)}.exercise-summary-grid,.routine-cards,.milestone-grid{grid-template-columns:1fr}.exercise-row{grid-template-columns:1fr 1fr}.exercise-name,.last-setting{grid-column:1/-1}.bottom-nav{overflow-x:auto;grid-template-columns:repeat(7,minmax(68px,1fr))}}
+
+
+/* Version 8.0.2 critical Day One overlay fix */
+.day-one-overlay.hidden {
+  display: none !important;
+}

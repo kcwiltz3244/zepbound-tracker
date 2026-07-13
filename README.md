@@ -29,3 +29,10 @@ Replace the six repository files and commit. Netlify will redeploy automatically
 - Added a direct button fallback
 - Replaced fragile browser-global element access
 - Changed service worker to network-first so Netlify updates appear reliably
+
+
+## Version 8.0.2 critical fix
+
+The Begin My Journey button was saving correctly, but a later CSS rule forced the
+welcome overlay to remain visible. Added a higher-priority hidden rule so the
+Day One screen closes immediately after the button is pressed.

@@ -1,4 +1,4 @@
-const CACHE_NAME = "my-zepbound-journey-v8-0-1";
+const CACHE_NAME = "my-zepbound-journey-v8-0-2";
 const CORE_ASSETS = ["./", "./index.html", "./styles.css", "./app.js", "./manifest.json"];
 
 self.addEventListener("install", event => {

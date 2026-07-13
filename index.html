@@ -21,7 +21,10 @@
       <h1>Welcome, Kevin.</h1>
       <h2>Today is Day One.</h2>
       <p>One Day. One Choice. One Step at a Time.</p>
-      <button id="beginJourneyBtn" class="day-one-button">Begin My Journey</button>
+      <button id="beginJourneyBtn" class="day-one-button"
+      onclick="localStorage.setItem('mzjV8DayOne', JSON.stringify({begun:true,date:new Date().toISOString().split('T')[0],dose:'2.5 mg'})); document.getElementById('dayOneOverlay').classList.add('hidden');">
+      Begin My Journey
+    </button>
       <small>Every journey begins with a single step.</small>
     </div>
   </section>

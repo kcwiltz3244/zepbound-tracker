@@ -173,8 +173,16 @@ const milestoneDefinitions=[
 {id:"tenWins",icon:"⭐",title:"Ten Wins",text:"Recorded ten personal victories.",test:()=>read(KEYS.wins,[]).flatMap(w=>w.wins||[]).length>=10},
 {id:"tenPounds",icon:"🎉",title:"Ten Pounds",text:"Reached a ten-pound change when you chose to look.",test:()=>{const s=settings(),a=read(KEYS.weights,[]);return !!(a.length&&s.startingWeight-a.at(-1).weight>=10)}}
 ];
-function initDayOne(){const state=read(KEYS.dayOne,null);if(!state?.begun)dayOneOverlay.classList.remove("hidden")}
-beginJourneyBtn.addEventListener("click",()=>{write(KEYS.dayOne,{begun:true,date:todayString(),dose:"2.5 mg"});dayOneOverlay.classList.add("hidden");renderMilestones()});
+function initDayOne(){
+  const overlay=document.getElementById("dayOneOverlay");
+  const state=read(KEYS.dayOne,null);
+  if(overlay && !state?.begun) overlay.classList.remove("hidden");
+}
+document.getElementById("beginJourneyBtn")?.addEventListener("click",()=>{
+  write(KEYS.dayOne,{begun:true,date:todayString(),dose:"2.5 mg"});
+  document.getElementById("dayOneOverlay")?.classList.add("hidden");
+  renderMilestones();
+});
 function getDailyMission(){const n=Math.floor(new Date(todayString()+"T00:00:00").getTime()/86400000);return missions[Math.abs(n)%missions.length]}
 function renderMission(){const m=getDailyMission(),s=read(KEYS.mission,{}),done=s.date===todayString()&&s.complete;missionIcon.textContent=done?"✓":m.icon;missionTitle.textContent=done?"Mission complete.":m.title;missionText.textContent=done?"You followed through on today’s focus. That matters.":m.text;completeMissionBtn.textContent=done?"Completed":"Mark complete";document.querySelector(".mission-card").classList.toggle("complete",done)}
 completeMissionBtn.addEventListener("click",()=>{const s=read(KEYS.mission,{}),done=!(s.date===todayString()&&s.complete);write(KEYS.mission,{date:todayString(),complete:done});renderMission()});

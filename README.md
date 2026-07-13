@@ -21,3 +21,11 @@ Created by Kevin Wiltz
 Exercise suggestions are general. Use comfortable ranges and stop or modify movements that cause sharp or increasing shoulder or hip pain.
 
 Replace the six repository files and commit. Netlify will redeploy automatically.
+
+
+## Version 8.0.1 fix
+
+- Fixed Begin My Journey button on phones
+- Added a direct button fallback
+- Replaced fragile browser-global element access
+- Changed service worker to network-first so Netlify updates appear reliably

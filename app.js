@@ -566,3 +566,65 @@ function initNutritionCoach(){
   renderNutritionCoach()
 }
 initNutritionCoach();
+
+
+/* Version 9.0.1 Automatic Food Matching */
+const FOOD_ALIASES={
+  "broccoli":"broccoli, cooked",
+  "steamed broccoli":"broccoli, cooked",
+  "broccoli steamed":"broccoli, cooked",
+  "eggs":"egg, large",
+  "egg":"egg, large",
+  "bacon":"bacon, pork, thick-cut",
+  "chicken":"chicken breast, cooked",
+  "chicken breast":"chicken breast, cooked",
+  "rice":"rice, white, cooked",
+  "brown rice":"rice, brown, cooked",
+  "oatmeal":"oatmeal, cooked",
+  "apple":"apple, medium",
+  "banana":"banana, medium"
+};
+function normalizeFoodText(value){return String(value||"").toLowerCase().replace(/[^\w\s]/g," ").replace(/\s+/g," ").trim()}
+function findFoodMatch(query){
+  const normalized=normalizeFoodText(query); if(!normalized)return null;
+  const aliasTarget=FOOD_ALIASES[normalized];
+  if(aliasTarget){const aliased=NUTRITION_FOODS.find(food=>normalizeFoodText(food.name)===normalizeFoodText(aliasTarget));if(aliased)return aliased}
+  const exact=NUTRITION_FOODS.find(food=>normalizeFoodText(food.name)===normalized);if(exact)return exact;
+  const starts=NUTRITION_FOODS.filter(food=>normalizeFoodText(food.name).startsWith(normalized));if(starts.length===1)return starts[0];
+  const contains=NUTRITION_FOODS.filter(food=>normalizeFoodText(food.name).includes(normalized));if(contains.length===1)return contains[0];
+  const words=normalized.split(" ").filter(Boolean);
+  const scored=NUTRITION_FOODS.map(food=>{const haystack=normalizeFoodText(food.name);return {food,score:words.reduce((t,w)=>t+(haystack.includes(w)?1:0),0)}}).filter(x=>x.score>0).sort((a,b)=>b.score-a.score);
+  if(scored.length&&(scored.length===1||scored[0].score>scored[1].score))return scored[0].food;
+  return null
+}
+function applyFoodMatch(food){
+  if(!food)return false;
+  document.getElementById("nutritionFoodName").value=food.name;
+  setNutritionServingBasis(food.servingAmount||1,food.servingUnit||"serving");
+  document.getElementById("nutritionAmount").value=food.servingAmount||1;
+  setSelectValue("nutritionUnit",food.servingUnit||"serving");
+  nutritionNutrients.forEach(key=>{document.getElementById("nutrition"+key[0].toUpperCase()+key.slice(1)).value=food[key]??0});
+  const status=document.getElementById("nutritionFoodMatchStatus");
+  if(status){status.textContent=`Matched: ${food.name} — nutrition values loaded.`;status.classList.add("matched");status.classList.remove("not-matched")}
+  nutritionPreview(); return true
+}
+function autoMatchTypedFood(showFailure=true){
+  const input=document.getElementById("nutritionFoodName"),query=input?.value.trim();if(!query)return false;
+  const match=findFoodMatch(query);if(match)return applyFoodMatch(match);
+  if(showFailure){const status=document.getElementById("nutritionFoodMatchStatus");if(status){status.textContent="No matching food was found. Choose a suggestion or enter the nutrition values manually.";status.classList.remove("matched");status.classList.add("not-matched")}}
+  return false
+}
+function initAutomaticFoodMatching(){
+  const input=document.getElementById("nutritionFoodName");if(!input)return;
+  let mobileMatchTimer;
+  input.addEventListener("input",()=>{clearTimeout(mobileMatchTimer);mobileMatchTimer=setTimeout(()=>autoMatchTypedFood(false),650)});
+  input.addEventListener("change",()=>autoMatchTypedFood(true));
+  input.addEventListener("blur",()=>autoMatchTypedFood(true));
+  input.addEventListener("keydown",event=>{if(event.key==="Enter"||event.key==="Tab")autoMatchTypedFood(true)});
+  ["nutritionAmount","nutritionUnit","nutritionMealType"].forEach(id=>document.getElementById(id)?.addEventListener("focus",()=>autoMatchTypedFood(true)));
+  document.getElementById("nutritionFoodForm").addEventListener("submit",event=>{
+    const nutrientTotal=nutritionNutrients.reduce((sum,key)=>sum+(Number(document.getElementById("nutrition"+key[0].toUpperCase()+key.slice(1))?.value)||0),0);
+    if(nutrientTotal===0&&input.value.trim()){const matched=autoMatchTypedFood(true);if(matched){event.preventDefault();setTimeout(()=>document.getElementById("nutritionFoodForm").requestSubmit(),0)}}
+  },true)
+}
+initAutomaticFoodMatching();

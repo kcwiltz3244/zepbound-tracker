@@ -378,3 +378,12 @@ fieldset{border:1px solid var(--border);border-radius:18px;margin:1rem 0}legend{
   .weekly-grid{grid-template-columns:repeat(2,1fr)}
   .grocery-form{grid-template-columns:1fr}
 }
+
+
+/* Version 9.0.1 food-name matching */
+.nutrition-match-status{margin:-.2rem 0 .2rem;padding:.55rem .7rem;border-radius:13px;background:#f8fafc;color:var(--muted);font-size:.78rem;font-weight:750;border:1px solid var(--border)}
+.nutrition-match-status.matched{background:#ecfdf5;color:#0f766e;border-color:#99f6e4}
+.nutrition-match-status.not-matched{background:#fff7ed;color:#9a3412;border-color:#fed7aa}
+
+/* Version 9.0.2 mobile matching */
+.nutrition-match-status{transition:background .2s ease,border-color .2s ease,color .2s ease}

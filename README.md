@@ -40,3 +40,10 @@ Netlify should redeploy automatically. The service-worker cache and asset query 
 
 ## Notes
 Food data remains stored locally on the device. Nutrition values are estimates and may vary by brand, serving size, and preparation. This release does not yet include live restaurant databases, barcode scanning, or photo recognition.
+
+
+## Version 9.0.2 mobile correction
+- Food matching runs after a brief pause in typing
+- Tapping Amount, Unit, or Meal triggers matching on phones
+- Tab and Enter still work on computers
+- Updated cache and asset versions

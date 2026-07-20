@@ -1,9 +1,9 @@
 {
-  "name": "My Zepbound Journey — Version 9.0 Nutrition Coach",
+  "name": "My Zepbound Journey \u2014 Version 9.0.2 Mobile Food Matching",
   "short_name": "My Journey",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#0f2747",
   "theme_color": "#2563eb",
-  "description": "A process-first wellness app with a nutrition dashboard, protein coaching, favorites, recent foods, weekly trends, grocery list, journaling, meals, exercise, and progress."
+  "description": "Nutrition coach with automatic food matching while typing and when moving to the amount field on phones."
 }

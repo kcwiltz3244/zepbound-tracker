@@ -383,3 +383,186 @@ function initNutrition(){
   renderNutritionSearch();renderNutrition();nutritionPreview()
 }
 initNutrition();
+
+
+/* Version 9.0 Nutrition Coach */
+const NUTRITION_GOALS_KEY="mzjV9NutritionGoals";
+const NUTRITION_FAVORITES_KEY="mzjV9NutritionFavorites";
+const GROCERY_KEY="mzjV9Grocery";
+let nutritionGoals=read(NUTRITION_GOALS_KEY,{calories:1900,protein:130,fiber:30});
+let nutritionFavorites=read(NUTRITION_FAVORITES_KEY,[]);
+let groceryItems=read(GROCERY_KEY,[]);
+
+function clampPercent(value,goal){return Math.max(0,Math.min(100,goal?value/goal*100:0))}
+function uniqueByName(items){
+  const seen=new Set();
+  return items.filter(item=>{
+    const key=(item.name||"").toLowerCase();
+    if(!key||seen.has(key))return false;
+    seen.add(key);return true
+  })
+}
+function nutritionTodayEntries(){return nutritionEntries.filter(e=>e.date===todayString())}
+function totalsForDate(date){
+  return nutritionEntries.filter(e=>e.date===date).reduce((sum,e)=>{
+    nutritionNutrients.forEach(k=>sum[k]+=Number(e[k])||0);return sum
+  },{calories:0,protein:0,carbs:0,sugar:0,fiber:0,fat:0,sodium:0})
+}
+function renderGoalProgress(){
+  if(!document.getElementById("goalCaloriesText"))return;
+  const totals=nutritionTotals();
+  document.getElementById("goalCaloriesText").textContent=`${Math.round(totals.calories).toLocaleString()} / ${nutritionGoals.calories.toLocaleString()}`;
+  document.getElementById("goalProteinText").textContent=`${nutritionRound(totals.protein)} / ${nutritionGoals.protein} g`;
+  document.getElementById("goalFiberText").textContent=`${nutritionRound(totals.fiber)} / ${nutritionGoals.fiber} g`;
+  document.getElementById("goalCaloriesMeter").style.width=`${clampPercent(totals.calories,nutritionGoals.calories)}%`;
+  document.getElementById("goalProteinMeter").style.width=`${clampPercent(totals.protein,nutritionGoals.protein)}%`;
+  document.getElementById("goalFiberMeter").style.width=`${clampPercent(totals.fiber,nutritionGoals.fiber)}%`
+}
+function renderMealTotals(){
+  document.querySelectorAll(".nutrition-meal-section").forEach(section=>{
+    const title=section.querySelector("h4")?.textContent;
+    const items=nutritionForDate().filter(e=>e.mealType===title);
+    const totals=items.reduce((s,e)=>{nutritionNutrients.forEach(k=>s[k]+=Number(e[k])||0);return s},{calories:0,protein:0,carbs:0,sugar:0,fiber:0,fat:0,sodium:0});
+    let summary=section.querySelector(".meal-total-summary");
+    if(!summary){summary=document.createElement("p");summary.className="meal-total-summary";section.querySelector("h4").after(summary)}
+    summary.textContent=`${Math.round(totals.calories)} calories • ${nutritionRound(totals.protein)} g protein • ${nutritionRound(totals.carbs)} g carbs`
+  });
+  document.querySelectorAll(".nutrition-meal-row").forEach(row=>{
+    const id=row.querySelector("[data-nutrition-id]")?.dataset.nutritionId;
+    if(!id||row.querySelector(".nutrition-favorite"))return;
+    const button=document.createElement("button");
+    button.type="button";button.className="nutrition-favorite";
+    button.textContent=nutritionFavorites.some(f=>f.sourceId===id)?"★":"☆";
+    button.title="Save as favorite";
+    button.addEventListener("click",()=>{
+      const entry=nutritionEntries.find(e=>e.id===id);if(!entry)return;
+      const existing=nutritionFavorites.findIndex(f=>f.name===entry.name&&f.amount===entry.amount&&f.unit===entry.unit);
+      if(existing>=0)nutritionFavorites.splice(existing,1);
+      else nutritionFavorites.unshift({...entry,sourceId:id,id:"fav-"+Date.now(),date:undefined});
+      write(NUTRITION_FAVORITES_KEY,nutritionFavorites);
+      renderNutritionCoach()
+    });
+    row.querySelector("div").prepend(button)
+  })
+}
+function prefillNutrition(entry){
+  document.getElementById("nutritionFoodName").value=entry.name;
+  document.getElementById("nutritionMealType").value=entry.mealType||"Breakfast";
+  document.getElementById("nutritionAmount").value=entry.amount||entry.servingAmount||1;
+  setSelectValue("nutritionUnit",entry.unit||entry.servingUnit||"serving");
+  setNutritionServingBasis(entry.servingAmount||entry.amount||1,entry.servingUnit||entry.unit||"serving");
+  const multiplier=(entry.amount||1)/(entry.servingAmount||entry.amount||1);
+  nutritionNutrients.forEach(k=>{
+    const perBasis=multiplier?Number(entry[k]||0)/multiplier:Number(entry[k]||0);
+    document.getElementById("nutrition"+k[0].toUpperCase()+k.slice(1)).value=nutritionRound(perBasis,k==="calories"||k==="sodium"?0:1)
+  });
+  nutritionPreview();
+  document.getElementById("nutritionFoodForm").scrollIntoView({behavior:"smooth",block:"center"})
+}
+function renderRecentFoods(){
+  const list=document.getElementById("recentFoodsList");if(!list)return;
+  const recent=uniqueByName([...nutritionEntries].reverse()).slice(0,8);
+  list.innerHTML=recent.map((e,i)=>`<button type="button" data-recent-index="${i}">${esc(e.name)}<small>${e.amount} ${esc(unitLabel(e.unit,e.amount))}</small></button>`).join("");
+  document.getElementById("recentFoodsEmpty").classList.toggle("hidden",recent.length>0);
+  list.querySelectorAll("[data-recent-index]").forEach(b=>b.addEventListener("click",()=>prefillNutrition(recent[Number(b.dataset.recentIndex)])))
+}
+function renderFavorites(){
+  const list=document.getElementById("favoriteFoodsList");if(!list)return;
+  list.innerHTML=nutritionFavorites.slice(0,10).map((e,i)=>`<button type="button" data-favorite-index="${i}">★ ${esc(e.name)}<small>${e.amount} ${esc(unitLabel(e.unit,e.amount))}</small></button>`).join("");
+  document.getElementById("favoriteFoodsEmpty").classList.toggle("hidden",nutritionFavorites.length>0);
+  list.querySelectorAll("[data-favorite-index]").forEach(b=>b.addEventListener("click",()=>prefillNutrition(nutritionFavorites[Number(b.dataset.favoriteIndex)])))
+}
+function renderProteinCoach(){
+  const total=nutritionTotals().protein;
+  const remaining=Math.max(0,nutritionGoals.protein-total);
+  document.getElementById("proteinCoachHeading").textContent=remaining>0?`${nutritionRound(remaining)} g still available to reach your goal`:"Protein goal reached";
+  document.getElementById("proteinCoachMessage").textContent=remaining>0
+    ?`You have logged ${nutritionRound(total)} g. Choose a familiar protein food or continue with your planned meals.`
+    :`You have logged ${nutritionRound(total)} g of protein today. Nice work—keep meals comfortable and balanced.`;
+  const suggestions=NUTRITION_FOODS.filter(f=>f.protein>=12).sort((a,b)=>b.protein-a.protein).slice(0,6);
+  const wrap=document.getElementById("proteinCoachSuggestions");
+  wrap.innerHTML=suggestions.map((f,i)=>`<button type="button" data-protein-index="${i}">${esc(f.name)}<small>${f.protein} g per ${esc(f.servingLabel)}</small></button>`).join("");
+  wrap.querySelectorAll("[data-protein-index]").forEach(b=>b.addEventListener("click",()=>{
+    const f=suggestions[Number(b.dataset.proteinIndex)];
+    prefillNutrition({...f,amount:f.servingAmount,unit:f.servingUnit,mealType:"Snack"})
+  }))
+}
+function renderWeeklyNutrition(){
+  const wrap=document.getElementById("weeklyNutritionGrid");if(!wrap)return;
+  const days=[];
+  for(let i=6;i>=0;i--){
+    const d=new Date();d.setHours(0,0,0,0);d.setDate(d.getDate()-i);
+    const date=d.toISOString().slice(0,10),totals=totalsForDate(date);
+    days.push({date,label:d.toLocaleDateString(undefined,{weekday:"short"}),totals})
+  }
+  wrap.innerHTML=days.map(day=>`<article class="${day.date===todayString()?"today":""}"><strong>${day.label}</strong><span>${Math.round(day.totals.calories)} cal</span><span>${nutritionRound(day.totals.protein)}g protein</span><span>${nutritionRound(day.totals.fiber)}g fiber</span></article>`).join("")
+}
+function renderGrocery(){
+  const wrap=document.getElementById("groceryList");if(!wrap)return;
+  wrap.innerHTML=groceryItems.map((item,i)=>`<label class="${item.checked?"checked":""}"><input type="checkbox" data-grocery-check="${i}" ${item.checked?"checked":""}><span>${esc(item.text)}</span><button type="button" data-grocery-remove="${i}">×</button></label>`).join("");
+  wrap.querySelectorAll("[data-grocery-check]").forEach(input=>input.addEventListener("change",()=>{
+    groceryItems[Number(input.dataset.groceryCheck)].checked=input.checked;write(GROCERY_KEY,groceryItems);renderGrocery()
+  }));
+  wrap.querySelectorAll("[data-grocery-remove]").forEach(button=>button.addEventListener("click",()=>{
+    groceryItems.splice(Number(button.dataset.groceryRemove),1);write(GROCERY_KEY,groceryItems);renderGrocery()
+  }))
+}
+function renderHomeNutrition(){
+  if(!document.getElementById("homeCalories"))return;
+  const totals=totalsForDate(todayString());
+  const meals=new Set(nutritionTodayEntries().map(e=>e.mealType)).size;
+  document.getElementById("homeCalories").textContent=Math.round(totals.calories).toLocaleString();
+  document.getElementById("homeProtein").textContent=`${nutritionRound(totals.protein)} g`;
+  document.getElementById("homeFiber").textContent=`${nutritionRound(totals.fiber)} g`;
+  document.getElementById("homeMealsLogged").textContent=meals;
+  document.getElementById("homeCaloriesGoal").textContent=`of ${nutritionGoals.calories.toLocaleString()}`;
+  document.getElementById("homeProteinGoal").textContent=`of ${nutritionGoals.protein} g`;
+  document.getElementById("homeFiberGoal").textContent=`of ${nutritionGoals.fiber} g`;
+  document.getElementById("homeCaloriesMeter").style.width=`${clampPercent(totals.calories,nutritionGoals.calories)}%`;
+  document.getElementById("homeProteinMeter").style.width=`${clampPercent(totals.protein,nutritionGoals.protein)}%`;
+  document.getElementById("homeFiberMeter").style.width=`${clampPercent(totals.fiber,nutritionGoals.fiber)}%`;
+  document.getElementById("homeMealsMeter").style.width=`${Math.min(100,meals/3*100)}%`;
+
+  const proteinRemaining=Math.max(0,nutritionGoals.protein-totals.protein);
+  let title="Your next good choice",message="Log your first meal when you are ready.";
+  if(meals===0){message="Nothing is logged yet. Start with what you actually ate—there is no need to make the day look perfect."}
+  else if(proteinRemaining>35){title="Protein needs attention";message=`You have ${nutritionRound(proteinRemaining)} g left to reach your protein target. A protein-rich meal or snack can help.`}
+  else if(totals.fiber<nutritionGoals.fiber*.5&&meals>=2){title="A little more fiber may help";message="Fruit, vegetables, beans, or oatmeal could gently raise today’s fiber."}
+  else if(proteinRemaining<=0){title="Protein goal reached";message="You reached your protein target. Keep the rest of the day comfortable, hydrated, and balanced."}
+  else{title="You are building a solid day";message=`You are within ${nutritionRound(proteinRemaining)} g of your protein goal. Keep going one choice at a time.`}
+  document.getElementById("dailyCoachTitle").textContent=title;
+  document.getElementById("dailyCoachMessage").textContent=message
+}
+function renderNutritionCoach(){
+  renderGoalProgress();renderMealTotals();renderRecentFoods();renderFavorites();renderProteinCoach();renderWeeklyNutrition();renderGrocery();renderHomeNutrition()
+}
+function initNutritionCoach(){
+  const goalsDialog=document.getElementById("nutritionGoalsDialog");
+  document.getElementById("nutritionGoalSettingsBtn").addEventListener("click",()=>{
+    document.getElementById("goalCaloriesInput").value=nutritionGoals.calories;
+    document.getElementById("goalProteinInput").value=nutritionGoals.protein;
+    document.getElementById("goalFiberInput").value=nutritionGoals.fiber;
+    goalsDialog.showModal()
+  });
+  document.getElementById("saveNutritionGoalsBtn").addEventListener("click",()=>{
+    nutritionGoals={
+      calories:Number(document.getElementById("goalCaloriesInput").value)||1900,
+      protein:Number(document.getElementById("goalProteinInput").value)||130,
+      fiber:Number(document.getElementById("goalFiberInput").value)||30
+    };
+    write(NUTRITION_GOALS_KEY,nutritionGoals);goalsDialog.close();renderNutritionCoach()
+  });
+  document.getElementById("groceryForm").addEventListener("submit",e=>{
+    e.preventDefault();const input=document.getElementById("groceryInput");const text=input.value.trim();
+    if(text){groceryItems.push({text,checked:false});write(GROCERY_KEY,groceryItems);input.value="";renderGrocery()}
+  });
+  document.getElementById("clearGroceryBtn").addEventListener("click",()=>{
+    groceryItems=groceryItems.filter(i=>!i.checked);write(GROCERY_KEY,groceryItems);renderGrocery()
+  });
+  document.getElementById("openNutritionBtn").addEventListener("click",()=>document.querySelector('[data-view="mealsView"]').click());
+  document.getElementById("nutritionDate").addEventListener("change",renderNutritionCoach);
+  document.getElementById("nutritionFoodForm").addEventListener("submit",()=>setTimeout(renderNutritionCoach,0));
+  document.getElementById("nutritionClearDayBtn").addEventListener("click",()=>setTimeout(renderNutritionCoach,0));
+  renderNutritionCoach()
+}
+initNutritionCoach();

@@ -332,3 +332,49 @@ fieldset{border:1px solid var(--border);border-radius:18px;margin:1rem 0}legend{
   color:#0f766e;
   border:1px solid #99f6e4;
 }
+
+
+/* Version 9.0 Nutrition Coach */
+.coach-dashboard{
+  background:radial-gradient(circle at 95% 5%,rgba(34,211,238,.16),transparent 24%),linear-gradient(135deg,#ffffff,#f5f8ff);
+}
+.coach-message{max-width:680px;color:var(--muted);font-weight:650;line-height:1.5}
+.home-nutrition-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.8rem;margin-top:1rem}
+.home-nutrition-grid article{padding:1rem;border-radius:20px;background:white;border:1px solid var(--border);box-shadow:var(--soft)}
+.home-nutrition-grid span,.home-nutrition-grid small{display:block;color:var(--muted)}
+.home-nutrition-grid strong{display:block;margin:.25rem 0;font-size:1.45rem;color:var(--navy)}
+.dashboard-meter,.goal-meter{height:8px;margin-top:.65rem;background:#e8edf5;border-radius:999px;overflow:hidden}
+.dashboard-meter span,.goal-meter span{display:block;width:0;height:100%;border-radius:inherit;background:linear-gradient(90deg,var(--blue),var(--aqua));transition:width .25s ease}
+.nutrition-goal-panel,.panel-inner,.smart-food-card{margin-top:1rem;padding:1rem;border-radius:24px;background:rgba(255,255,255,.86);border:1px solid var(--border)}
+.nutrition-goal-panel h3,.smart-food-card h3,.panel-inner h3{margin:.1rem 0;font-size:1.35rem}
+.goal-progress-list{display:grid;grid-template-columns:repeat(3,1fr);gap:.8rem;margin-top:1rem}
+.goal-progress-list>div{padding:.85rem;border-radius:17px;background:#f8fbff;border:1px solid var(--border)}
+.goal-progress-list span,.goal-progress-list strong{display:block}
+.goal-progress-list strong{margin-top:.2rem;color:var(--navy)}
+.smart-food-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.85rem}
+.smart-chip-list{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.8rem}
+.smart-chip-list button{padding:.65rem .75rem;border-radius:16px;text-align:left;background:#eef4ff;color:#274472;border:1px solid #dbe7ff;font-weight:850}
+.smart-chip-list button small{display:block;margin-top:.2rem;color:#64748b;font-weight:650}
+.protein-coach-card{background:linear-gradient(180deg,#f0fdfa,#fff)}
+.weekly-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:.55rem;margin-top:1rem}
+.weekly-grid article{padding:.75rem .4rem;text-align:center;border-radius:16px;background:#f8fafc;border:1px solid var(--border)}
+.weekly-grid article.today{background:#eef4ff;border-color:#bdd1f4}
+.weekly-grid strong,.weekly-grid span{display:block}
+.weekly-grid span{margin-top:.25rem;color:var(--muted);font-size:.73rem}
+.grocery-form{display:grid;grid-template-columns:1fr auto;gap:.65rem;margin:1rem 0}
+.grocery-list{display:grid;gap:.45rem}
+.grocery-list label{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:.65rem;padding:.7rem .8rem;border-radius:15px;background:#f8fafc;border:1px solid var(--border)}
+.grocery-list label input{width:auto}
+.grocery-list label button{width:34px;height:34px;border-radius:50%;background:#fff0f0;color:#b91c1c}
+.grocery-list label.checked span{text-decoration:line-through;color:var(--muted)}
+.meal-total-summary{margin:.35rem 0 .7rem;color:#0f766e;font-size:.82rem;font-weight:850}
+.nutrition-favorite{float:left;margin-right:.45rem;padding:0;background:transparent;color:#f59e0b;font-size:1.2rem;transform:none!important}
+@media(max-width:920px){
+  .home-nutrition-grid,.smart-food-grid{grid-template-columns:repeat(2,1fr)}
+  .weekly-grid{grid-template-columns:repeat(4,1fr)}
+}
+@media(max-width:620px){
+  .home-nutrition-grid,.goal-progress-list,.smart-food-grid{grid-template-columns:1fr}
+  .weekly-grid{grid-template-columns:repeat(2,1fr)}
+  .grocery-form{grid-template-columns:1fr}
+}

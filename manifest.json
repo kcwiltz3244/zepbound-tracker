@@ -1,9 +1,9 @@
 {
-  "name": "My Zepbound Journey — Version 8.2.3 Live Main Totals",
+  "name": "My Zepbound Journey — Version 9.0 Nutrition Coach",
   "short_name": "My Journey",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#0f2747",
   "theme_color": "#2563eb",
-  "description": "Wellness app with main nutrition totals that update immediately as food amounts are entered."
+  "description": "A process-first wellness app with a nutrition dashboard, protein coaching, favorites, recent foods, weekly trends, grocery list, journaling, meals, exercise, and progress."
 }

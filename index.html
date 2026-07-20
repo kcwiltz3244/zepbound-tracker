@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#2563eb" />
   <title>My Zepbound Journey</title>
   <link rel="manifest" href="manifest.json" />
-  <link rel="stylesheet" href="styles.css?v=8.2.3" />
+  <link rel="stylesheet" href="styles.css?v=9.0.0" />
 </head>
 <body>
   <section id="dayOneOverlay" class="day-one-overlay hidden">
@@ -53,6 +53,45 @@
         </section>
 
         
+
+        <section class="coach-dashboard panel">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">Daily coach</p>
+              <h2 id="dailyCoachTitle">Your next good choice</h2>
+              <p id="dailyCoachMessage" class="coach-message">Log a meal or check in to begin today’s coaching.</p>
+            </div>
+            <button id="openNutritionBtn" type="button" class="primary-button">Open nutrition</button>
+          </div>
+
+          <div class="home-nutrition-grid">
+            <article>
+              <span>Calories</span>
+              <strong id="homeCalories">0</strong>
+              <small id="homeCaloriesGoal">of 1,900</small>
+              <div class="dashboard-meter"><span id="homeCaloriesMeter"></span></div>
+            </article>
+            <article>
+              <span>Protein</span>
+              <strong id="homeProtein">0 g</strong>
+              <small id="homeProteinGoal">of 130 g</small>
+              <div class="dashboard-meter"><span id="homeProteinMeter"></span></div>
+            </article>
+            <article>
+              <span>Fiber</span>
+              <strong id="homeFiber">0 g</strong>
+              <small id="homeFiberGoal">of 30 g</small>
+              <div class="dashboard-meter"><span id="homeFiberMeter"></span></div>
+            </article>
+            <article>
+              <span>Meals logged</span>
+              <strong id="homeMealsLogged">0</strong>
+              <small>today</small>
+              <div class="dashboard-meter"><span id="homeMealsMeter"></span></div>
+            </article>
+          </div>
+        </section>
+
         <section class="mission-card">
           <div class="mission-icon" id="missionIcon">💧</div>
           <div>
@@ -390,6 +429,60 @@
             <article><span>Sodium</span><strong id="nutritionTotalSodium">0</strong><small>mg</small></article>
           </div>
 
+          <section class="nutrition-goal-panel">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow">Daily targets</p>
+                <h3>Nutrition progress</h3>
+              </div>
+              <button id="nutritionGoalSettingsBtn" type="button" class="secondary-button">Change goals</button>
+            </div>
+            <div class="goal-progress-list">
+              <div><span>Calories</span><strong id="goalCaloriesText">0 / 1,900</strong><div class="goal-meter"><span id="goalCaloriesMeter"></span></div></div>
+              <div><span>Protein</span><strong id="goalProteinText">0 / 130 g</strong><div class="goal-meter"><span id="goalProteinMeter"></span></div></div>
+              <div><span>Fiber</span><strong id="goalFiberText">0 / 30 g</strong><div class="goal-meter"><span id="goalFiberMeter"></span></div></div>
+            </div>
+          </section>
+
+          <section class="smart-food-grid">
+            <article class="smart-food-card">
+              <div class="panel-heading"><div><p class="eyebrow">Recent foods</p><h3>Log it again</h3></div></div>
+              <div id="recentFoodsList" class="smart-chip-list"></div>
+              <p id="recentFoodsEmpty" class="nutrition-empty">Your recently logged foods will appear here.</p>
+            </article>
+
+            <article class="smart-food-card">
+              <div class="panel-heading"><div><p class="eyebrow">Favorites</p><h3>Your quick picks</h3></div></div>
+              <div id="favoriteFoodsList" class="smart-chip-list"></div>
+              <p id="favoriteFoodsEmpty" class="nutrition-empty">Tap the star beside a logged food to save it here.</p>
+            </article>
+
+            <article class="smart-food-card protein-coach-card">
+              <div class="panel-heading"><div><p class="eyebrow">Protein coach</p><h3 id="proteinCoachHeading">Build toward your goal</h3></div></div>
+              <p id="proteinCoachMessage">Log food to see what you still need.</p>
+              <div id="proteinCoachSuggestions" class="smart-chip-list"></div>
+            </article>
+          </section>
+
+          <section class="weekly-nutrition panel-inner">
+            <div class="panel-heading">
+              <div><p class="eyebrow">Weekly nutrition</p><h3>Your last seven days</h3></div>
+            </div>
+            <div id="weeklyNutritionGrid" class="weekly-grid"></div>
+          </section>
+
+          <section class="grocery-panel panel-inner">
+            <div class="panel-heading">
+              <div><p class="eyebrow">Grocery list</p><h3>Keep the basics handy</h3></div>
+              <button id="clearGroceryBtn" type="button" class="secondary-button">Clear checked</button>
+            </div>
+            <form id="groceryForm" class="grocery-form">
+              <input id="groceryInput" placeholder="Add eggs, yogurt, chicken…" required>
+              <button class="primary-button" type="submit">Add item</button>
+            </form>
+            <div id="groceryList" class="grocery-list"></div>
+          </section>
+
           <div class="nutrition-layout">
             <section class="nutrition-entry-card">
               <div class="panel-heading">
@@ -668,7 +761,7 @@
         </section>
       </section>
       <section class="about-card">
-        <strong>My Zepbound Journey — Version 8.2.3 Live Main Totals</strong>
+        <strong>My Zepbound Journey — Version 9.0 Nutrition Coach</strong>
         <span>Created by Kevin Wiltz</span>
         <small>One Day. One Choice. One Step at a Time.</small>
       </section>
@@ -693,6 +786,26 @@
       </div>
       <div id="shoppingList"></div>
       <button type="button" id="copyShoppingBtn" class="primary-button">Copy list</button>
+    </form>
+  </dialog>
+
+
+  <dialog id="nutritionGoalsDialog">
+    <form method="dialog" class="dialog-card">
+      <div class="panel-heading">
+        <h2>Nutrition goals</h2>
+        <button value="cancel" class="secondary-button">Close</button>
+      </div>
+      <label>Daily calorie goal
+        <input id="goalCaloriesInput" type="number" min="800" max="5000" step="50">
+      </label>
+      <label>Daily protein goal
+        <div class="input-with-unit"><input id="goalProteinInput" type="number" min="20" max="400"><span>g</span></div>
+      </label>
+      <label>Daily fiber goal
+        <div class="input-with-unit"><input id="goalFiberInput" type="number" min="5" max="100"><span>g</span></div>
+      </label>
+      <button id="saveNutritionGoalsBtn" type="button" class="primary-button">Save nutrition goals</button>
     </form>
   </dialog>
 
@@ -727,7 +840,7 @@
     </form>
   </dialog>
 
-  <script src="app.js?v=8.2.3"></script>
+  <script src="app.js?v=9.0.0"></script>
   <script>
     if ("serviceWorker" in navigator) {
       window.addEventListener("load", () => navigator.serviceWorker.register("./sw.js"));

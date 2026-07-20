@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#2563eb" />
   <title>My Zepbound Journey</title>
   <link rel="manifest" href="manifest.json" />
-  <link rel="stylesheet" href="styles.css?v=10.0.0" />
+  <link rel="stylesheet" href="styles.css?v=11.0.0" />
 </head>
 <body>
   <section id="dayOneOverlay" class="day-one-overlay hidden">
@@ -91,6 +91,13 @@
             </article>
           </div>
         </section>
+
+
+        <button id="homeDiningShortcut" type="button" class="home-dining-shortcut">
+          <span class="home-dining-icon">🍴</span>
+          <span><strong>Eat Out Smart</strong><small>Restaurant choices ranked for your goals</small></span>
+          <span class="home-dining-arrow">›</span>
+        </button>
 
         <section class="mission-card">
           <div class="mission-icon" id="missionIcon">💧</div>
@@ -391,6 +398,68 @@
             </div>
             <div id="journalTimeline" class="timeline"></div>
           </article>
+        </section>
+      </section>
+
+
+      <section id="diningView" class="view">
+        <section class="dining-hero">
+          <div>
+            <p class="eyebrow light">Smart Dining</p>
+            <h2>Eat out without losing the plot.</h2>
+            <p>See protein-forward choices, compare nutrition, and log an item with one tap.</p>
+          </div>
+          <div class="dining-hero-icon">🍽️</div>
+        </section>
+
+        <section class="dining-today-card panel">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">Your day so far</p>
+              <h2 id="diningCoachTitle">Let’s find your best next choice</h2>
+              <p id="diningCoachMessage">Your recommendations adjust to today’s calories, protein, and fiber.</p>
+            </div>
+            <button id="diningOpenNutritionBtn" type="button" class="secondary-button">View food log</button>
+          </div>
+          <div class="dining-goal-strip">
+            <article><span>Calories left</span><strong id="diningCaloriesLeft">—</strong></article>
+            <article><span>Protein left</span><strong id="diningProteinLeft">—</strong></article>
+            <article><span>Fiber left</span><strong id="diningFiberLeft">—</strong></article>
+          </div>
+        </section>
+
+        <section class="dining-controls panel">
+          <label class="dining-search-label">Find a restaurant or food
+            <input id="diningSearchInput" type="search" placeholder="Try Smoothie King, chicken, shake…" autocomplete="off">
+          </label>
+          <div id="diningRestaurantChips" class="restaurant-chip-row"></div>
+          <div class="dining-filter-row" role="group" aria-label="Dining filters">
+            <button class="dining-filter active" type="button" data-dining-filter="all">All choices</button>
+            <button class="dining-filter" type="button" data-dining-filter="green">🟢 Best</button>
+            <button class="dining-filter" type="button" data-dining-filter="yellow">🟡 Good</button>
+            <button class="dining-filter" type="button" data-dining-filter="favorites">⭐ Favorites</button>
+          </div>
+        </section>
+
+        <section class="dining-section-heading">
+          <div>
+            <p class="eyebrow">One-tap restaurant logging</p>
+            <h2 id="diningResultsHeading">Recommended choices</h2>
+          </div>
+          <span id="diningResultCount" class="date-chip">0 items</span>
+        </section>
+
+        <div id="diningResults" class="dining-results"></div>
+        <div id="diningEmpty" class="panel dining-empty hidden">
+          <div>🔎</div>
+          <h3>No choices match that search.</h3>
+          <p>Try a restaurant name, “chicken,” “protein,” or clear the filters.</p>
+          <button id="clearDiningSearchBtn" class="primary-button" type="button">Show everything</button>
+        </div>
+
+        <section class="dining-note panel">
+          <strong>Nutrition reminder</strong>
+          <p>Restaurant recipes and serving sizes can change. Use the restaurant’s current nutrition information when exact numbers matter.</p>
         </section>
       </section>
 
@@ -779,7 +848,7 @@
         </section>
       </section>
       <section class="about-card">
-        <strong>My Zepbound Journey — Version 10 Smart Food Search</strong>
+        <strong>My Zepbound Journey — Version 11 Smart Dining</strong>
         <span>Created by Kevin Wiltz</span>
         <small>One Day. One Choice. One Step at a Time.</small>
       </section>
@@ -788,6 +857,7 @@
     <nav class="bottom-nav">
       <button class="nav-item active" data-view="homeView"><span>🏠</span><strong>Today</strong></button>
       <button class="nav-item" data-view="journalView"><span>📖</span><strong>Journal</strong></button>
+      <button class="nav-item" data-view="diningView"><span>🍴</span><strong>Dining</strong></button>
       <button class="nav-item" data-view="mealsView"><span>🍽️</span><strong>Meals</strong></button>
       <button class="nav-item" data-view="exerciseView"><span>🏋️</span><strong>Exercise</strong></button>
       <button class="nav-item" data-view="milestonesView"><span>🏆</span><strong>Wins</strong></button>
@@ -858,7 +928,7 @@
     </form>
   </dialog>
 
-  <script src="app.js?v=10.0.0"></script>
+  <script src="app.js?v=11.0.0"></script>
   <script>
     if ("serviceWorker" in navigator) {
       window.addEventListener("load", () => navigator.serviceWorker.register("./sw.js"));

@@ -881,3 +881,166 @@ function v10InitSmartFoodSearch(){
   }
 }
 v10InitSmartFoodSearch();
+
+
+/* Version 11 — Smart Dining and one-tap restaurant logging */
+const V11_DINING_FAVORITES_KEY="mzjV11DiningFavorites";
+let v11DiningFavorites=new Set(read(V11_DINING_FAVORITES_KEY,[]));
+let v11DiningRestaurant="All";
+let v11DiningFilter="all";
+
+const V11_DINING_ITEMS=[
+  {id:"sk-glad-choc",restaurant:"Smoothie King",name:"Gladiator GLP-1 Chocolate (20 oz)",emoji:"🥤",mealType:"Snack",calories:220,protein:45,carbs:5,sugar:0,fiber:2,fat:3.5,sodium:500,score:"green",why:["45 g protein","0 g added sugar","Lower-calorie shake"],verified:"2026-07"},
+  {id:"sk-glad-van",restaurant:"Smoothie King",name:"Gladiator GLP-1 Vanilla (20 oz)",emoji:"🥤",mealType:"Snack",calories:220,protein:45,carbs:3,sugar:1,fiber:1,fat:2.5,sodium:400,score:"green",why:["45 g protein","0 g added sugar","Very low carbohydrate"],verified:"2026-07"},
+  {id:"sk-power-choc",restaurant:"Smoothie King",name:"Power Meal Slim GLP-1 Chocolate (20 oz)",emoji:"🥤",mealType:"Snack",calories:200,protein:22,carbs:26,sugar:6,fiber:10,fat:7,sodium:630,score:"green",why:["10 g fiber","22 g protein","Meal-sized nutrition"],verified:"2026-07"},
+  {id:"sk-activator",restaurant:"Smoothie King",name:"Activator Recovery GLP-1 Almond Berry (20 oz)",emoji:"🫐",mealType:"Snack",calories:200,protein:24,carbs:22,sugar:13,fiber:5,fat:2,sodium:220,score:"green",why:["24 g protein","5 g fiber","Fruit-forward option"],verified:"2026-07"},
+
+  {id:"cfa-grill12",restaurant:"Chick-fil-A",name:"12-count Grilled Nuggets",emoji:"🍗",mealType:"Lunch",calories:200,protein:38,carbs:2,sugar:1,fiber:0,fat:4.5,sodium:660,score:"green",why:["38 g protein","Low carbohydrate","Easy small portion"],verified:"starter"},
+  {id:"cfa-grill8",restaurant:"Chick-fil-A",name:"8-count Grilled Nuggets",emoji:"🍗",mealType:"Lunch",calories:130,protein:25,carbs:1,sugar:1,fiber:0,fat:3,sodium:440,score:"green",why:["25 g protein","Low calorie","Good for lighter appetite"],verified:"starter"},
+  {id:"cfa-grillsand",restaurant:"Chick-fil-A",name:"Grilled Chicken Sandwich",emoji:"🥪",mealType:"Lunch",calories:390,protein:28,carbs:44,sugar:12,fiber:3,fat:12,sodium:770,score:"yellow",why:["28 g protein","Complete meal","Watch sauces and sodium"],verified:"starter"},
+  {id:"cfa-kale",restaurant:"Chick-fil-A",name:"Kale Crunch Side",emoji:"🥬",mealType:"Snack",calories:170,protein:4,carbs:13,sugar:8,fiber:4,fat:12,sodium:250,score:"yellow",why:["4 g fiber","Vegetable side","Pair with lean protein"],verified:"starter"},
+
+  {id:"chip-lowcal",restaurant:"Chipotle",name:"High Protein–Low Calorie Bowl",emoji:"🥗",mealType:"Lunch",calories:470,protein:36,carbs:28,sugar:6,fiber:11,fat:25,sodium:1050,score:"green",why:["36 g protein","High fiber","No tortilla"],verified:"2026 starter"},
+  {id:"chip-chicken-cup",restaurant:"Chipotle",name:"High Protein Chicken Cup",emoji:"🍗",mealType:"Snack",calories:180,protein:32,carbs:0,sugar:0,fiber:0,fat:7,sodium:310,score:"green",why:["32 g protein","Small portion","Easy protein add-on"],verified:"2026-07"},
+  {id:"chip-kylie",restaurant:"Chipotle",name:"Kylie’s High Protein Chicken Bowl",emoji:"🥣",mealType:"Lunch",calories:690,protein:52,carbs:67,sugar:7,fiber:12,fat:25,sodium:1500,score:"yellow",why:["52 g protein","12 g fiber","Higher calorie and sodium"],verified:"2025-12"},
+  {id:"chip-salad",restaurant:"Chipotle",name:"Chicken Salad: fajita vegetables, tomato salsa, beans",emoji:"🥗",mealType:"Lunch",calories:430,protein:40,carbs:35,sugar:7,fiber:13,fat:14,sodium:1100,score:"green",why:["Protein + fiber","Skip tortilla","Customize portions"],verified:"starter"},
+
+  {id:"sb-eggs",restaurant:"Starbucks",name:"Eggs & Cheddar Protein Box",emoji:"🥚",mealType:"Lunch",calories:460,protein:22,carbs:40,sugar:21,fiber:5,fat:24,sodium:460,score:"yellow",why:["22 g protein","Portable meal","Higher calorie than a shake"],verified:"2026-07"},
+  {id:"sb-cheese-fruit",restaurant:"Starbucks",name:"Cheese & Fruit Protein Box",emoji:"🧀",mealType:"Lunch",calories:470,protein:20,carbs:37,sugar:17,fiber:4,fat:28,sodium:620,score:"yellow",why:["20 g protein","Portable","Higher fat"],verified:"2026-07"},
+  {id:"sb-egg-bites",restaurant:"Starbucks",name:"Egg White & Roasted Red Pepper Egg Bites",emoji:"🥚",mealType:"Breakfast",calories:170,protein:12,carbs:11,sugar:3,fiber:0,fat:8,sodium:470,score:"yellow",why:["Small serving","12 g protein","Pair with fruit or yogurt"],verified:"starter"},
+  {id:"sb-coffee",restaurant:"Starbucks",name:"Grande Caffè Latte with nonfat milk",emoji:"☕",mealType:"Snack",calories:130,protein:13,carbs:19,sugar:18,fiber:0,fat:0,sodium:150,score:"yellow",why:["13 g protein","No syrup","Liquid calories still count"],verified:"starter"},
+
+  {id:"sub-turkey",restaurant:"Subway",name:"6-inch Oven-Roasted Turkey on wheat, vegetables, mustard",emoji:"🥪",mealType:"Lunch",calories:300,protein:20,carbs:48,sugar:7,fiber:5,fat:4,sodium:850,score:"yellow",why:["20 g protein","Add vegetables","Choose mustard over creamy sauce"],verified:"starter"},
+  {id:"sub-chicken-salad",restaurant:"Subway",name:"Rotisserie-Style Chicken Salad",emoji:"🥗",mealType:"Lunch",calories:230,protein:24,carbs:13,sugar:6,fiber:4,fat:10,sodium:620,score:"green",why:["24 g protein","Lower carbohydrate","Dressing changes totals"],verified:"starter"},
+  {id:"panera-chicken-salad",restaurant:"Panera",name:"Half Green Goddess Cobb Salad with Chicken",emoji:"🥗",mealType:"Lunch",calories:260,protein:21,carbs:12,sugar:6,fiber:4,fat:15,sodium:560,score:"green",why:["21 g protein","Half portion","Vegetable-rich"],verified:"starter"},
+  {id:"panera-turkey-chili",restaurant:"Panera",name:"Cup of Turkey Chili",emoji:"🥣",mealType:"Lunch",calories:200,protein:14,carbs:27,sugar:5,fiber:7,fat:5,sodium:690,score:"green",why:["7 g fiber","Warm smaller meal","Moderate protein"],verified:"starter"},
+
+  {id:"braums-grill",restaurant:"Braum’s",name:"Grilled Chicken Sandwich, no mayonnaise",emoji:"🥪",mealType:"Lunch",calories:380,protein:33,carbs:42,sugar:7,fiber:2,fat:9,sodium:900,score:"yellow",why:["33 g protein","Skip mayonnaise","Sodium can be high"],verified:"starter estimate"},
+  {id:"braums-milk",restaurant:"Braum’s",name:"Fat-Free Milk (12 oz)",emoji:"🥛",mealType:"Snack",calories:130,protein:13,carbs:18,sugar:18,fiber:0,fat:0,sodium:170,score:"yellow",why:["13 g protein","Simple option","Contains natural milk sugar"],verified:"starter estimate"},
+
+  {id:"g-fairlife",restaurant:"Grocery Favorites",name:"Fairlife Nutrition Plan Shake",emoji:"🥤",mealType:"Snack",calories:150,protein:30,carbs:4,sugar:2,fiber:1,fat:2.5,sodium:230,score:"green",why:["30 g protein","Ready to drink","Low sugar"],verified:"label varies"},
+  {id:"g-premier",restaurant:"Grocery Favorites",name:"Premier Protein Shake",emoji:"🥤",mealType:"Snack",calories:160,protein:30,carbs:5,sugar:1,fiber:3,fat:3,sodium:370,score:"green",why:["30 g protein","Shelf-stable","Multiple flavors"],verified:"label varies"},
+  {id:"g-oikos",restaurant:"Grocery Favorites",name:"Oikos Triple Zero Greek Yogurt",emoji:"🥣",mealType:"Snack",calories:90,protein:15,carbs:7,sugar:5,fiber:0,fat:0,sodium:60,score:"green",why:["15 g protein","Small portion","Easy snack"],verified:"label varies"},
+  {id:"g-cottage",restaurant:"Grocery Favorites",name:"Low-fat Cottage Cheese (1/2 cup)",emoji:"🥣",mealType:"Snack",calories:90,protein:12,carbs:5,sugar:4,fiber:0,fat:2.5,sodium:360,score:"green",why:["12 g protein","Soft texture","Watch sodium"],verified:"generic"},
+  {id:"g-tuna",restaurant:"Grocery Favorites",name:"Tuna Packet in Water",emoji:"🐟",mealType:"Snack",calories:90,protein:20,carbs:0,sugar:0,fiber:0,fat:1,sodium:300,score:"green",why:["20 g protein","No preparation","Portable"],verified:"label varies"},
+  {id:"g-chicken",restaurant:"Grocery Favorites",name:"Rotisserie Chicken Breast, skin removed (3 oz)",emoji:"🍗",mealType:"Lunch",calories:140,protein:26,carbs:0,sugar:0,fiber:0,fat:3,sodium:420,score:"green",why:["26 g protein","Easy meal prep","Remove skin for less fat"],verified:"generic"}
+];
+
+function v11DiningGoals(){
+  const goals=typeof getNutritionGoals==="function"?getNutritionGoals():{calories:1900,protein:130,fiber:30};
+  return {calories:Number(goals.calories)||1900,protein:Number(goals.protein)||130,fiber:Number(goals.fiber)||30};
+}
+function v11DiningTotals(){
+  const entries=nutritionEntries.filter(e=>e.date===todayString());
+  return entries.reduce((a,e)=>{a.calories+=Number(e.calories)||0;a.protein+=Number(e.protein)||0;a.fiber+=Number(e.fiber)||0;return a},{calories:0,protein:0,fiber:0});
+}
+function v11AddDiningItem(item){
+  const entry={
+    id:crypto.randomUUID?crypto.randomUUID():String(Date.now()+Math.random()),
+    date:todayString(),
+    mealType:item.mealType||"Lunch",
+    name:`${item.restaurant}: ${item.name}`,
+    amount:1,
+    unit:"serving",
+    calories:item.calories,
+    protein:item.protein,
+    carbs:item.carbs,
+    sugar:item.sugar,
+    fiber:item.fiber,
+    fat:item.fat,
+    sodium:item.sodium
+  };
+  nutritionEntries.push(entry);
+  write(NUTRITION_STORAGE_KEY,nutritionEntries);
+  renderNutrition();
+  if(typeof renderNutritionCoach==="function")renderNutritionCoach();
+  v11RenderDining();
+  const button=document.querySelector(`[data-dining-add="${item.id}"]`);
+  if(button){const old=button.textContent;button.textContent="✓ Added to today";button.classList.add("added");setTimeout(()=>{button.textContent=old;button.classList.remove("added")},1600)}
+}
+function v11ToggleDiningFavorite(id){
+  if(v11DiningFavorites.has(id))v11DiningFavorites.delete(id);else v11DiningFavorites.add(id);
+  write(V11_DINING_FAVORITES_KEY,[...v11DiningFavorites]);
+  v11RenderDining();
+}
+function v11DiningCard(item){
+  const favorite=v11DiningFavorites.has(item.id);
+  const label=item.score==="green"?"Best choice":"Good choice";
+  return `<article class="dining-item-card ${item.score}">
+    <div class="dining-card-top">
+      <span class="dining-item-emoji">${item.emoji}</span>
+      <div class="dining-card-title"><small>${esc(item.restaurant)}</small><h3>${esc(item.name)}</h3></div>
+      <button type="button" class="dining-favorite ${favorite?'saved':''}" data-dining-favorite="${item.id}" aria-label="${favorite?'Remove from':'Add to'} favorites">${favorite?'★':'☆'}</button>
+    </div>
+    <div class="dining-score-line"><span class="choice-badge ${item.score}">${item.score==="green"?"🟢":"🟡"} ${label}</span><span>${item.calories} cal</span></div>
+    <div class="dining-macro-grid">
+      <div><strong>${item.protein}g</strong><span>Protein</span></div>
+      <div><strong>${item.fiber}g</strong><span>Fiber</span></div>
+      <div><strong>${item.carbs}g</strong><span>Carbs</span></div>
+      <div><strong>${item.sodium}mg</strong><span>Sodium</span></div>
+    </div>
+    <details class="why-choice"><summary>Why this choice?</summary><ul>${item.why.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></details>
+    <button type="button" class="primary-button dining-add-button" data-dining-add="${item.id}">Add to today</button>
+  </article>`;
+}
+function v11RenderDining(){
+  const wrap=document.getElementById("diningResults");if(!wrap)return;
+  const query=(document.getElementById("diningSearchInput")?.value||"").trim().toLowerCase();
+  const totals=v11DiningTotals(),goals=v11DiningGoals();
+  const calLeft=Math.max(0,goals.calories-totals.calories);
+  const proteinLeft=Math.max(0,goals.protein-totals.protein);
+  const fiberLeft=Math.max(0,goals.fiber-totals.fiber);
+  document.getElementById("diningCaloriesLeft").textContent=`${Math.round(calLeft)} kcal`;
+  document.getElementById("diningProteinLeft").textContent=`${nutritionRound(proteinLeft)} g`;
+  document.getElementById("diningFiberLeft").textContent=`${nutritionRound(fiberLeft)} g`;
+  const coachTitle=document.getElementById("diningCoachTitle"),coachMessage=document.getElementById("diningCoachMessage");
+  if(proteinLeft>35){coachTitle.textContent="Protein is today’s priority";coachMessage.textContent=`You have about ${Math.round(proteinLeft)} g of protein left. Green choices with 25+ g protein are highlighted.`}
+  else if(fiberLeft>8){coachTitle.textContent="Add some fiber next";coachMessage.textContent=`You’re close on protein. Look for vegetables, beans, berries, or an item with 5+ g fiber.`}
+  else{coachTitle.textContent="You’re in a good spot";coachMessage.textContent="Choose a portion that feels comfortable, eat slowly, and stop when comfortably satisfied."}
+
+  let items=V11_DINING_ITEMS.filter(item=>{
+    const restaurantOK=v11DiningRestaurant==="All"||item.restaurant===v11DiningRestaurant;
+    const filterOK=v11DiningFilter==="all"||item.score===v11DiningFilter||(v11DiningFilter==="favorites"&&v11DiningFavorites.has(item.id));
+    const queryOK=!query||`${item.restaurant} ${item.name} ${item.why.join(" ")}`.toLowerCase().includes(query);
+    return restaurantOK&&filterOK&&queryOK;
+  });
+  items.sort((a,b)=>{
+    const aNeed=(a.protein*Math.min(1,proteinLeft/30))+(a.fiber*Math.min(1,fiberLeft/8))-a.calories/250;
+    const bNeed=(b.protein*Math.min(1,proteinLeft/30))+(b.fiber*Math.min(1,fiberLeft/8))-b.calories/250;
+    return bNeed-aNeed;
+  });
+  wrap.innerHTML=items.map(v11DiningCard).join("");
+  document.getElementById("diningResultCount").textContent=`${items.length} item${items.length===1?"":"s"}`;
+  document.getElementById("diningResultsHeading").textContent=v11DiningRestaurant==="All"?"Recommended choices":v11DiningRestaurant;
+  document.getElementById("diningEmpty").classList.toggle("hidden",items.length>0);
+  wrap.querySelectorAll("[data-dining-add]").forEach(btn=>btn.addEventListener("click",()=>v11AddDiningItem(V11_DINING_ITEMS.find(x=>x.id===btn.dataset.diningAdd))));
+  wrap.querySelectorAll("[data-dining-favorite]").forEach(btn=>btn.addEventListener("click",()=>v11ToggleDiningFavorite(btn.dataset.diningFavorite)));
+}
+function v11InitDining(){
+  const chips=document.getElementById("diningRestaurantChips");if(!chips)return;
+  const restaurants=["All",...new Set(V11_DINING_ITEMS.map(x=>x.restaurant))];
+  chips.innerHTML=restaurants.map((name,i)=>`<button type="button" class="restaurant-chip ${i===0?'active':''}" data-restaurant="${esc(name)}">${esc(name)}</button>`).join("");
+  chips.querySelectorAll("[data-restaurant]").forEach(btn=>btn.addEventListener("click",()=>{
+    v11DiningRestaurant=btn.dataset.restaurant;
+    chips.querySelectorAll(".restaurant-chip").forEach(x=>x.classList.toggle("active",x===btn));
+    v11RenderDining();
+  }));
+  document.querySelectorAll("[data-dining-filter]").forEach(btn=>btn.addEventListener("click",()=>{
+    v11DiningFilter=btn.dataset.diningFilter;
+    document.querySelectorAll("[data-dining-filter]").forEach(x=>x.classList.toggle("active",x===btn));
+    v11RenderDining();
+  }));
+  document.getElementById("diningSearchInput").addEventListener("input",v11RenderDining);
+  document.getElementById("clearDiningSearchBtn").addEventListener("click",()=>{
+    document.getElementById("diningSearchInput").value="";
+    v11DiningRestaurant="All";v11DiningFilter="all";
+    chips.querySelectorAll(".restaurant-chip").forEach((x,i)=>x.classList.toggle("active",i===0));
+    document.querySelectorAll("[data-dining-filter]").forEach(x=>x.classList.toggle("active",x.dataset.diningFilter==="all"));
+    v11RenderDining();
+  });
+  document.getElementById("diningOpenNutritionBtn").addEventListener("click",()=>document.querySelector('[data-view="mealsView"]').click());
+  document.getElementById("homeDiningShortcut").addEventListener("click",()=>document.querySelector('[data-view="diningView"]').click());
+  document.querySelector('[data-view="diningView"]').addEventListener("click",()=>setTimeout(v11RenderDining,0));
+  v11RenderDining();
+}
+v11InitDining();

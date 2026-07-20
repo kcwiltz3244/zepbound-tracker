@@ -1,9 +1,9 @@
 {
-  "name": "My Zepbound Journey \u2014 Version 9.0.2 Mobile Food Matching",
-  "short_name": "My Journey",
+  "name": "My Zepbound Journey \u2014 Version 10 Smart Food Search",
+  "short_name": "Zepbound V10",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#0f2747",
   "theme_color": "#2563eb",
-  "description": "Nutrition coach with automatic food matching while typing and when moving to the amount field on phones."
+  "description": "Phone-first nutrition logging with local foods and Open Food Facts online search."
 }

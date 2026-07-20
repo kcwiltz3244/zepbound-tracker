@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#2563eb" />
   <title>My Zepbound Journey</title>
   <link rel="manifest" href="manifest.json" />
-  <link rel="stylesheet" href="styles.css?v=9.0.0" />
+  <link rel="stylesheet" href="styles.css?v=10.0.0" />
 </head>
 <body>
   <section id="dayOneOverlay" class="day-one-overlay hidden">
@@ -492,16 +492,31 @@
                 </div>
               </div>
 
-              <label>Search common foods
-                <input id="nutritionFoodSearch" type="search" placeholder="Try eggs, chicken, yogurt, oatmeal…" autocomplete="off">
-              </label>
-              <div id="nutritionFoodResults" class="nutrition-food-results"></div>
+              <section class="smart-food-search" aria-labelledby="smartFoodHeading">
+                <div class="smart-food-heading">
+                  <div>
+                    <p class="eyebrow">Smart food search</p>
+                    <h3 id="smartFoodHeading">Search, tap, and log</h3>
+                  </div>
+                  <span id="foodSearchSourceBadge" class="food-source-badge">Local + online</span>
+                </div>
+                <div class="smart-search-row">
+                  <input id="nutritionFoodSearch" type="search" placeholder="Type cabbage, chicken, Cheerios…" autocomplete="off" enterkeyhint="search">
+                  <button id="onlineFoodSearchBtn" type="button" class="primary-button">Search foods</button>
+                </div>
+                <p id="onlineFoodSearchStatus" class="search-help" aria-live="polite">Local matches appear immediately. Tap Search foods for the larger online database.</p>
+                <div id="nutritionFoodResults" class="nutrition-food-results"></div>
+                <div id="onlineFoodResults" class="nutrition-food-results online-food-results"></div>
+              </section>
 
               <form id="nutritionFoodForm">
                 <div class="nutrition-form-grid">
                   <label class="nutrition-wide">Food name
                     <input id="nutritionFoodName" required placeholder="Example: Grilled chicken breast">
                   </label>
+                  <button id="findTypedFoodBtn" type="button" class="secondary-button nutrition-find-button">
+                    Find this food
+                  </button>
                   <label>Meal
                     <select id="nutritionMealType">
                       <option>Breakfast</option>
@@ -541,6 +556,8 @@
                       <input id="nutritionServingUnit" type="hidden" value="serving">
                     </div>
                   </label>
+                  <button id="toggleNutritionDetailsBtn" type="button" class="nutrition-wide secondary-button nutrition-details-toggle" aria-expanded="false">Show nutrition details</button>
+                  <div id="nutritionDetailsFields" class="nutrition-details-fields nutrition-wide">
                   <label>Calories
                     <input id="nutritionCalories" type="number" min="0" step="1" value="0" required>
                   </label>
@@ -562,6 +579,7 @@
                   <label>Sodium (mg)
                     <input id="nutritionSodium" type="number" min="0" step="1" value="0" required>
                   </label>
+                  </div>
                 </div>
                 <p class="nutrition-note">Change only the amount you ate. The serving basis stays locked to the selected food so the totals calculate correctly.</p>
 
@@ -579,7 +597,7 @@
                   </div>
                 </section>
 
-                <button type="submit" class="primary-button">Add calculated amount to food log</button>
+                <button id="nutritionAddFoodBtn" type="submit" class="primary-button nutrition-add-sticky">Add food to today</button>
               </form>
             </section>
 
@@ -761,7 +779,7 @@
         </section>
       </section>
       <section class="about-card">
-        <strong>My Zepbound Journey — Version 9.0 Nutrition Coach</strong>
+        <strong>My Zepbound Journey — Version 10 Smart Food Search</strong>
         <span>Created by Kevin Wiltz</span>
         <small>One Day. One Choice. One Step at a Time.</small>
       </section>
@@ -840,7 +858,7 @@
     </form>
   </dialog>
 
-  <script src="app.js?v=9.0.0"></script>
+  <script src="app.js?v=10.0.0"></script>
   <script>
     if ("serviceWorker" in navigator) {
       window.addEventListener("load", () => navigator.serviceWorker.register("./sw.js"));

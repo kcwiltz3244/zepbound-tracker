@@ -1,4 +1,4 @@
-# My Zepbound Journey — Version 9.0 Nutrition Coach
+# My Zepbound Journey — Version 10 Smart Food Search
 
 Day One Edition  
 Created by Kevin Wiltz
@@ -47,3 +47,24 @@ Food data remains stored locally on the device. Nutrition values are estimates a
 - Tapping Amount, Unit, or Meal triggers matching on phones
 - Tab and Enter still work on computers
 - Updated cache and asset versions
+
+
+## Version 9.0.3 correction
+- Added cabbage, raw and cabbage, cooked
+- Added ounce and cup serving support for cabbage
+- Typing cabbage now loads nutrition automatically
+- Matching triggers after typing, on Tab, on Enter, when tapping Amount, or by pressing Find this food
+- Foods not in the database now show a clear warning instead of silently staying at zero
+
+
+## Version 10
+- Phone-first nutrition entry layout
+- Large tap-friendly food result cards
+- Built-in local food search for quick and offline use
+- Explicit online search powered by Open Food Facts
+- Online foods are normalized to a 100 g serving for dependable calculation
+- Nutrition-detail fields collapse on phones to reduce clutter
+- Sticky Add Food button on phones
+- Clear online/offline status and fallback messages
+
+Open Food Facts data is community-contributed and may be incomplete. Package labels remain the best source for exact branded-product values.

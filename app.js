@@ -212,6 +212,46 @@ loadToday();loadJournalEntry(todayString());renderAll();initDayOne();loadFutureL
 /* Version 8.2 improved integrated nutrition tracker */
 const NUTRITION_STORAGE_KEY="mzjV81Nutrition";
 const NUTRITION_FOODS=[
+  {
+    name:"Cabbage, raw",
+    servingLabel:"1 cup chopped",
+    servingAmount:1,
+    servingUnit:"cup",
+    calories:22,
+    protein:1.1,
+    carbs:5.2,
+    sugar:2.8,
+    fiber:2.2,
+    fat:0.1,
+    sodium:16
+  },
+  {
+    name:"Cabbage, cooked",
+    servingLabel:"1 cup cooked",
+    servingAmount:1,
+    servingUnit:"cup",
+    calories:35,
+    protein:1.9,
+    carbs:8.2,
+    sugar:4,
+    fiber:3.1,
+    fat:0.1,
+    sodium:13
+  },
+  {
+    name:"Cabbage, raw",
+    servingLabel:"1 oz",
+    servingAmount:1,
+    servingUnit:"oz",
+    calories:7,
+    protein:0.4,
+    carbs:1.6,
+    sugar:0.8,
+    fiber:0.7,
+    fat:0,
+    sodium:5
+  },
+
 {name:"Bacon, pork, cooked",aliases:["bacon","pork bacon"],servingAmount:1,servingUnit:"strip",servingLabel:"1 cooked strip",calories:43,protein:3,carbs:.1,sugar:0,fiber:0,fat:3.3,sodium:137},
 {name:"Bacon, pork, thick-cut",aliases:["bacon","thick bacon"],servingAmount:1,servingUnit:"slice",servingLabel:"1 thick slice",calories:70,protein:5,carbs:0,sugar:0,fiber:0,fat:5.5,sodium:230},
 {name:"Bacon, center-cut pork",aliases:["bacon","center cut bacon"],servingAmount:2,servingUnit:"slice",servingLabel:"2 slices",calories:60,protein:6,carbs:0,sugar:0,fiber:0,fat:4,sodium:260},
@@ -570,6 +610,11 @@ initNutritionCoach();
 
 /* Version 9.0.1 Automatic Food Matching */
 const FOOD_ALIASES={
+  "cabbage":"cabbage, raw",
+  "raw cabbage":"cabbage, raw",
+  "cooked cabbage":"cabbage, cooked",
+  "boiled cabbage":"cabbage, cooked",
+  "steamed cabbage":"cabbage, cooked",
   "broccoli":"broccoli, cooked",
   "steamed broccoli":"broccoli, cooked",
   "broccoli steamed":"broccoli, cooked",
@@ -628,3 +673,211 @@ function initAutomaticFoodMatching(){
   },true)
 }
 initAutomaticFoodMatching();
+
+
+/* Version 9.0.3 robust typed-food matching */
+(function(){
+  const input=document.getElementById("nutritionFoodName");
+  const amount=document.getElementById("nutritionAmount");
+  const findButton=document.getElementById("findTypedFoodBtn");
+  if(!input)return;
+
+  let timer=null;
+
+  function showStatus(message,state){
+    const status=document.getElementById("nutritionFoodMatchStatus");
+    if(!status)return;
+    status.textContent=message;
+    status.classList.remove("matched","not-matched");
+    if(state)status.classList.add(state);
+  }
+
+  function normalizeV903(value){
+    return String(value||"").toLowerCase().replace(/[^\w\s]/g," ").replace(/\s+/g," ").trim();
+  }
+
+  function findV903Match(query){
+    const normalized=normalizeV903(query);
+    if(!normalized)return null;
+
+    const aliases={
+      "cabbage":"cabbage, raw",
+      "raw cabbage":"cabbage, raw",
+      "cooked cabbage":"cabbage, cooked",
+      "boiled cabbage":"cabbage, cooked",
+      "steamed cabbage":"cabbage, cooked"
+    };
+    const target=aliases[normalized]||normalized;
+
+    return NUTRITION_FOODS.find(food=>normalizeV903(food.name)===normalizeV903(target))
+      || NUTRITION_FOODS.find(food=>normalizeV903(food.name).startsWith(normalized))
+      || NUTRITION_FOODS.find(food=>normalizeV903(food.name).includes(normalized))
+      || null;
+  }
+
+  function applyV903Match(){
+    const query=input.value.trim();
+    if(!query)return false;
+
+    const food=findV903Match(query);
+    if(!food){
+      showStatus(`"${query}" is not in the food list yet. Choose a suggestion or enter nutrition manually.`,"not-matched");
+      return false;
+    }
+
+    input.value=food.name;
+    document.getElementById("nutritionAmount").value=food.servingAmount||1;
+    if(typeof setSelectValue==="function"){
+      setSelectValue("nutritionUnit",food.servingUnit||"serving");
+    }else{
+      const unit=document.getElementById("nutritionUnit");
+      if(unit)unit.value=food.servingUnit||"serving";
+    }
+    if(typeof setNutritionServingBasis==="function"){
+      setNutritionServingBasis(food.servingAmount||1,food.servingUnit||"serving");
+    }
+    nutritionNutrients.forEach(key=>{
+      const field=document.getElementById("nutrition"+key[0].toUpperCase()+key.slice(1));
+      if(field)field.value=food[key]??0;
+    });
+    showStatus(`Matched: ${food.name} — nutrition values loaded.`,"matched");
+    if(typeof nutritionPreview==="function")nutritionPreview();
+    return true;
+  }
+
+  input.addEventListener("input",()=>{
+    clearTimeout(timer);
+    timer=setTimeout(applyV903Match,450);
+  });
+  input.addEventListener("blur",applyV903Match);
+  input.addEventListener("change",applyV903Match);
+  input.addEventListener("keydown",event=>{
+    if(event.key==="Tab" || event.key==="Enter"){
+      applyV903Match();
+    }
+  });
+  if(amount){
+    amount.addEventListener("focus",applyV903Match);
+    amount.addEventListener("pointerdown",applyV903Match);
+  }
+  if(findButton)findButton.addEventListener("click",applyV903Match);
+})();
+
+
+/* Version 10 — smart food search and phone-first nutrition entry */
+const V10_OFF_SEARCH_URL="https://world.openfoodfacts.org/cgi/search.pl";
+let v10OnlineFoods=[];
+
+function v10Number(value){
+  const n=Number(value);
+  return Number.isFinite(n)?n:0;
+}
+function v10Text(value){return String(value||"").trim()}
+function v10Nutrient(product,key){
+  const n=product?.nutriments||{};
+  return v10Number(n[`${key}_100g`] ?? n[key]);
+}
+function v10ProductToFood(product){
+  const name=v10Text(product.product_name_en||product.product_name||product.generic_name_en||product.generic_name);
+  if(!name)return null;
+  const brand=v10Text(product.brands);
+  return {
+    name:brand?`${name} — ${brand}`:name,
+    servingLabel:"100 g",
+    servingAmount:100,
+    servingUnit:"g",
+    calories:Math.round(v10Nutrient(product,"energy-kcal")),
+    protein:v10Nutrient(product,"proteins"),
+    carbs:v10Nutrient(product,"carbohydrates"),
+    sugar:v10Nutrient(product,"sugars"),
+    fiber:v10Nutrient(product,"fiber"),
+    fat:v10Nutrient(product,"fat"),
+    sodium:Math.round(v10Nutrient(product,"sodium")*1000),
+    image:v10Text(product.image_front_small_url||product.image_small_url),
+    source:"Open Food Facts"
+  };
+}
+function v10FoodHasNutrition(food){
+  return [food.calories,food.protein,food.carbs,food.fat,food.fiber].some(v=>Number(v)>0);
+}
+function v10ApplyFood(food){
+  if(!food)return;
+  document.getElementById("nutritionFoodName").value=food.name;
+  document.getElementById("nutritionAmount").value=food.servingAmount||1;
+  setSelectValue("nutritionUnit",food.servingUnit||"serving");
+  setNutritionServingBasis(food.servingAmount||1,food.servingUnit||"serving");
+  nutritionNutrients.forEach(k=>{
+    const field=document.getElementById("nutrition"+k[0].toUpperCase()+k.slice(1));
+    if(field)field.value=food[k]??0;
+  });
+  const status=document.getElementById("nutritionFoodMatchStatus");
+  if(status){
+    status.textContent=`Selected: ${food.name}. Change the amount, then add it.`;
+    status.classList.add("matched");status.classList.remove("not-matched");
+  }
+  nutritionPreview();
+  document.getElementById("nutritionAmount")?.focus({preventScroll:true});
+  document.getElementById("nutritionFoodForm")?.scrollIntoView({behavior:"smooth",block:"start"});
+}
+function v10FoodCard(food,index,online=false){
+  const image=food.image?`<img src="${esc(food.image)}" alt="" loading="lazy">`:`<span class="food-card-placeholder">🍽️</span>`;
+  return `<button type="button" class="v10-food-card" data-v10-${online?'online':'local'}="${index}">${image}<span class="v10-food-card-copy"><strong>${esc(food.name)}</strong><small>${esc(food.servingLabel||'Serving information')}</small><span>${Math.round(food.calories||0)} cal • ${nutritionRound(food.protein||0)}g protein</span></span><span class="v10-select-arrow">›</span></button>`;
+}
+function v10BindFoodCards(container){
+  container.querySelectorAll("[data-v10-local]").forEach(btn=>btn.addEventListener("click",()=>v10ApplyFood(NUTRITION_FOODS[Number(btn.dataset.v10Local)])));
+  container.querySelectorAll("[data-v10-online]").forEach(btn=>btn.addEventListener("click",()=>v10ApplyFood(v10OnlineFoods[Number(btn.dataset.v10Online)])));
+}
+function v10RenderLocal(query=""){
+  const wrap=document.getElementById("nutritionFoodResults");if(!wrap)return;
+  const q=query.trim().toLowerCase();
+  if(!q){wrap.innerHTML="";return}
+  const matches=NUTRITION_FOODS.filter(f=>f.name.toLowerCase().includes(q)||(f.aliases||[]).some(a=>a.includes(q))).slice(0,8);
+  wrap.innerHTML=matches.length?`<p class="result-section-label">Quick local matches</p>${matches.map(f=>v10FoodCard(f,NUTRITION_FOODS.indexOf(f),false)).join("")}`:"";
+  v10BindFoodCards(wrap);
+}
+async function v10SearchOnline(){
+  const input=document.getElementById("nutritionFoodSearch");
+  const query=input.value.trim();
+  const status=document.getElementById("onlineFoodSearchStatus");
+  const wrap=document.getElementById("onlineFoodResults");
+  if(query.length<2){status.textContent="Type at least two letters first.";input.focus();return}
+  status.textContent=`Searching the larger food database for “${query}”…`;
+  wrap.innerHTML='<div class="food-search-loading">Searching…</div>';
+  try{
+    const params=new URLSearchParams({search_terms:query,search_simple:"1",action:"process",json:"1",page_size:"18",fields:"code,product_name,product_name_en,generic_name,generic_name_en,brands,nutriments,image_front_small_url,image_small_url"});
+    const response=await fetch(`${V10_OFF_SEARCH_URL}?${params.toString()}`,{headers:{Accept:"application/json"}});
+    if(!response.ok)throw new Error(`Search returned ${response.status}`);
+    const data=await response.json();
+    const seen=new Set();
+    v10OnlineFoods=(data.products||[]).map(v10ProductToFood).filter(Boolean).filter(v10FoodHasNutrition).filter(food=>{const key=food.name.toLowerCase();if(seen.has(key))return false;seen.add(key);return true}).slice(0,12);
+    if(!v10OnlineFoods.length){
+      wrap.innerHTML='<div class="food-search-empty"><strong>No usable online matches found.</strong><span>Try a brand name, a more specific description, or use manual nutrition entry.</span></div>';
+      status.textContent="No online matches with nutrition values were found.";return;
+    }
+    wrap.innerHTML=`<p class="result-section-label">Online food database</p>${v10OnlineFoods.map((f,i)=>v10FoodCard(f,i,true)).join("")}`;
+    status.textContent=`Found ${v10OnlineFoods.length} foods. Tap the closest match.`;
+    v10BindFoodCards(wrap);
+  }catch(error){
+    wrap.innerHTML='<div class="food-search-empty"><strong>Online search is temporarily unavailable.</strong><span>Your built-in foods and manual entry still work.</span></div>';
+    status.textContent="Could not reach the online database. Check the connection and try again.";
+  }
+}
+function v10InitSmartFoodSearch(){
+  const input=document.getElementById("nutritionFoodSearch");
+  const button=document.getElementById("onlineFoodSearchBtn");
+  if(!input||!button)return;
+  input.addEventListener("input",()=>v10RenderLocal(input.value));
+  input.addEventListener("keydown",event=>{if(event.key==="Enter"){event.preventDefault();v10SearchOnline()}});
+  button.addEventListener("click",v10SearchOnline);
+
+  const toggle=document.getElementById("toggleNutritionDetailsBtn");
+  const details=document.getElementById("nutritionDetailsFields");
+  if(toggle&&details){
+    toggle.addEventListener("click",()=>{
+      const open=details.classList.toggle("open");
+      toggle.setAttribute("aria-expanded",String(open));
+      toggle.textContent=open?"Hide nutrition details":"Show nutrition details";
+    });
+  }
+}
+v10InitSmartFoodSearch();

@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#2563eb" />
   <title>My Zepbound Journey</title>
   <link rel="manifest" href="manifest.json" />
-  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="styles.css?v=8.2.3" />
 </head>
 <body>
   <section id="dayOneOverlay" class="day-one-overlay hidden">
@@ -367,7 +367,7 @@
           <div class="panel-heading">
             <div>
               <p class="eyebrow">Nutrition tracker</p>
-              <h2>Today’s food and nutrition</h2>
+              <h2>Today’s food and nutrition</h2><p id="nutritionTotalsStatus" class="nutrition-totals-status">Saved food totals</p>
               <p class="nutrition-intro">Log food and automatically total calories, protein, carbohydrates, sugar, fiber, fat, and sodium.</p>
             </div>
             <button id="nutritionClearDayBtn" type="button" class="danger-button">Clear today</button>
@@ -436,23 +436,16 @@
                       <option value="shake">shake</option>
                     </select>
                   </label>
-                  <label class="nutrition-wide">Nutrition values are for
-                    <div class="serving-definition">
-                      <input id="nutritionServingAmount" type="number" min="0.1" step="0.1" value="1" required>
-                      <select id="nutritionServingUnit">
-                        <option value="serving">serving</option>
-                        <option value="piece">piece</option>
-                        <option value="slice">slice</option>
-                        <option value="egg">egg</option>
-                        <option value="strip">strip</option>
-                        <option value="cup">cup</option>
-                        <option value="tbsp">tablespoon</option>
-                        <option value="tsp">teaspoon</option>
-                        <option value="oz">ounce</option>
-                        <option value="g">gram</option>
-                        <option value="container">container</option>
-                        <option value="shake">shake</option>
-                      </select>
+                  <div class="nutrition-wide amount-live-summary" aria-live="polite">
+                    <span>Calculated for <strong id="nutritionInlineAmount">1 serving</strong></span>
+                    <strong><span id="nutritionInlineCalories">0</span> calories • <span id="nutritionInlineProtein">0</span> g protein</strong>
+                    <small>This preview changes immediately. Today’s totals update after you press “Add calculated amount to food log.”</small>
+                  </div>
+                  <label class="nutrition-wide">Nutrition values are based on
+                    <div class="serving-definition locked-serving">
+                      <input id="nutritionServingAmount" type="number" value="1" readonly>
+                      <input id="nutritionServingUnitDisplay" type="text" value="serving" readonly>
+                      <input id="nutritionServingUnit" type="hidden" value="serving">
                     </div>
                   </label>
                   <label>Calories
@@ -477,8 +470,23 @@
                     <input id="nutritionSodium" type="number" min="0" step="1" value="0" required>
                   </label>
                 </div>
-                <p class="nutrition-note">Enter how much you ate, then identify the amount represented by the nutrition values. Example: ate 2 strips; label values are for 3 strips.</p>
-                <button type="submit" class="primary-button">Add to food log</button>
+                <p class="nutrition-note">Change only the amount you ate. The serving basis stays locked to the selected food so the totals calculate correctly.</p>
+
+                <section class="nutrition-preview" aria-live="polite">
+                  <p class="eyebrow">Calculated amount</p>
+                  <h3 id="nutritionPreviewHeading">1 serving</h3>
+                  <div class="nutrition-preview-grid">
+                    <span><strong id="nutritionPreviewCalories">0</strong> calories</span>
+                    <span><strong id="nutritionPreviewProtein">0</strong> g protein</span>
+                    <span><strong id="nutritionPreviewCarbs">0</strong> g carbs</span>
+                    <span><strong id="nutritionPreviewSugar">0</strong> g sugar</span>
+                    <span><strong id="nutritionPreviewFiber">0</strong> g fiber</span>
+                    <span><strong id="nutritionPreviewFat">0</strong> g fat</span>
+                    <span><strong id="nutritionPreviewSodium">0</strong> mg sodium</span>
+                  </div>
+                </section>
+
+                <button type="submit" class="primary-button">Add calculated amount to food log</button>
               </form>
             </section>
 
@@ -660,7 +668,7 @@
         </section>
       </section>
       <section class="about-card">
-        <strong>My Zepbound Journey — Version 8.2 Improved Food Log</strong>
+        <strong>My Zepbound Journey — Version 8.2.3 Live Main Totals</strong>
         <span>Created by Kevin Wiltz</span>
         <small>One Day. One Choice. One Step at a Time.</small>
       </section>
@@ -719,7 +727,7 @@
     </form>
   </dialog>
 
-  <script src="app.js"></script>
+  <script src="app.js?v=8.2.3"></script>
   <script>
     if ("serviceWorker" in navigator) {
       window.addEventListener("load", () => navigator.serviceWorker.register("./sw.js"));

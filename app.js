@@ -255,7 +255,61 @@ function unitLabel(unit,amount){
   const base=names[unit]||unit;
   return Number(amount)===1?base:(base==="piece"?"pieces":base==="slice"?"slices":base==="egg"?"eggs":base==="strip"?"strips":base==="cup"?"cups":base==="tablespoon"?"tablespoons":base==="teaspoon"?"teaspoons":base==="ounce"?"ounces":base==="container"?"containers":base==="shake"?"shakes":base+"s")
 }
-function setSelectValue(id,value){const el=document.getElementById(id);if(el&&[...el.options].some(o=>o.value===value))el.value=value}
+function setSelectValue(id,value){const el=document.getElementById(id);if(el&&el.options&&[...el.options].some(o=>o.value===value))el.value=value}
+function setNutritionServingBasis(amount,unit){
+  document.getElementById("nutritionServingAmount").value=amount;
+  document.getElementById("nutritionServingUnit").value=unit;
+  document.getElementById("nutritionServingUnitDisplay").value=unitLabel(unit,amount);
+}
+function nutritionPreview(){
+  const amount=Number(document.getElementById("nutritionAmount")?.value)||0;
+  const servingAmount=Number(document.getElementById("nutritionServingAmount")?.value)||1;
+  const unit=document.getElementById("nutritionUnit")?.value||"serving";
+  const multiplier=amount/servingAmount;
+  document.getElementById("nutritionPreviewHeading").textContent=`${amount} ${unitLabel(unit,amount)}`;
+  nutritionNutrients.forEach(k=>{
+    const source=Number(document.getElementById("nutrition"+k[0].toUpperCase()+k.slice(1))?.value)||0;
+    const total=source*multiplier;
+    const target=document.getElementById("nutritionPreview"+k[0].toUpperCase()+k.slice(1));
+    if(target)target.textContent=(k==="calories"||k==="sodium")?Math.round(total):nutritionRound(total);
+  });
+  const inlineAmount=document.getElementById("nutritionInlineAmount");
+  const inlineCalories=document.getElementById("nutritionInlineCalories");
+  const inlineProtein=document.getElementById("nutritionInlineProtein");
+  if(inlineAmount)inlineAmount.textContent=`${amount} ${unitLabel(unit,amount)}`;
+  if(inlineCalories){
+    const sourceCalories=Number(document.getElementById("nutritionCalories")?.value)||0;
+    inlineCalories.textContent=Math.round(sourceCalories*multiplier);
+  }
+  if(inlineProtein){
+    const sourceProtein=Number(document.getElementById("nutritionProtein")?.value)||0;
+    inlineProtein.textContent=nutritionRound(sourceProtein*multiplier);
+  }
+
+  const saved=nutritionTotals();
+  const draft={};
+  nutritionNutrients.forEach(k=>{
+    const source=Number(document.getElementById("nutrition"+k[0].toUpperCase()+k.slice(1))?.value)||0;
+    draft[k]=source*multiplier;
+  });
+
+  document.getElementById("nutritionTotalCalories").textContent=Math.round(saved.calories+draft.calories);
+  document.getElementById("nutritionTotalProtein").textContent=nutritionRound(saved.protein+draft.protein);
+  document.getElementById("nutritionTotalCarbs").textContent=nutritionRound(saved.carbs+draft.carbs);
+  document.getElementById("nutritionTotalSugar").textContent=nutritionRound(saved.sugar+draft.sugar);
+  document.getElementById("nutritionTotalFiber").textContent=nutritionRound(saved.fiber+draft.fiber);
+  document.getElementById("nutritionTotalFat").textContent=nutritionRound(saved.fat+draft.fat);
+  document.getElementById("nutritionTotalSodium").textContent=Math.round(saved.sodium+draft.sodium);
+
+  const status=document.getElementById("nutritionTotalsStatus");
+  const foodName=document.getElementById("nutritionFoodName")?.value.trim();
+  if(status){
+    status.textContent=foodName
+      ? "Live totals including the food currently being entered"
+      : "Saved food totals";
+    status.classList.toggle("previewing",Boolean(foodName));
+  }
+}
 function renderNutritionSearch(query=""){
   const wrap=document.getElementById("nutritionFoodResults");if(!wrap)return;
   const q=query.trim().toLowerCase();
@@ -266,9 +320,9 @@ function renderNutritionSearch(query=""){
     document.getElementById("nutritionFoodName").value=f.name;
     document.getElementById("nutritionAmount").value=f.servingAmount;
     setSelectValue("nutritionUnit",f.servingUnit);
-    document.getElementById("nutritionServingAmount").value=f.servingAmount;
-    setSelectValue("nutritionServingUnit",f.servingUnit);
+    setNutritionServingBasis(f.servingAmount,f.servingUnit);
     nutritionNutrients.forEach(k=>document.getElementById("nutrition"+k[0].toUpperCase()+k.slice(1)).value=f[k]);
+    nutritionPreview();
     document.getElementById("nutritionFoodForm").scrollIntoView({behavior:"smooth",block:"center"})
   }))
 }
@@ -296,6 +350,19 @@ function initNutrition(){
   const date=document.getElementById("nutritionDate");if(!date)return;
   date.value=todayString();date.addEventListener("change",renderNutrition);
   document.getElementById("nutritionFoodSearch").addEventListener("input",e=>renderNutritionSearch(e.target.value));
+  ["nutritionAmount","nutritionUnit","nutritionCalories","nutritionProtein","nutritionCarbs","nutritionSugar","nutritionFiber","nutritionFat","nutritionSodium"].forEach(id=>{
+    const field=document.getElementById(id);
+    ["input","change","keyup","blur"].forEach(eventName=>field.addEventListener(eventName,nutritionPreview));
+  });
+  document.getElementById("nutritionFoodForm").addEventListener("input",nutritionPreview);
+  document.getElementById("nutritionFoodForm").addEventListener("change",nutritionPreview);
+  document.getElementById("nutritionAmount").addEventListener("keydown",event=>{
+    if(event.key==="Enter"){
+      event.preventDefault();
+      nutritionPreview();
+      document.getElementById("nutritionFoodForm").requestSubmit();
+    }
+  });
   document.getElementById("nutritionFoodForm").addEventListener("submit",e=>{
     e.preventDefault();
     const amount=Number(document.getElementById("nutritionAmount").value)||1;
@@ -304,12 +371,15 @@ function initNutrition(){
     const entry={id:crypto.randomUUID?crypto.randomUUID():String(Date.now()),date:nutritionSelectedDate(),name:document.getElementById("nutritionFoodName").value.trim(),mealType:document.getElementById("nutritionMealType").value,amount,unit:document.getElementById("nutritionUnit").value,servingAmount,servingUnit:document.getElementById("nutritionServingUnit").value};
     nutritionNutrients.forEach(k=>{const id="nutrition"+k[0].toUpperCase()+k.slice(1);entry[k]=nutritionRound(Number(document.getElementById(id).value)*multiplier,k==="calories"||k==="sodium"?0:1)});
     nutritionEntries.push(entry);saveNutrition();e.target.reset();
-    document.getElementById("nutritionAmount").value=1;document.getElementById("nutritionServingAmount").value=1;
-    setSelectValue("nutritionUnit","serving");setSelectValue("nutritionServingUnit","serving");
-    nutritionNutrients.forEach(k=>document.getElementById("nutrition"+k[0].toUpperCase()+k.slice(1)).value=0)
+    document.getElementById("nutritionAmount").value=1;
+    setSelectValue("nutritionUnit","serving");
+    setNutritionServingBasis(1,"serving");
+    nutritionNutrients.forEach(k=>document.getElementById("nutrition"+k[0].toUpperCase()+k.slice(1)).value=0);
+    renderNutrition();
+    nutritionPreview()
   });
   document.getElementById("nutritionClearDayBtn").addEventListener("click",()=>{const d=nutritionSelectedDate();if(confirm(`Clear all food logged for ${d}?`)){nutritionEntries=nutritionEntries.filter(e=>e.date!==d);saveNutrition()}});
   document.getElementById("nutritionCopyProteinBtn").addEventListener("click",()=>{const total=nutritionRound(nutritionTotals().protein);document.getElementById("protein").value=total;quickCheckMessage.textContent=`Nutrition total copied: ${total} g protein. Save today when finished.`;document.querySelector('[data-view="homeView"]').click();setTimeout(()=>document.getElementById("protein").scrollIntoView({behavior:"smooth",block:"center"}),200)});
-  renderNutritionSearch();renderNutrition()
+  renderNutritionSearch();renderNutrition();nutritionPreview()
 }
 initNutrition();

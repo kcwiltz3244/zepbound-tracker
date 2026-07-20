@@ -1,4 +1,4 @@
-const CACHE_NAME = "my-zepbound-journey-v8-1-nutrition";
+const CACHE_NAME = "my-zepbound-journey-v8-2-food-log";
 const CORE_ASSETS = ["./", "./index.html", "./styles.css", "./app.js", "./manifest.json"];
 
 self.addEventListener("install", event => {

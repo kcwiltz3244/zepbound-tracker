@@ -417,8 +417,43 @@
                       <option>Snack</option>
                     </select>
                   </label>
-                  <label>Servings
-                    <input id="nutritionServings" type="number" min="0.25" step="0.25" value="1" required>
+                  <label>Amount
+                    <input id="nutritionAmount" type="number" min="0.1" step="0.1" value="1" required>
+                  </label>
+                  <label>Unit
+                    <select id="nutritionUnit">
+                      <option value="serving">serving</option>
+                      <option value="piece">piece</option>
+                      <option value="slice">slice</option>
+                      <option value="egg">egg</option>
+                      <option value="strip">strip</option>
+                      <option value="cup">cup</option>
+                      <option value="tbsp">tablespoon</option>
+                      <option value="tsp">teaspoon</option>
+                      <option value="oz">ounce</option>
+                      <option value="g">gram</option>
+                      <option value="container">container</option>
+                      <option value="shake">shake</option>
+                    </select>
+                  </label>
+                  <label class="nutrition-wide">Nutrition values are for
+                    <div class="serving-definition">
+                      <input id="nutritionServingAmount" type="number" min="0.1" step="0.1" value="1" required>
+                      <select id="nutritionServingUnit">
+                        <option value="serving">serving</option>
+                        <option value="piece">piece</option>
+                        <option value="slice">slice</option>
+                        <option value="egg">egg</option>
+                        <option value="strip">strip</option>
+                        <option value="cup">cup</option>
+                        <option value="tbsp">tablespoon</option>
+                        <option value="tsp">teaspoon</option>
+                        <option value="oz">ounce</option>
+                        <option value="g">gram</option>
+                        <option value="container">container</option>
+                        <option value="shake">shake</option>
+                      </select>
+                    </div>
                   </label>
                   <label>Calories
                     <input id="nutritionCalories" type="number" min="0" step="1" value="0" required>
@@ -442,7 +477,7 @@
                     <input id="nutritionSodium" type="number" min="0" step="1" value="0" required>
                   </label>
                 </div>
-                <p class="nutrition-note">Values are per serving. The tracker multiplies them by the number of servings.</p>
+                <p class="nutrition-note">Enter how much you ate, then identify the amount represented by the nutrition values. Example: ate 2 strips; label values are for 3 strips.</p>
                 <button type="submit" class="primary-button">Add to food log</button>
               </form>
             </section>
@@ -625,7 +660,7 @@
         </section>
       </section>
       <section class="about-card">
-        <strong>My Zepbound Journey — Version 8.1 Nutrition Edition</strong>
+        <strong>My Zepbound Journey — Version 8.2 Improved Food Log</strong>
         <span>Created by Kevin Wiltz</span>
         <small>One Day. One Choice. One Step at a Time.</small>
       </section>

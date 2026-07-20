@@ -1,4 +1,4 @@
-# My Zepbound Journey — Version 8.1 Nutrition Edition
+# My Zepbound Journey — Version 8.2 Improved Food Log
 
 Day One Edition  
 Created by Kevin Wiltz
@@ -38,3 +38,13 @@ Netlify should redeploy automatically.
 Nutrition values are estimates and can vary by brand, preparation, and serving size. Use package labels when precision matters.
 
 Exercise suggestions are general. Use comfortable ranges and stop or modify movements that cause sharp or increasing shoulder or hip pain.
+
+
+## Version 8.2 food-log improvements
+- Multiple bacon choices: pork, thick-cut, center-cut, turkey, and Canadian bacon
+- Multiple egg choices: whole, egg white, hard-boiled, scrambled, fried, and omelet
+- Search aliases so broad terms such as “bacon” and “eggs” show all relevant choices
+- Separate amount and unit fields
+- Supports pieces, slices, eggs, strips, cups, tablespoons, teaspoons, ounces, grams, containers, shakes, and servings
+- Nutrition-label serving definition, such as “values are for 3 strips”
+- Automatic proportional calculation, such as eating 2 strips when the label is for 3

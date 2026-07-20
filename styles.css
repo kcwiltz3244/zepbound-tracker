@@ -260,3 +260,7 @@ fieldset{border:1px solid var(--border);border-radius:18px;margin:1rem 0}legend{
   .nutrition-form-grid{grid-template-columns:1fr}
   .nutrition-wide{grid-column:auto}
 }
+
+/* Version 8.2 food amount controls */
+.serving-definition{display:grid;grid-template-columns:.7fr 1.3fr;gap:.5rem}
+@media(max-width:620px){.serving-definition{grid-template-columns:1fr 1fr}}

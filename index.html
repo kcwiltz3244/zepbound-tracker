@@ -362,6 +362,107 @@
           <p>Plan the week once, then make the next good choice easier.</p>
         </section>
 
+
+        <section class="nutrition-center panel">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">Nutrition tracker</p>
+              <h2>Today’s food and nutrition</h2>
+              <p class="nutrition-intro">Log food and automatically total calories, protein, carbohydrates, sugar, fiber, fat, and sodium.</p>
+            </div>
+            <button id="nutritionClearDayBtn" type="button" class="danger-button">Clear today</button>
+          </div>
+
+          <div class="nutrition-date-row">
+            <label>Log date
+              <input id="nutritionDate" type="date">
+            </label>
+            <button id="nutritionCopyProteinBtn" type="button" class="secondary-button">Use protein total in today’s check-in</button>
+          </div>
+
+          <div class="nutrition-stats-grid">
+            <article><span>Calories</span><strong id="nutritionTotalCalories">0</strong><small>kcal</small></article>
+            <article><span>Protein</span><strong id="nutritionTotalProtein">0</strong><small>g</small></article>
+            <article><span>Carbs</span><strong id="nutritionTotalCarbs">0</strong><small>g</small></article>
+            <article><span>Sugar</span><strong id="nutritionTotalSugar">0</strong><small>g</small></article>
+            <article><span>Fiber</span><strong id="nutritionTotalFiber">0</strong><small>g</small></article>
+            <article><span>Fat</span><strong id="nutritionTotalFat">0</strong><small>g</small></article>
+            <article><span>Sodium</span><strong id="nutritionTotalSodium">0</strong><small>mg</small></article>
+          </div>
+
+          <div class="nutrition-layout">
+            <section class="nutrition-entry-card">
+              <div class="panel-heading">
+                <div>
+                  <p class="eyebrow">Add food</p>
+                  <h3>What did you eat?</h3>
+                </div>
+              </div>
+
+              <label>Search common foods
+                <input id="nutritionFoodSearch" type="search" placeholder="Try eggs, chicken, yogurt, oatmeal…" autocomplete="off">
+              </label>
+              <div id="nutritionFoodResults" class="nutrition-food-results"></div>
+
+              <form id="nutritionFoodForm">
+                <div class="nutrition-form-grid">
+                  <label class="nutrition-wide">Food name
+                    <input id="nutritionFoodName" required placeholder="Example: Grilled chicken breast">
+                  </label>
+                  <label>Meal
+                    <select id="nutritionMealType">
+                      <option>Breakfast</option>
+                      <option>Lunch</option>
+                      <option>Dinner</option>
+                      <option>Snack</option>
+                    </select>
+                  </label>
+                  <label>Servings
+                    <input id="nutritionServings" type="number" min="0.25" step="0.25" value="1" required>
+                  </label>
+                  <label>Calories
+                    <input id="nutritionCalories" type="number" min="0" step="1" value="0" required>
+                  </label>
+                  <label>Protein (g)
+                    <input id="nutritionProtein" type="number" min="0" step="0.1" value="0" required>
+                  </label>
+                  <label>Carbs (g)
+                    <input id="nutritionCarbs" type="number" min="0" step="0.1" value="0" required>
+                  </label>
+                  <label>Sugar (g)
+                    <input id="nutritionSugar" type="number" min="0" step="0.1" value="0" required>
+                  </label>
+                  <label>Fiber (g)
+                    <input id="nutritionFiber" type="number" min="0" step="0.1" value="0" required>
+                  </label>
+                  <label>Fat (g)
+                    <input id="nutritionFat" type="number" min="0" step="0.1" value="0" required>
+                  </label>
+                  <label>Sodium (mg)
+                    <input id="nutritionSodium" type="number" min="0" step="1" value="0" required>
+                  </label>
+                </div>
+                <p class="nutrition-note">Values are per serving. The tracker multiplies them by the number of servings.</p>
+                <button type="submit" class="primary-button">Add to food log</button>
+              </form>
+            </section>
+
+            <section class="nutrition-log-card">
+              <div class="panel-heading">
+                <div>
+                  <p class="eyebrow">Food log</p>
+                  <h3 id="nutritionLogHeading">Today’s meals</h3>
+                </div>
+              </div>
+              <div id="nutritionMealGroups"></div>
+              <p id="nutritionEmptyState" class="nutrition-empty">No food entered for this date yet.</p>
+            </section>
+          </div>
+
+          <p class="exercise-note">Nutrition values are estimates and vary by brand, preparation, and serving size. Use package labels when precision matters.</p>
+        </section>
+
+
         <section class="panel">
           <div class="panel-heading">
             <div>
@@ -524,7 +625,7 @@
         </section>
       </section>
       <section class="about-card">
-        <strong>My Zepbound Journey — Day One Edition</strong>
+        <strong>My Zepbound Journey — Version 8.1 Nutrition Edition</strong>
         <span>Created by Kevin Wiltz</span>
         <small>One Day. One Choice. One Step at a Time.</small>
       </section>
@@ -584,5 +685,10 @@
   </dialog>
 
   <script src="app.js"></script>
+  <script>
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => navigator.serviceWorker.register("./sw.js"));
+    }
+  </script>
 </body>
 </html>

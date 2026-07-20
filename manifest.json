@@ -1,9 +1,9 @@
 {
-  "name": "My Zepbound Journey \u2014 Day One Edition",
+  "name": "My Zepbound Journey — Version 8.1 Nutrition Edition",
   "short_name": "My Journey",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#0f2747",
   "theme_color": "#2563eb",
-  "description": "A beautiful, functional, process-first wellness app with journaling, meals, milestones, and exercise logging."
+  "description": "A process-first wellness app with nutrition tracking, journaling, meals, milestones, exercise logging, and progress."
 }

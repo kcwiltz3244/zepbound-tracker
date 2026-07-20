@@ -1,38 +1,40 @@
-# My Zepbound Journey — Version 8.0
+# My Zepbound Journey — Version 8.1 Nutrition Edition
 
 Day One Edition  
 Created by Kevin Wiltz
 
 **One Day. One Choice. One Step at a Time.**
 
-## New
-- Day One sunrise welcome
-- Begin My Journey ceremony
-- Today's Mission
-- Quick Check-In
+## Version 8 features retained
+- Day One sunrise welcome and Begin My Journey ceremony
+- Today's Mission and Quick Check-In
 - Letter to Future Me
-- Milestone page
-- Exercise page with gym, gentle-day, and home routines
-- Workout logging: weight, sets, reps/time, feeling, notes
-- Previous exercise settings
-- Weekly gym visit summary
-- Existing journal, meals, story, and progress retained
+- Journal, weekly meal planner, story, milestones, exercise, and progress
+- Gym, gentle-day, and home routines
+- Workout logging and previous exercise settings
+
+## New integrated nutrition tracker
+- Searchable starter list of common foods
+- Manual food and nutrition entry
+- Breakfast, lunch, dinner, and snack grouping
+- Serving multiplier
+- Date-by-date food history
+- Automatic daily totals for calories, protein, carbs, sugar, fiber, fat, and sodium
+- One-button transfer of the nutrition protein total to the daily check-in
+- Local device storage and offline PWA support
+
+## Install
+Replace the six repository files with these files and commit:
+- index.html
+- styles.css
+- app.js
+- manifest.json
+- sw.js
+- README.md
+
+Netlify should redeploy automatically.
+
+## Important
+Nutrition values are estimates and can vary by brand, preparation, and serving size. Use package labels when precision matters.
 
 Exercise suggestions are general. Use comfortable ranges and stop or modify movements that cause sharp or increasing shoulder or hip pain.
-
-Replace the six repository files and commit. Netlify will redeploy automatically.
-
-
-## Version 8.0.1 fix
-
-- Fixed Begin My Journey button on phones
-- Added a direct button fallback
-- Replaced fragile browser-global element access
-- Changed service worker to network-first so Netlify updates appear reliably
-
-
-## Version 8.0.2 critical fix
-
-The Begin My Journey button was saving correctly, but a later CSS rule forced the
-welcome overlay to remain visible. Added a higher-priority hidden rule so the
-Day One screen closes immediately after the button is pressed.

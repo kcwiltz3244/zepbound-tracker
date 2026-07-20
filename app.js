@@ -208,3 +208,102 @@ function renderWorkouts(){const all=[...read(KEYS.workouts,[])].reverse(),week=s
 function renderMilestones(){milestoneGrid.innerHTML=milestoneDefinitions.map(m=>{const u=!!m.test();return `<article class="milestone-card ${u?"unlocked":"locked"}"><div class="milestone-symbol">${m.icon}</div><h3>${m.title}</h3><p>${m.text}</p><span class="milestone-status">${u?"Unlocked":"Still ahead"}</span></article>`}).join("")}
 
 loadToday();loadJournalEntry(todayString());renderAll();initDayOne();loadFutureLetter();renderMission();renderRoutines();workoutDate.value=todayString();addExerciseRow();renderWorkouts();renderMilestones();
+
+/* Version 8.1 integrated nutrition tracker */
+const NUTRITION_STORAGE_KEY="mzjV81Nutrition";
+const NUTRITION_FOODS=[
+{name:"Egg, large",serving:"1 egg",calories:72,protein:6.3,carbs:.4,sugar:.2,fiber:0,fat:4.8,sodium:71},
+{name:"Scrambled eggs",serving:"2 large eggs",calories:182,protein:12.5,carbs:2,sugar:.8,fiber:0,fat:13.5,sodium:190},
+{name:"Turkey bacon",serving:"3 slices",calories:90,protein:6,carbs:0,sugar:0,fiber:0,fat:7,sodium:540},
+{name:"Grilled chicken breast",serving:"3 oz cooked",calories:128,protein:26,carbs:0,sugar:0,fiber:0,fat:2.7,sodium:44},
+{name:"Salmon, baked",serving:"3 oz cooked",calories:175,protein:19,carbs:0,sugar:0,fiber:0,fat:10.5,sodium:50},
+{name:"Greek yogurt, plain nonfat",serving:"3/4 cup",calories:100,protein:17,carbs:6,sugar:5,fiber:0,fat:0,sodium:65},
+{name:"Cottage cheese, low fat",serving:"1/2 cup",calories:90,protein:12,carbs:5,sugar:4,fiber:0,fat:2.5,sodium:360},
+{name:"Oatmeal, cooked",serving:"1 cup",calories:154,protein:6,carbs:27,sugar:1,fiber:4,fat:3,sodium:2},
+{name:"Banana, medium",serving:"1 banana",calories:105,protein:1.3,carbs:27,sugar:14.4,fiber:3.1,fat:.4,sodium:1},
+{name:"Apple, medium",serving:"1 apple",calories:95,protein:.5,carbs:25,sugar:19,fiber:4.4,fat:.3,sodium:2},
+{name:"Broccoli, cooked",serving:"1 cup",calories:55,protein:3.7,carbs:11.2,sugar:2.2,fiber:5.1,fat:.6,sodium:64},
+{name:"Brown rice, cooked",serving:"1/2 cup",calories:108,protein:2.5,carbs:22.4,sugar:.2,fiber:1.8,fat:.9,sodium:5},
+{name:"Sweet potato, baked",serving:"1 medium",calories:112,protein:2,carbs:26,sugar:5.4,fiber:3.9,fat:.1,sodium:72},
+{name:"Tuna, canned in water",serving:"3 oz drained",calories:99,protein:22,carbs:0,sugar:0,fiber:0,fat:.7,sodium:320},
+{name:"Turkey breast, sliced",serving:"3 oz",calories:90,protein:18,carbs:2,sugar:1,fiber:0,fat:1,sodium:540},
+{name:"Black beans, cooked",serving:"1/2 cup",calories:114,protein:7.6,carbs:20.4,sugar:.3,fiber:7.5,fat:.5,sodium:1},
+{name:"Protein shake",serving:"1 prepared shake",calories:160,protein:30,carbs:6,sugar:2,fiber:1,fat:3,sodium:210},
+{name:"Almonds",serving:"1 oz",calories:164,protein:6,carbs:6.1,sugar:1.2,fiber:3.5,fat:14.2,sodium:0},
+{name:"Peanut butter",serving:"2 tbsp",calories:190,protein:7,carbs:7,sugar:3,fiber:2,fat:16,sodium:140},
+{name:"Avocado",serving:"1/2 medium",calories:120,protein:1.5,carbs:6.4,sugar:.3,fiber:5,fat:11,sodium:5}
+];
+let nutritionEntries=read(NUTRITION_STORAGE_KEY,[]);
+const nutritionNutrients=["calories","protein","carbs","sugar","fiber","fat","sodium"];
+function nutritionRound(n,p=1){return Number((Number(n)||0).toFixed(p))}
+function nutritionSelectedDate(){return document.getElementById("nutritionDate")?.value||todayString()}
+function nutritionForDate(){const d=nutritionSelectedDate();return nutritionEntries.filter(e=>e.date===d)}
+function nutritionTotals(){
+  return nutritionForDate().reduce((a,e)=>{nutritionNutrients.forEach(k=>a[k]+=Number(e[k])||0);return a},
+  {calories:0,protein:0,carbs:0,sugar:0,fiber:0,fat:0,sodium:0})
+}
+function saveNutrition(){write(NUTRITION_STORAGE_KEY,nutritionEntries);renderNutrition()}
+function renderNutritionSearch(query=""){
+  const wrap=document.getElementById("nutritionFoodResults");if(!wrap)return;
+  const q=query.trim().toLowerCase();
+  const results=NUTRITION_FOODS.filter(f=>!q||f.name.toLowerCase().includes(q)).slice(0,8);
+  wrap.innerHTML=results.map((f,i)=>`<button type="button" class="nutrition-food-result" data-food-index="${NUTRITION_FOODS.indexOf(f)}"><span><strong>${esc(f.name)}</strong><small>${esc(f.serving)}</small></span><span>${f.calories} cal • ${f.protein}g protein</span></button>`).join("");
+  wrap.querySelectorAll("[data-food-index]").forEach(b=>b.addEventListener("click",()=>{
+    const f=NUTRITION_FOODS[Number(b.dataset.foodIndex)];
+    document.getElementById("nutritionFoodName").value=f.name;
+    nutritionNutrients.forEach(k=>document.getElementById("nutrition"+k[0].toUpperCase()+k.slice(1)).value=f[k]);
+    document.getElementById("nutritionServings").value=1;
+    document.getElementById("nutritionFoodForm").scrollIntoView({behavior:"smooth",block:"center"});
+  }))
+}
+function renderNutrition(){
+  if(!document.getElementById("nutritionDate"))return;
+  const totals=nutritionTotals();
+  document.getElementById("nutritionTotalCalories").textContent=Math.round(totals.calories);
+  document.getElementById("nutritionTotalProtein").textContent=nutritionRound(totals.protein);
+  document.getElementById("nutritionTotalCarbs").textContent=nutritionRound(totals.carbs);
+  document.getElementById("nutritionTotalSugar").textContent=nutritionRound(totals.sugar);
+  document.getElementById("nutritionTotalFiber").textContent=nutritionRound(totals.fiber);
+  document.getElementById("nutritionTotalFat").textContent=nutritionRound(totals.fat);
+  document.getElementById("nutritionTotalSodium").textContent=Math.round(totals.sodium);
+  const date=nutritionSelectedDate();
+  document.getElementById("nutritionLogHeading").textContent=new Date(date+"T00:00:00").toLocaleDateString(undefined,{weekday:"long",month:"short",day:"numeric"});
+  const todays=nutritionForDate(),groups=["Breakfast","Lunch","Dinner","Snack"],wrap=document.getElementById("nutritionMealGroups");
+  document.getElementById("nutritionEmptyState").classList.toggle("hidden",todays.length>0);
+  wrap.innerHTML=groups.map(group=>{
+    const items=todays.filter(e=>e.mealType===group);if(!items.length)return "";
+    return `<section class="nutrition-meal-section"><h4>${group}</h4>${items.map(item=>`<div class="nutrition-meal-row"><div><p><strong>${esc(item.name)}</strong></p><small>${item.servings} serving${Number(item.servings)===1?"":"s"}</small></div><button type="button" class="nutrition-remove" data-nutrition-id="${item.id}">Remove</button><div class="nutrition-meal-nutrients">${Math.round(item.calories)} cal • ${nutritionRound(item.protein)}g protein • ${nutritionRound(item.carbs)}g carbs • ${nutritionRound(item.sugar)}g sugar • ${nutritionRound(item.fiber)}g fiber • ${nutritionRound(item.fat)}g fat • ${Math.round(item.sodium)}mg sodium</div></div>`).join("")}</section>`
+  }).join("");
+  wrap.querySelectorAll("[data-nutrition-id]").forEach(b=>b.addEventListener("click",()=>{nutritionEntries=nutritionEntries.filter(e=>e.id!==b.dataset.nutritionId);saveNutrition()}))
+}
+function initNutrition(){
+  const date=document.getElementById("nutritionDate");if(!date)return;
+  date.value=todayString();
+  date.addEventListener("change",renderNutrition);
+  document.getElementById("nutritionFoodSearch").addEventListener("input",e=>renderNutritionSearch(e.target.value));
+  document.getElementById("nutritionFoodForm").addEventListener("submit",e=>{
+    e.preventDefault();
+    const servings=Number(document.getElementById("nutritionServings").value)||1;
+    const entry={id:crypto.randomUUID?crypto.randomUUID():String(Date.now()),date:nutritionSelectedDate(),name:document.getElementById("nutritionFoodName").value.trim(),mealType:document.getElementById("nutritionMealType").value,servings};
+    nutritionNutrients.forEach(k=>{
+      const id="nutrition"+k[0].toUpperCase()+k.slice(1);
+      entry[k]=nutritionRound(Number(document.getElementById(id).value)*servings,k==="calories"||k==="sodium"?0:1)
+    });
+    nutritionEntries.push(entry);saveNutrition();e.target.reset();
+    document.getElementById("nutritionServings").value=1;
+    nutritionNutrients.forEach(k=>document.getElementById("nutrition"+k[0].toUpperCase()+k.slice(1)).value=0)
+  });
+  document.getElementById("nutritionClearDayBtn").addEventListener("click",()=>{
+    const d=nutritionSelectedDate();
+    if(confirm(`Clear all food logged for ${d}?`)){nutritionEntries=nutritionEntries.filter(e=>e.date!==d);saveNutrition()}
+  });
+  document.getElementById("nutritionCopyProteinBtn").addEventListener("click",()=>{
+    const total=nutritionRound(nutritionTotals().protein);
+    document.getElementById("protein").value=total;
+    quickCheckMessage.textContent=`Nutrition total copied: ${total} g protein. Save today when finished.`;
+    document.querySelector('[data-view="homeView"]').click();
+    setTimeout(()=>document.getElementById("protein").scrollIntoView({behavior:"smooth",block:"center"}),200)
+  });
+  renderNutritionSearch();renderNutrition()
+}
+initNutrition();

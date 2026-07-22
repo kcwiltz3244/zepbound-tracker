@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#2563eb" />
   <title>My Zepbound Journey</title>
   <link rel="manifest" href="manifest.json" />
-  <link rel="stylesheet" href="styles.css?v=11.2.0" />
+  <link rel="stylesheet" href="styles.css?v=11.2.1" />
 </head>
 <body>
   <section id="dayOneOverlay" class="day-one-overlay hidden">
@@ -906,7 +906,7 @@
           <div class="photo-album-controls">
             <input id="photoAlbumUrl" type="url" placeholder="Paste your Google Photos album link">
             <button id="savePhotoAlbumBtn" type="button" class="secondary-button">Save link</button>
-            <button id="openPhotoAlbumBtn" type="button" class="primary-button">Open album</button>
+            <a id="openPhotoAlbumBtn" class="primary-button" href="#" target="_blank" rel="noopener noreferrer" role="button">Open album</a>
           </div>
           <small class="privacy-note">Your album stays private unless you change its sharing settings in Google Photos.</small>
         </section>
@@ -1069,7 +1069,7 @@
     </form>
   </dialog>
 
-  <script src="app.js?v=11.2.0"></script>
+  <script src="app.js?v=11.2.1"></script>
   <script>
     if ("serviceWorker" in navigator) {
       window.addEventListener("load", () => navigator.serviceWorker.register("./sw.js"));

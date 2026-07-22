@@ -1229,10 +1229,38 @@ function suggestedPhotoWeek(){
   const now=new Date(todayString()+"T00:00:00");
   return Math.max(1,Math.floor((now-start)/604800000)+1);
 }
-function openPhotoAlbum(){
-  const url=(document.getElementById("photoAlbumUrl")?.value||localStorage.getItem(PHOTO_ALBUM_KEY)||"").trim();
-  if(!url){alert("Paste and save your Google Photos album link first.");return;}
-  window.open(url,"_blank","noopener");
+function normalizePhotoAlbumUrl(value){
+  let url=(value||"").trim();
+  if(!url)return "";
+  // Links copied from Google Photos should begin with https://. Add it when omitted.
+  if(!/^https?:\/\//i.test(url))url=`https://${url.replace(/^\/+/,"")}`;
+  try{
+    const parsed=new URL(url);
+    const allowed=parsed.hostname==="photos.google.com"||parsed.hostname.endsWith(".photos.google.com")||parsed.hostname==="photos.app.goo.gl";
+    if(!allowed)return "";
+    return parsed.href;
+  }catch{return "";}
+}
+function updatePhotoAlbumLink(){
+  const link=document.getElementById("openPhotoAlbumBtn");
+  const input=document.getElementById("photoAlbumUrl");
+  if(!link||!input)return;
+  const url=normalizePhotoAlbumUrl(input.value||localStorage.getItem(PHOTO_ALBUM_KEY)||"");
+  link.href=url||"#";
+  link.setAttribute("aria-disabled",url?"false":"true");
+}
+function openPhotoAlbum(event){
+  const input=document.getElementById("photoAlbumUrl");
+  const url=normalizePhotoAlbumUrl(input?.value||localStorage.getItem(PHOTO_ALBUM_KEY)||"");
+  if(!url){
+    event?.preventDefault();
+    alert("Paste a valid Google Photos album link, then tap Save link.");
+    return;
+  }
+  if(input)input.value=url;
+  localStorage.setItem(PHOTO_ALBUM_KEY,url);
+  const link=document.getElementById("openPhotoAlbumBtn");
+  if(link)link.href=url;
 }
 function loadPhotoEntry(week){
   const e=photoProgressEntries.find(x=>Number(x.week)===Number(week));
@@ -1272,8 +1300,17 @@ function initPhotoProgress(){
   photoWeek.value=suggestedPhotoWeek();photoDate.value=todayString();
   const todayDaily=read(KEYS.daily,[]).find(x=>x.date===todayString());if(todayDaily?.dose)photoDose.value=todayDaily.dose;
   const weights=read(KEYS.weights,[]);if(weights.length)photoWeight.value=weights[weights.length-1].weight||"";
-  savePhotoAlbumBtn.onclick=()=>{const u=photoAlbumUrl.value.trim();if(!u){alert("Paste your Google Photos album link first.");return;}localStorage.setItem(PHOTO_ALBUM_KEY,u);alert("Album link saved on this device.");};
-  openPhotoAlbumBtn.onclick=openPhotoAlbum;
+  savePhotoAlbumBtn.onclick=()=>{
+    const u=normalizePhotoAlbumUrl(photoAlbumUrl.value);
+    if(!u){alert("That does not look like a Google Photos album link. Open the album in Google Photos, choose Share, and copy the link.");return;}
+    photoAlbumUrl.value=u;
+    localStorage.setItem(PHOTO_ALBUM_KEY,u);
+    updatePhotoAlbumLink();
+    alert("Album link saved on this device.");
+  };
+  photoAlbumUrl.addEventListener("input",updatePhotoAlbumLink);
+  openPhotoAlbumBtn.addEventListener("click",openPhotoAlbum);
+  updatePhotoAlbumLink();
   form.addEventListener("submit",e=>{e.preventDefault();const entry={week:Number(photoWeek.value),date:photoDate.value,weight:photoWeight.value?Number(photoWeight.value):null,dose:photoDose.value,notes:photoNotes.value.trim(),added:photoAdded.checked,updatedAt:new Date().toISOString()};const i=photoProgressEntries.findIndex(x=>Number(x.week)===entry.week);if(i>=0)photoProgressEntries[i]=entry;else photoProgressEntries.push(entry);write(PHOTO_PROGRESS_KEY,photoProgressEntries);renderPhotoProgress();alert(`Week ${entry.week} saved.`);});
   copyPhotoLabelBtn.onclick=()=>{const entry={week:Number(photoWeek.value||suggestedPhotoWeek()),date:photoDate.value||todayString(),weight:photoWeight.value,dose:photoDose.value,notes:photoNotes.value.trim()};navigator.clipboard.writeText(photoEntryLabel(entry)).then(()=>alert("Photo label copied. Paste it into Markup or your photo editor."));};
   clearPhotoFormBtn.onclick=()=>{form.reset();photoWeek.value=suggestedPhotoWeek();photoDate.value=todayString();photoDose.value="2.5 mg";};

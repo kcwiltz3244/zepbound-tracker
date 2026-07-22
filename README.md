@@ -42,3 +42,10 @@ Commit the files, wait for deployment, then fully close and reopen the installed
 - Copy-ready labels for placing on photos
 - Week-to-week comparison
 - Built-in consistent photo-label guide
+
+
+## Version 11.2.1
+- Fixed the Google Photos Open album control.
+- Accepts Google Photos links copied with or without https://.
+- Validates and saves the album URL before opening it.
+- Uses a real web link for better reliability in installed phone apps.

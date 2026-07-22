@@ -1,22 +1,30 @@
-# My Zepbound Journey — Version 11 Smart Dining
+# My Zepbound Journey — Version 11.2
 
-## New in Version 11
-- Dedicated phone-friendly Dining tab
-- One-tap logging for curated restaurant and grocery choices
-- Smoothie King, Chick-fil-A, Chipotle, Starbucks, Subway, Panera, Braum's, and Grocery Favorites
-- Daily calorie, protein, and fiber guidance
-- Green “Best choice” and yellow “Good choice” labels
-- Restaurant search and quick filter chips
-- Dining favorites saved on the device
-- “Why this choice?” explanations
-- Home-screen Eat Out Smart shortcut
-- Existing Version 10 smart food search remains available
+## New: Personal Dose-Effectiveness Tracker
+- Starts a new tracking cycle when “Injection taken today” is saved
+- Shows current dose, injection date, and cycle day
+- Daily 0–10 ratings for:
+  - appetite control
+  - craving control
+  - comfortable fullness
+- Optional daily observation notes
+- Seven-day visual trend chart
+- Calculates a personal average control score
+- Flags a possible fade day when the score first drops below 6 after previously reaching 6 or higher
+- Saves all tracking data privately on the device
 
-## Important nutrition note
-Restaurant recipes, product labels, and serving sizes can change. The curated menu is a practical starter library, not a substitute for the restaurant’s latest nutrition calculator or medical nutrition advice.
+The tracker records personal observations. It does not estimate the amount of medication in the body, diagnose loss of effectiveness, or recommend changing the prescribed dose or weekly schedule.
+
+## Version 11 features retained
+- Smart Dining tab
+- One-tap restaurant and grocery logging
+- Daily nutrition guidance
+- Dining favorites
+- Phone-friendly controls
+- Version 10 smart food search
 
 ## Install/update
-Replace all six files in the deployed project:
+Replace all six deployed files:
 - index.html
 - styles.css
 - app.js
@@ -24,4 +32,13 @@ Replace all six files in the deployed project:
 - sw.js
 - README.md
 
-Commit the files, wait for deployment, then fully close and reopen the installed phone app so the Version 11 service-worker cache loads.
+Commit the files, wait for deployment, then fully close and reopen the installed phone app so the Version 11.2 cache loads.
+
+
+## Version 11.2 — Progress Photos
+- New My Progress in Pictures section
+- Saves a Google Photos album link locally
+- Weekly photo records with date, weight, dose, notes, and photo-added status
+- Copy-ready labels for placing on photos
+- Week-to-week comparison
+- Built-in consistent photo-label guide

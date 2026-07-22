@@ -1,9 +1,9 @@
 {
-  "name": "My Zepbound Journey \u2014 Version 11 Smart Dining",
-  "short_name": "Zepbound V11",
+  "name": "My Zepbound Journey \u2014 Version 11.2",
+  "short_name": "Zepbound V11.2",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#0f2747",
   "theme_color": "#2563eb",
-  "description": "Phone-friendly GLP-1 nutrition, smart restaurant choices, and one-tap dining logs."
+  "description": "GLP-1 nutrition, smart dining, and a personal weekly dose-effectiveness tracker."
 }

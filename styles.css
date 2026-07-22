@@ -463,3 +463,47 @@ fieldset{border:1px solid var(--border);border-radius:18px;margin:1rem 0}legend{
   .dining-goal-strip{gap:6px}.dining-goal-strip span{font-size:.67rem}.dining-goal-strip strong{font-size:.82rem}
   .dining-macro-grid strong{font-size:.75rem}.dining-macro-grid span{font-size:.56rem}
 }
+
+
+/* Version 11.1 — Dose-effectiveness tracker */
+.dose-effectiveness-panel{margin:22px 0}
+.dose-icon{background:#ede9fe}
+.dose-cycle-summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:14px 0 16px}
+.dose-cycle-summary article{background:linear-gradient(180deg,#f8fafc,#fff);border:1px solid var(--border);border-radius:17px;padding:13px}
+.dose-cycle-summary span{display:block;color:var(--muted);font-size:.74rem;font-weight:800;margin-bottom:4px}
+.dose-cycle-summary strong{font-size:1rem}
+.dose-guidance{background:#fff7ed;border:1px solid #fed7aa;color:#9a3412;border-radius:15px;padding:12px 14px;font-weight:750;margin-bottom:14px}
+.dose-checkin-form{display:grid;gap:15px}
+.dose-checkin-form.dose-disabled{opacity:.55;pointer-events:none}
+.dose-slider-label{display:grid;gap:8px;background:#f8fafc;border:1px solid var(--border);border-radius:17px;padding:13px}
+.dose-slider-label>span{display:flex;justify-content:space-between;gap:12px;align-items:center}
+.dose-slider-label output{font-weight:900;color:#1d4ed8}
+.dose-slider-label input[type="range"]{width:100%;accent-color:#2563eb}
+.dose-slider-label small{color:var(--muted);line-height:1.35}
+.dose-chart-heading{display:flex;justify-content:space-between;align-items:end;gap:12px;margin:22px 0 10px}
+.dose-chart-heading h3{margin:.1rem 0 0}
+.dose-effectiveness-chart{height:210px;display:grid;grid-template-columns:repeat(7,1fr);gap:8px;align-items:end;border:1px solid var(--border);border-radius:18px;padding:16px 10px 10px;background:linear-gradient(180deg,#eff6ff,#fff)}
+.dose-day{height:100%;display:grid;grid-template-rows:1fr auto auto auto;align-items:end;text-align:center;gap:2px;border-radius:12px;padding:4px}
+.dose-day.fade-day{background:#fff7ed;outline:2px solid #fb923c}
+.dose-bar-shell{height:100%;display:flex;align-items:flex-end;justify-content:center}
+.dose-bar{width:min(32px,75%);border-radius:10px 10px 4px 4px;min-height:4px;background:#94a3b8;transition:height .25s ease}
+.dose-bar.strong{background:#10b981}.dose-bar.moderate{background:#f59e0b}.dose-bar.low{background:#ef4444}.dose-bar.empty{background:#cbd5e1}
+.dose-day strong{font-size:.72rem}.dose-day span,.dose-day small{font-size:.63rem;color:var(--muted)}
+.dose-insight{background:#eef2ff;color:#3730a3;border-radius:14px;padding:12px 14px;font-weight:750}
+.dose-method-note{margin-top:12px;color:var(--muted);font-size:.83rem}.dose-method-note summary{font-weight:850;color:var(--ink);cursor:pointer}.dose-method-note p{line-height:1.5}
+@media(max-width:720px){
+  .dose-cycle-summary{grid-template-columns:repeat(2,1fr)}
+  .dose-effectiveness-chart{height:190px;gap:4px;padding-left:6px;padding-right:6px}
+  .dose-day strong{font-size:.64rem}.dose-day span{display:none}
+}
+
+
+/* Version 11.2 — Progress photos */
+.photos-hero{background:linear-gradient(135deg,#6d28d9,#9333ea 60%,#f59e0b)}
+.photo-album-panel{border-top:5px solid #7c3aed}.photo-help{color:var(--muted);line-height:1.5}.privacy-note{display:block;margin-top:10px;color:var(--muted)}
+.photo-album-controls{display:grid;grid-template-columns:1fr auto auto;gap:10px}.photo-album-controls input{min-width:0}
+.photo-week-form{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}.photo-notes-label,.photo-confirm,.photo-form-actions{grid-column:1/-1}.photo-confirm{background:#f8fafc;border:1px solid var(--border);border-radius:15px;padding:13px}
+.photo-week-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}.photo-week-card{border:1px solid var(--border);border-top:5px solid #cbd5e1;border-radius:20px;padding:15px;background:#fff;box-shadow:0 8px 22px rgba(15,23,42,.06)}.photo-week-card.photo-complete{border-top-color:#10b981}.photo-week-card-top,.photo-week-details,.photo-card-actions{display:flex;justify-content:space-between;gap:8px;align-items:center}.photo-week-badge{font-weight:900;color:#6d28d9}.photo-status{font-size:.72rem;font-weight:850;color:var(--muted)}.photo-week-card>strong{display:block;font-size:1.05rem;margin:12px 0 8px}.photo-week-details{justify-content:flex-start;flex-wrap:wrap;color:var(--muted);font-weight:750}.photo-week-card p{color:var(--muted);line-height:1.45}.photo-card-actions{justify-content:flex-start;flex-wrap:wrap;margin-top:12px}.photo-card-actions button{padding:8px 10px;min-height:38px}.photo-empty{text-align:center;grid-column:1/-1;padding:32px;color:var(--muted)}.photo-empty div{font-size:2.6rem}.photo-empty strong{display:block;color:var(--ink);margin:8px}
+.photo-compare-controls{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:15px}.photo-compare-result{display:grid;grid-template-columns:1fr auto 1fr;gap:14px;align-items:stretch}.photo-compare-result article{background:#f8fafc;border:1px solid var(--border);border-radius:18px;padding:16px}.photo-compare-result article span,.photo-compare-result article small{display:block;color:var(--muted);font-weight:750}.photo-compare-result article strong{font-size:1.7rem;display:block;margin:6px 0}.compare-arrow{display:grid;place-items:center;font-size:1.7rem;font-weight:900;color:#7c3aed}.compare-change{grid-column:1/-1;background:#eef2ff;color:#3730a3;border-radius:14px;padding:12px;text-align:center}.photo-guide-image{width:100%;height:auto;border-radius:18px;border:1px solid var(--border)}
+@media(max-width:760px){.photo-album-controls{grid-template-columns:1fr 1fr}.photo-album-controls input{grid-column:1/-1}.photo-week-form{grid-template-columns:1fr 1fr}.photo-week-grid{grid-template-columns:1fr}.photo-compare-result{grid-template-columns:1fr}.compare-arrow{transform:rotate(90deg)}.photo-compare-controls{grid-template-columns:1fr}.photo-guide-panel{padding:12px}}
+@media(max-width:430px){.photo-week-form{grid-template-columns:1fr}.photo-notes-label,.photo-confirm,.photo-form-actions{grid-column:1}.photo-album-controls{grid-template-columns:1fr}.photo-album-controls input{grid-column:1}}

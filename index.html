@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#2563eb" />
   <title>My Zepbound Journey</title>
   <link rel="manifest" href="manifest.json" />
-  <link rel="stylesheet" href="styles.css?v=11.0.0" />
+  <link rel="stylesheet" href="styles.css?v=11.2.0" />
 </head>
 <body>
   <section id="dayOneOverlay" class="day-one-overlay hidden">
@@ -277,6 +277,84 @@
             <button id="saveWinBtn" class="gold-button">Add win</button>
             <div id="winsList" class="wins-list"></div>
           </article>
+        </section>
+
+
+        <section class="panel dose-effectiveness-panel" id="doseEffectivenessPanel">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">Dose effectiveness</p>
+              <h2>How is this week’s injection working?</h2>
+              <p>Track your own appetite control from injection day through the end of the week.</p>
+            </div>
+            <span class="mini-icon dose-icon">💉</span>
+          </div>
+
+          <div class="dose-cycle-summary">
+            <article>
+              <span>Current dose</span>
+              <strong id="doseTrackerCurrentDose">Not logged</strong>
+            </article>
+            <article>
+              <span>Injection date</span>
+              <strong id="doseTrackerShotDate">—</strong>
+            </article>
+            <article>
+              <span>Cycle day</span>
+              <strong id="doseTrackerCycleDay">—</strong>
+            </article>
+            <article>
+              <span>Possible fade day</span>
+              <strong id="doseTrackerFadeDay">Not enough data</strong>
+            </article>
+          </div>
+
+          <div id="doseTrackerNoShot" class="dose-guidance">
+            Log “Injection taken today” above to begin a new seven-day tracking cycle.
+          </div>
+
+          <form id="doseEffectivenessForm" class="dose-checkin-form">
+            <input id="doseEffectivenessDate" type="hidden">
+
+            <label class="dose-slider-label">
+              <span><strong>Appetite control</strong><output id="doseAppetiteOutput">5 / 10</output></span>
+              <input id="doseAppetiteControl" type="range" min="0" max="10" step="1" value="5">
+              <small>0 = no appetite control · 10 = very strong appetite control</small>
+            </label>
+
+            <label class="dose-slider-label">
+              <span><strong>Craving control</strong><output id="doseCravingOutput">5 / 10</output></span>
+              <input id="doseCravingControl" type="range" min="0" max="10" step="1" value="5">
+              <small>0 = strong cravings · 10 = cravings very well controlled</small>
+            </label>
+
+            <label class="dose-slider-label">
+              <span><strong>Comfortable fullness</strong><output id="doseFullnessOutput">5 / 10</output></span>
+              <input id="doseFullnessControl" type="range" min="0" max="10" step="1" value="5">
+              <small>0 = not getting full easily · 10 = comfortably satisfied with small portions</small>
+            </label>
+
+            <label>Today’s observation
+              <textarea id="doseEffectivenessNotes" rows="3" placeholder="Example: Hunger returned before dinner, but portions were still smaller."></textarea>
+            </label>
+
+            <button class="primary-button" type="submit">Save effectiveness check-in</button>
+          </form>
+
+          <div class="dose-chart-heading">
+            <div>
+              <p class="eyebrow">This injection cycle</p>
+              <h3>Your seven-day pattern</h3>
+            </div>
+            <span id="doseTrackerAverage" class="date-chip">No check-ins</span>
+          </div>
+          <div id="doseEffectivenessChart" class="dose-effectiveness-chart"></div>
+          <p id="doseTrackerInsight" class="dose-insight">Add daily check-ins to identify your personal pattern.</p>
+
+          <details class="dose-method-note">
+            <summary>How the “possible fade day” is identified</summary>
+            <p>The app looks for the first day your average control score drops below 6 after an earlier check-in of 6 or higher. It is only a personal trend marker—not a measurement of medication remaining in your body and not a reason to change your dose or injection schedule.</p>
+          </details>
         </section>
 
         <section class="quote-card">
@@ -811,6 +889,68 @@
         <section class="panel"><div id="milestoneGrid" class="milestone-grid"></div></section>
       </section>
 
+
+      <section id="photosView" class="view">
+        <section class="view-hero photos-hero">
+          <p class="eyebrow light">My progress in pictures</p>
+          <h2>See the changes week by week.</h2>
+          <p>Keep your photos in Google Photos and your weekly details organized here.</p>
+        </section>
+
+        <section class="panel photo-album-panel">
+          <div class="panel-heading">
+            <div><p class="eyebrow">Google Photos album</p><h2>My Zepbound Journey</h2></div>
+            <span class="mini-icon">📸</span>
+          </div>
+          <p class="photo-help">Paste the private album link once. The app will remember it on this device.</p>
+          <div class="photo-album-controls">
+            <input id="photoAlbumUrl" type="url" placeholder="Paste your Google Photos album link">
+            <button id="savePhotoAlbumBtn" type="button" class="secondary-button">Save link</button>
+            <button id="openPhotoAlbumBtn" type="button" class="primary-button">Open album</button>
+          </div>
+          <small class="privacy-note">Your album stays private unless you change its sharing settings in Google Photos.</small>
+        </section>
+
+        <section class="panel">
+          <div class="panel-heading">
+            <div><p class="eyebrow">Weekly photo record</p><h2>Log this week's picture</h2></div>
+          </div>
+          <form id="photoWeekForm" class="photo-week-form">
+            <label>Week number<input id="photoWeek" type="number" min="1" max="104" required></label>
+            <label>Date<input id="photoDate" type="date" required></label>
+            <label>Weight<div class="input-with-unit"><input id="photoWeight" type="number" step="0.1" min="100" max="700"><span>lb</span></div></label>
+            <label>Dose<select id="photoDose"><option>2.5 mg</option><option>5 mg</option><option>7.5 mg</option><option>10 mg</option><option>12.5 mg</option><option>15 mg</option></select></label>
+            <label class="photo-notes-label">Notes<textarea id="photoNotes" rows="3" placeholder="How are you feeling? What changes do you notice?"></textarea></label>
+            <label class="toggle-row photo-confirm"><input id="photoAdded" type="checkbox"><span>Photo added to my Google Photos album</span></label>
+            <div class="button-group photo-form-actions">
+              <button type="submit" class="primary-button">Save week</button>
+              <button id="copyPhotoLabelBtn" type="button" class="secondary-button">Copy photo label</button>
+              <button id="clearPhotoFormBtn" type="button" class="secondary-button">Clear</button>
+            </div>
+          </form>
+        </section>
+
+        <section class="panel">
+          <div class="panel-heading"><div><p class="eyebrow">Weekly gallery</p><h2>Your photo timeline</h2></div></div>
+          <div id="photoWeekGrid" class="photo-week-grid"></div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-heading"><div><p class="eyebrow">Compare progress</p><h2>Choose two weeks</h2></div></div>
+          <div class="photo-compare-controls">
+            <label>Earlier week<select id="comparePhotoA"></select></label>
+            <label>Later week<select id="comparePhotoB"></select></label>
+          </div>
+          <div id="photoCompareResult" class="photo-compare-result"></div>
+        </section>
+
+        <section class="panel photo-guide-panel">
+          <div class="panel-heading"><div><p class="eyebrow">Consistent photo guide</p><h2>Use the same setup each week</h2></div></div>
+          <img src="photo-label-guide.png" alt="Weekly Zepbound progress photo label examples" class="photo-guide-image">
+          <p class="photo-help">Try to use the same location, lighting, distance, pose, and clothing for easier comparison.</p>
+        </section>
+      </section>
+
       <section id="progressView" class="view">
         <section class="view-hero progress-hero">
           <p class="eyebrow light">My progress</p>
@@ -848,7 +988,7 @@
         </section>
       </section>
       <section class="about-card">
-        <strong>My Zepbound Journey — Version 11 Smart Dining</strong>
+        <strong>My Zepbound Journey — Version 11.2 Progress Photos</strong>
         <span>Created by Kevin Wiltz</span>
         <small>One Day. One Choice. One Step at a Time.</small>
       </section>
@@ -862,6 +1002,7 @@
       <button class="nav-item" data-view="exerciseView"><span>🏋️</span><strong>Exercise</strong></button>
       <button class="nav-item" data-view="milestonesView"><span>🏆</span><strong>Wins</strong></button>
       <button class="nav-item" data-view="storyView"><span>🕰️</span><strong>Story</strong></button>
+      <button class="nav-item" data-view="photosView"><span>📸</span><strong>Photos</strong></button>
       <button class="nav-item" data-view="progressView"><span>📈</span><strong>Progress</strong></button>
     </nav>
   </div>
@@ -928,7 +1069,7 @@
     </form>
   </dialog>
 
-  <script src="app.js?v=11.0.0"></script>
+  <script src="app.js?v=11.2.0"></script>
   <script>
     if ("serviceWorker" in navigator) {
       window.addEventListener("load", () => navigator.serviceWorker.register("./sw.js"));

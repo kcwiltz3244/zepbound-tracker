@@ -1044,3 +1044,240 @@ function v11InitDining(){
   v11RenderDining();
 }
 v11InitDining();
+
+
+/* Version 11.1 — Personal dose-effectiveness tracker */
+const DOSE_EFFECTIVENESS_KEY="mzjV11DoseEffectiveness";
+let doseEffectivenessEntries=read(DOSE_EFFECTIVENESS_KEY,[]);
+
+function doseISODate(value){
+  const d=value?new Date(`${value}T12:00:00`):new Date();
+  return Number.isNaN(d.getTime())?new Date():d;
+}
+function doseDayDifference(start,end){
+  const a=doseISODate(start),b=doseISODate(end);
+  return Math.floor((b-a)/86400000);
+}
+function doseAverage(entry){
+  return ((Number(entry.appetite)||0)+(Number(entry.cravings)||0)+(Number(entry.fullness)||0))/3;
+}
+function doseFindShots(){
+  const shots=[];
+  (dailyEntries||[]).forEach(entry=>{
+    if(entry.shotTaken){
+      shots.push({date:entry.date,dose:entry.dose||"Dose not recorded"});
+    }
+  });
+  const dayOne=read("mzjV8DayOne",null);
+  if(dayOne?.begun&&dayOne?.date&&!shots.some(s=>s.date===dayOne.date)){
+    shots.push({date:dayOne.date,dose:dayOne.dose||"2.5 mg"});
+  }
+  return shots.sort((a,b)=>b.date.localeCompare(a.date));
+}
+function doseCurrentShot(onDate=todayString()){
+  return doseFindShots().find(shot=>shot.date<=onDate)||null;
+}
+function doseCycleEntries(shot){
+  if(!shot)return[];
+  return doseEffectivenessEntries
+    .filter(entry=>entry.shotDate===shot.date&&doseDayDifference(shot.date,entry.date)>=0&&doseDayDifference(shot.date,entry.date)<=6)
+    .sort((a,b)=>a.date.localeCompare(b.date));
+}
+function dosePossibleFadeDay(entries,shot){
+  let previouslyStrong=false;
+  for(const entry of entries){
+    const avg=doseAverage(entry);
+    if(avg>=6)previouslyStrong=true;
+    if(previouslyStrong&&avg<6){
+      return doseDayDifference(shot.date,entry.date)+1;
+    }
+  }
+  return null;
+}
+function doseUpdateOutputs(){
+  const pairs=[
+    ["doseAppetiteControl","doseAppetiteOutput"],
+    ["doseCravingControl","doseCravingOutput"],
+    ["doseFullnessControl","doseFullnessOutput"]
+  ];
+  pairs.forEach(([inputId,outputId])=>{
+    const input=document.getElementById(inputId),output=document.getElementById(outputId);
+    if(input&&output)output.textContent=`${input.value} / 10`;
+  });
+}
+function doseLoadTodayEntry(){
+  const shot=doseCurrentShot();
+  const today=todayString();
+  const existing=shot?doseEffectivenessEntries.find(e=>e.date===today&&e.shotDate===shot.date):null;
+  document.getElementById("doseEffectivenessDate").value=today;
+  document.getElementById("doseAppetiteControl").value=existing?.appetite??5;
+  document.getElementById("doseCravingControl").value=existing?.cravings??5;
+  document.getElementById("doseFullnessControl").value=existing?.fullness??5;
+  document.getElementById("doseEffectivenessNotes").value=existing?.notes??"";
+  doseUpdateOutputs();
+}
+function renderDoseEffectiveness(){
+  const panel=document.getElementById("doseEffectivenessPanel");
+  if(!panel)return;
+  const shot=doseCurrentShot();
+  const noShot=document.getElementById("doseTrackerNoShot");
+  const form=document.getElementById("doseEffectivenessForm");
+
+  if(!shot){
+    document.getElementById("doseTrackerCurrentDose").textContent="Not logged";
+    document.getElementById("doseTrackerShotDate").textContent="—";
+    document.getElementById("doseTrackerCycleDay").textContent="—";
+    document.getElementById("doseTrackerFadeDay").textContent="Not enough data";
+    noShot.classList.remove("hidden");
+    form.classList.add("dose-disabled");
+  }else{
+    const cycleDay=doseDayDifference(shot.date,todayString())+1;
+    document.getElementById("doseTrackerCurrentDose").textContent=shot.dose;
+    document.getElementById("doseTrackerShotDate").textContent=formatDate(shot.date);
+    document.getElementById("doseTrackerCycleDay").textContent=cycleDay>=1?`Day ${cycleDay}`:"Before injection";
+    noShot.classList.add("hidden");
+    form.classList.remove("dose-disabled");
+  }
+
+  const entries=doseCycleEntries(shot);
+  const fadeDay=shot?dosePossibleFadeDay(entries,shot):null;
+  document.getElementById("doseTrackerFadeDay").textContent=fadeDay?`Day ${fadeDay}`:"Not detected yet";
+
+  const chart=document.getElementById("doseEffectivenessChart");
+  const byDay=new Map(entries.map(e=>[doseDayDifference(shot.date,e.date)+1,e]));
+  chart.innerHTML=Array.from({length:7},(_,i)=>{
+    const day=i+1,entry=byDay.get(day),avg=entry?doseAverage(entry):null;
+    const height=avg===null?4:Math.max(8,avg*9);
+    const date=shot?new Date(doseISODate(shot.date).getTime()+i*86400000):null;
+    const dateLabel=date?date.toLocaleDateString(undefined,{weekday:"short"}):"";
+    return `<article class="dose-day ${fadeDay===day?"fade-day":""}">
+      <div class="dose-bar-shell"><div class="dose-bar ${avg===null?"empty":avg>=7?"strong":avg>=5?"moderate":"low"}" style="height:${height}%"></div></div>
+      <strong>Day ${day}</strong>
+      <span>${dateLabel}</span>
+      <small>${avg===null?"—":avg.toFixed(1)}</small>
+    </article>`;
+  }).join("");
+
+  if(entries.length){
+    const overall=entries.reduce((sum,e)=>sum+doseAverage(e),0)/entries.length;
+    document.getElementById("doseTrackerAverage").textContent=`Average ${overall.toFixed(1)} / 10`;
+    const first=doseAverage(entries[0]),last=doseAverage(entries[entries.length-1]);
+    let insight=`You have ${entries.length} check-in${entries.length===1?"":"s"} in this cycle.`;
+    if(entries.length>=2){
+      const change=last-first;
+      if(change<=-2) insight+=` Control is down ${Math.abs(change).toFixed(1)} points from your first check-in.`;
+      else if(change>=2) insight+=` Control is up ${change.toFixed(1)} points from your first check-in.`;
+      else insight+=" Your ratings are fairly steady so far.";
+    }
+    if(fadeDay) insight+=` Your first possible fade point appears on Day ${fadeDay}.`;
+    document.getElementById("doseTrackerInsight").textContent=insight;
+  }else{
+    document.getElementById("doseTrackerAverage").textContent="No check-ins";
+    document.getElementById("doseTrackerInsight").textContent="Add daily check-ins to identify your personal pattern.";
+  }
+  doseLoadTodayEntry();
+}
+function saveDoseEffectiveness(event){
+  event.preventDefault();
+  const shot=doseCurrentShot();
+  if(!shot){
+    alert("Please log an injection date first using “Injection taken today” in the daily check-in.");
+    return;
+  }
+  const date=todayString();
+  const entry={
+    id:`${shot.date}-${date}`,
+    shotDate:shot.date,
+    dose:shot.dose,
+    date,
+    appetite:Number(document.getElementById("doseAppetiteControl").value),
+    cravings:Number(document.getElementById("doseCravingControl").value),
+    fullness:Number(document.getElementById("doseFullnessControl").value),
+    notes:document.getElementById("doseEffectivenessNotes").value.trim(),
+    updatedAt:new Date().toISOString()
+  };
+  const index=doseEffectivenessEntries.findIndex(e=>e.shotDate===shot.date&&e.date===date);
+  if(index>=0)doseEffectivenessEntries[index]=entry;else doseEffectivenessEntries.push(entry);
+  write(DOSE_EFFECTIVENESS_KEY,doseEffectivenessEntries);
+  renderDoseEffectiveness();
+  const button=document.querySelector("#doseEffectivenessForm button[type='submit']");
+  if(button){const old=button.textContent;button.textContent="✓ Check-in saved";setTimeout(()=>button.textContent=old,1600)}
+}
+function initDoseEffectiveness(){
+  const form=document.getElementById("doseEffectivenessForm");
+  if(!form)return;
+  ["doseAppetiteControl","doseCravingControl","doseFullnessControl"].forEach(id=>{
+    document.getElementById(id).addEventListener("input",doseUpdateOutputs);
+  });
+  form.addEventListener("submit",saveDoseEffectiveness);
+  document.getElementById("dailyForm")?.addEventListener("submit",()=>setTimeout(renderDoseEffectiveness,0));
+  renderDoseEffectiveness();
+}
+initDoseEffectiveness();
+
+
+// Version 11.2 — Google Photos weekly progress log
+const PHOTO_PROGRESS_KEY="mzjV11PhotoProgress";
+const PHOTO_ALBUM_KEY="mzjV11PhotoAlbumUrl";
+let photoProgressEntries=read(PHOTO_PROGRESS_KEY,[]);
+function photoEntryLabel(entry){
+  return `WEEK ${entry.week}\n${formatDate(entry.date)}\n${entry.weight?entry.weight+" lbs":""}\nDose: ${entry.dose}${entry.notes?"\n"+entry.notes:""}`.trim();
+}
+function suggestedPhotoWeek(){
+  const s=settings();
+  const start=new Date((s.startDate||todayString())+"T00:00:00");
+  const now=new Date(todayString()+"T00:00:00");
+  return Math.max(1,Math.floor((now-start)/604800000)+1);
+}
+function openPhotoAlbum(){
+  const url=(document.getElementById("photoAlbumUrl")?.value||localStorage.getItem(PHOTO_ALBUM_KEY)||"").trim();
+  if(!url){alert("Paste and save your Google Photos album link first.");return;}
+  window.open(url,"_blank","noopener");
+}
+function loadPhotoEntry(week){
+  const e=photoProgressEntries.find(x=>Number(x.week)===Number(week));
+  if(!e)return;
+  photoWeek.value=e.week;photoDate.value=e.date;photoWeight.value=e.weight||"";photoDose.value=e.dose||"2.5 mg";photoNotes.value=e.notes||"";photoAdded.checked=!!e.added;
+  document.getElementById("photoWeekForm")?.scrollIntoView({behavior:"smooth",block:"start"});
+}
+function deletePhotoEntry(week){
+  if(!confirm(`Delete the Week ${week} record? This will not delete the photo from Google Photos.`))return;
+  photoProgressEntries=photoProgressEntries.filter(x=>Number(x.week)!==Number(week));
+  write(PHOTO_PROGRESS_KEY,photoProgressEntries);renderPhotoProgress();
+}
+function renderPhotoProgress(){
+  const grid=document.getElementById("photoWeekGrid");if(!grid)return;
+  photoProgressEntries.sort((a,b)=>Number(a.week)-Number(b.week));
+  grid.innerHTML=photoProgressEntries.length?photoProgressEntries.map(e=>`<article class="photo-week-card ${e.added?"photo-complete":""}">
+    <div class="photo-week-card-top"><span class="photo-week-badge">Week ${e.week}</span><span class="photo-status">${e.added?"✓ Photo added":"Photo pending"}</span></div>
+    <strong>${formatDate(e.date)}</strong>
+    <div class="photo-week-details"><span>⚖️ ${e.weight?esc(e.weight)+" lb":"No weight"}</span><span>💉 ${esc(e.dose||"—")}</span></div>
+    ${e.notes?`<p>${esc(e.notes)}</p>`:""}
+    <div class="photo-card-actions"><button type="button" class="secondary-button" onclick="loadPhotoEntry(${Number(e.week)})">Edit</button><button type="button" class="secondary-button" onclick="navigator.clipboard.writeText(photoEntryLabel(photoProgressEntries.find(x=>Number(x.week)===${Number(e.week)}))).then(()=>alert('Label copied.'))">Copy label</button><button type="button" class="danger-button" onclick="deletePhotoEntry(${Number(e.week)})">Delete</button></div>
+  </article>`).join(""):"<div class='photo-empty'><div>📷</div><strong>No weekly photos logged yet.</strong><p>Start with Week 1 and build your visual journey one picture at a time.</p></div>";
+  const a=document.getElementById("comparePhotoA"),b=document.getElementById("comparePhotoB");
+  const opts=photoProgressEntries.map(e=>`<option value="${e.week}">Week ${e.week}</option>`).join("");
+  if(a&&b){const av=a.value,bv=b.value;a.innerHTML=opts;b.innerHTML=opts;if(photoProgressEntries.length){a.value=photoProgressEntries.some(e=>String(e.week)===av)?av:String(photoProgressEntries[0].week);b.value=photoProgressEntries.some(e=>String(e.week)===bv)?bv:String(photoProgressEntries[photoProgressEntries.length-1].week);}renderPhotoComparison();}
+}
+function renderPhotoComparison(){
+  const out=document.getElementById("photoCompareResult");if(!out)return;
+  const a=photoProgressEntries.find(e=>String(e.week)===document.getElementById("comparePhotoA")?.value),b=photoProgressEntries.find(e=>String(e.week)===document.getElementById("comparePhotoB")?.value);
+  if(!a||!b){out.innerHTML="<p>Add at least one weekly record to compare.</p>";return;}
+  const change=(a.weight&&b.weight)?(Number(b.weight)-Number(a.weight)).toFixed(1):null;
+  out.innerHTML=`<article><span>Week ${a.week}</span><strong>${a.weight?a.weight+" lb":"—"}</strong><small>${formatDate(a.date)} • ${esc(a.dose)}</small><p>${esc(a.notes||"No notes")}</p></article><div class="compare-arrow">→</div><article><span>Week ${b.week}</span><strong>${b.weight?b.weight+" lb":"—"}</strong><small>${formatDate(b.date)} • ${esc(b.dose)}</small><p>${esc(b.notes||"No notes")}</p></article>${change!==null?`<div class="compare-change">Weight change: <strong>${Number(change)>0?"+":""}${change} lb</strong></div>`:""}`;
+}
+function initPhotoProgress(){
+  const form=document.getElementById("photoWeekForm");if(!form)return;
+  photoAlbumUrl.value=localStorage.getItem(PHOTO_ALBUM_KEY)||"";
+  photoWeek.value=suggestedPhotoWeek();photoDate.value=todayString();
+  const todayDaily=read(KEYS.daily,[]).find(x=>x.date===todayString());if(todayDaily?.dose)photoDose.value=todayDaily.dose;
+  const weights=read(KEYS.weights,[]);if(weights.length)photoWeight.value=weights[weights.length-1].weight||"";
+  savePhotoAlbumBtn.onclick=()=>{const u=photoAlbumUrl.value.trim();if(!u){alert("Paste your Google Photos album link first.");return;}localStorage.setItem(PHOTO_ALBUM_KEY,u);alert("Album link saved on this device.");};
+  openPhotoAlbumBtn.onclick=openPhotoAlbum;
+  form.addEventListener("submit",e=>{e.preventDefault();const entry={week:Number(photoWeek.value),date:photoDate.value,weight:photoWeight.value?Number(photoWeight.value):null,dose:photoDose.value,notes:photoNotes.value.trim(),added:photoAdded.checked,updatedAt:new Date().toISOString()};const i=photoProgressEntries.findIndex(x=>Number(x.week)===entry.week);if(i>=0)photoProgressEntries[i]=entry;else photoProgressEntries.push(entry);write(PHOTO_PROGRESS_KEY,photoProgressEntries);renderPhotoProgress();alert(`Week ${entry.week} saved.`);});
+  copyPhotoLabelBtn.onclick=()=>{const entry={week:Number(photoWeek.value||suggestedPhotoWeek()),date:photoDate.value||todayString(),weight:photoWeight.value,dose:photoDose.value,notes:photoNotes.value.trim()};navigator.clipboard.writeText(photoEntryLabel(entry)).then(()=>alert("Photo label copied. Paste it into Markup or your photo editor."));};
+  clearPhotoFormBtn.onclick=()=>{form.reset();photoWeek.value=suggestedPhotoWeek();photoDate.value=todayString();photoDose.value="2.5 mg";};
+  comparePhotoA.onchange=renderPhotoComparison;comparePhotoB.onchange=renderPhotoComparison;
+  renderPhotoProgress();
+}
+initPhotoProgress();

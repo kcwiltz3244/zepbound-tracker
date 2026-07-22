@@ -49,3 +49,10 @@ Commit the files, wait for deployment, then fully close and reopen the installed
 - Accepts Google Photos links copied with or without https://.
 - Validates and saves the album URL before opening it.
 - Uses a real web link for better reliability in installed phone apps.
+
+
+## Version 11.2.2
+- Replaced the album anchor with a true button to prevent accidental app navigation.
+- Opens the saved Google Photos album with JavaScript and a same-window fallback.
+- Detects incomplete Google Photos share URLs that are missing the required key.
+- Recommends copying the album address directly from the browser address bar.

@@ -1232,7 +1232,6 @@ function suggestedPhotoWeek(){
 function normalizePhotoAlbumUrl(value){
   let url=(value||"").trim();
   if(!url)return "";
-  // Links copied from Google Photos should begin with https://. Add it when omitted.
   if(!/^https?:\/\//i.test(url))url=`https://${url.replace(/^\/+/,"")}`;
   try{
     const parsed=new URL(url);
@@ -1241,26 +1240,36 @@ function normalizePhotoAlbumUrl(value){
     return parsed.href;
   }catch{return "";}
 }
-function updatePhotoAlbumLink(){
-  const link=document.getElementById("openPhotoAlbumBtn");
-  const input=document.getElementById("photoAlbumUrl");
-  if(!link||!input)return;
-  const url=normalizePhotoAlbumUrl(input.value||localStorage.getItem(PHOTO_ALBUM_KEY)||"");
-  link.href=url||"#";
-  link.setAttribute("aria-disabled",url?"false":"true");
+function photoAlbumLinkProblem(url){
+  try{
+    const parsed=new URL(url);
+    if(parsed.hostname==="photos.google.com" && parsed.pathname.startsWith("/share/") && !parsed.searchParams.get("key")){
+      return "That Google Photos share address is incomplete. Open the album itself and copy the full address from the browser address bar, or create a share link that includes the complete key.";
+    }
+  }catch{}
+  return "";
 }
-function openPhotoAlbum(event){
+function updatePhotoAlbumLink(){
+  const button=document.getElementById("openPhotoAlbumBtn");
+  const input=document.getElementById("photoAlbumUrl");
+  if(!button||!input)return;
+  const url=normalizePhotoAlbumUrl(input.value||localStorage.getItem(PHOTO_ALBUM_KEY)||"");
+  button.disabled=!url;
+  button.setAttribute("aria-disabled",url?"false":"true");
+}
+function openPhotoAlbum(){
   const input=document.getElementById("photoAlbumUrl");
   const url=normalizePhotoAlbumUrl(input?.value||localStorage.getItem(PHOTO_ALBUM_KEY)||"");
   if(!url){
-    event?.preventDefault();
-    alert("Paste a valid Google Photos album link, then tap Save link.");
+    alert("Paste a valid Google Photos album address, then tap Save link.");
     return;
   }
+  const problem=photoAlbumLinkProblem(url);
+  if(problem){alert(problem);return;}
   if(input)input.value=url;
   localStorage.setItem(PHOTO_ALBUM_KEY,url);
-  const link=document.getElementById("openPhotoAlbumBtn");
-  if(link)link.href=url;
+  const opened=window.open(url,"_blank","noopener,noreferrer");
+  if(!opened)window.location.assign(url);
 }
 function loadPhotoEntry(week){
   const e=photoProgressEntries.find(x=>Number(x.week)===Number(week));
@@ -1302,7 +1311,9 @@ function initPhotoProgress(){
   const weights=read(KEYS.weights,[]);if(weights.length)photoWeight.value=weights[weights.length-1].weight||"";
   savePhotoAlbumBtn.onclick=()=>{
     const u=normalizePhotoAlbumUrl(photoAlbumUrl.value);
-    if(!u){alert("That does not look like a Google Photos album link. Open the album in Google Photos, choose Share, and copy the link.");return;}
+    if(!u){alert("That does not look like a Google Photos album address. Open the album and copy the full address from the browser address bar.");return;}
+    const problem=photoAlbumLinkProblem(u);
+    if(problem){alert(problem);return;}
     photoAlbumUrl.value=u;
     localStorage.setItem(PHOTO_ALBUM_KEY,u);
     updatePhotoAlbumLink();

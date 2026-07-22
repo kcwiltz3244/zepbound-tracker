@@ -51,8 +51,11 @@ Commit the files, wait for deployment, then fully close and reopen the installed
 - Uses a real web link for better reliability in installed phone apps.
 
 
-## Version 11.2.2
+## Version 11.2.3
 - Replaced the album anchor with a true button to prevent accidental app navigation.
 - Opens the saved Google Photos album with JavaScript and a same-window fallback.
 - Detects incomplete Google Photos share URLs that are missing the required key.
 - Recommends copying the album address directly from the browser address bar.
+
+
+Version 11.2.3 changes the Open album control to a standard browser hyperlink so Google Photos receives the exact saved share URL.

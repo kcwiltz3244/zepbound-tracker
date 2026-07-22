@@ -1250,26 +1250,30 @@ function photoAlbumLinkProblem(url){
   return "";
 }
 function updatePhotoAlbumLink(){
-  const button=document.getElementById("openPhotoAlbumBtn");
+  const link=document.getElementById("openPhotoAlbumBtn");
   const input=document.getElementById("photoAlbumUrl");
-  if(!button||!input)return;
+  if(!link||!input)return;
   const url=normalizePhotoAlbumUrl(input.value||localStorage.getItem(PHOTO_ALBUM_KEY)||"");
-  button.disabled=!url;
-  button.setAttribute("aria-disabled",url?"false":"true");
+  link.href=url||"#";
+  link.setAttribute("aria-disabled",url?"false":"true");
+  link.classList.toggle("disabled",!url);
 }
-function openPhotoAlbum(){
+function openPhotoAlbum(event){
   const input=document.getElementById("photoAlbumUrl");
   const url=normalizePhotoAlbumUrl(input?.value||localStorage.getItem(PHOTO_ALBUM_KEY)||"");
   if(!url){
-    alert("Paste a valid Google Photos album address, then tap Save link.");
+    event.preventDefault();
+    alert("Paste a valid Google Photos album link, then tap Save link.");
     return;
   }
   const problem=photoAlbumLinkProblem(url);
-  if(problem){alert(problem);return;}
+  if(problem){event.preventDefault();alert(problem);return;}
   if(input)input.value=url;
   localStorage.setItem(PHOTO_ALBUM_KEY,url);
-  const opened=window.open(url,"_blank","noopener,noreferrer");
-  if(!opened)window.location.assign(url);
+  const link=document.getElementById("openPhotoAlbumBtn");
+  if(link)link.href=url;
+  // Do not call window.open here. Let the browser follow the real hyperlink
+  // from the user's click so Google Photos receives the exact saved URL.
 }
 function loadPhotoEntry(week){
   const e=photoProgressEntries.find(x=>Number(x.week)===Number(week));

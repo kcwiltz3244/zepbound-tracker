@@ -5,9 +5,9 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <meta content="#2563eb" name="theme-color"/>
-<title>My Zepbound Journey — Version 12.0.2</title>
+<title>My Zepbound Journey — Version 12.2</title>
 <link href="manifest.json" rel="manifest"/>
-<link href="styles.css?v=12.0.2" rel="stylesheet"/>
+<link href="styles.css?v=12.2" rel="stylesheet"/>
 </head>
 <body>
 <section class="day-one-overlay hidden" id="dayOneOverlay">
@@ -855,7 +855,7 @@
 </section>
 </section>
 <section class="about-card">
-<strong>My Zepbound Journey — Version 12.1</strong>
+<strong>My Zepbound Journey — Version 12.2</strong>
 <span>Created by Kevin Wiltz</span>
 <small>One Day. One Choice. One Step at a Time.</small>
 </section>
@@ -971,16 +971,15 @@
       var more = document.getElementById("moreMenuDialog");
       if (more && more.open) more.close();
 
-      var navButton = document.querySelector('.nav-item[data-view="' + viewId + '"]');
-      if (navButton) {
-        navButton.click();
-      } else {
-        document.querySelectorAll('.nav-item').forEach(function(btn) { btn.classList.remove('active'); });
-        document.querySelectorAll('.view').forEach(function(view) { view.classList.remove('active'); });
-        var requestedView = document.getElementById(viewId);
-        if (requestedView) requestedView.classList.add('active');
-        window.scrollTo(0, 0);
+      if (typeof window.mzjNavigate === "function") {
+        window.mzjNavigate(viewId, { targetId: targetId });
+        return;
       }
+      document.querySelectorAll('.nav-item').forEach(function(btn) { btn.classList.remove('active'); });
+      document.querySelectorAll('.view').forEach(function(view) { view.classList.remove('active'); });
+      var requestedView = document.getElementById(viewId);
+      if (requestedView) requestedView.classList.add('active');
+      window.scrollTo(0, 0);
 
       window.setTimeout(function() {
         var target = document.getElementById(targetId);
@@ -1023,8 +1022,7 @@
 <script>
 (function(){
   function openHome(){
-    var homeButton=document.querySelector('.bottom-nav .nav-item[data-view="homeView"]');
-    if(homeButton){ homeButton.click(); return; }
+    if(typeof window.mzjNavigate === "function"){ window.mzjNavigate("homeView"); return; }
     document.querySelectorAll('.view').forEach(function(v){v.classList.remove('active')});
     document.getElementById('homeView')?.classList.add('active');
     window.scrollTo(0,0);
@@ -1051,7 +1049,7 @@
   });
 })();
 </script>
-<script src="app.js?v=12.1.1"></script>
+<script src="app.js?v=12.2"></script>
 <script>
     if ("serviceWorker" in navigator) {
       window.addEventListener("load", () => navigator.serviceWorker.register("./sw.js"));

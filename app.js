@@ -15,25 +15,9 @@ function settings(){return {...defaults,...read(KEYS.settings,{})}}
 function esc(v=""){return String(v).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;")}
 function dl(name,rows){const csv=rows.map(r=>r.map(v=>`"${String(v??"").replaceAll('"','""')}"`).join(",")).join("\n"),b=new Blob([csv],{type:"text/csv"}),u=URL.createObjectURL(b),a=document.createElement("a");a.href=u;a.download=name;a.click();URL.revokeObjectURL(u)}
 function pct(v,g){return Math.max(0,Math.min(100,g?(Number(v)/Number(g))*100:0))}
-function setGreeting(){const h=new Date().getHours(),w=h<12?"Good morning":h<18?"Good afternoon":"Good evening",s=settings();const greetingEl=document.getElementById("greeting");if(greetingEl)greetingEl.textContent=`${w}, ${s.name}`;const todayEl=document.getElementById("todayLabel");if(todayEl)todayEl.textContent=new Date().toLocaleDateString(undefined,{weekday:"short",month:"short",day:"numeric"});const start=new Date(s.startDate+"T00:00:00"),daysSince=Math.max(0,Math.floor((new Date()-start)/86400000));const weekEl=document.getElementById("journeyWeek");if(weekEl)weekEl.textContent=Math.floor(daysSince/7)+1}
+function setGreeting(){const h=new Date().getHours(),w=h<12?"Good morning":h<18?"Good afternoon":"Good evening",s=settings();document.getElementById("greeting").textContent=`${w}, ${s.name}`;document.getElementById("todayLabel").textContent=new Date().toLocaleDateString(undefined,{weekday:"short",month:"short",day:"numeric"});const start=new Date(s.startDate+"T00:00:00"),daysSince=Math.max(0,Math.floor((new Date()-start)/86400000));document.getElementById("journeyWeek").textContent=Math.floor(daysSince/7)+1}
 function loadToday(){const d=read(KEYS.daily,[]).find(x=>x.date===todayString());if(!d)return;["water","protein","movement","sleep","mood","energy","appetite","dose"].forEach(id=>{if(document.getElementById(id)&&d[id]!==undefined)document.getElementById(id).value=d[id]});document.getElementById("shotTaken").checked=!!d.shotTaken}
-function renderToday(){
-  const s=settings(),d=read(KEYS.daily,[]).find(x=>x.date===todayString())||{};
-  const setText=(id,value)=>{const el=document.getElementById(id);if(el)el.textContent=value;};
-  const setWidth=(id,value)=>{const el=document.getElementById(id);if(el)el.style.width=value;};
-  setText("waterValue",`${d.water||0} / ${s.waterGoal} oz`);
-  setText("proteinValue",`${d.protein||0} / ${s.proteinGoal} g`);
-  setText("movementValue",`${d.movement||0} / ${s.movementGoal} min`);
-  setText("sleepValue",`${d.sleep||0} / ${s.sleepGoal} hr`);
-  setText("shotValue",d.shotTaken?"Complete":"Not logged");
-  const doseField=document.getElementById("dose");
-  setText("currentDose",d.dose||doseField?.value||"2.5 mg");
-  setWidth("waterMeter",`${pct(d.water,s.waterGoal)}%`);
-  setWidth("proteinMeter",`${pct(d.protein,s.proteinGoal)}%`);
-  setWidth("movementMeter",`${pct(d.movement,s.movementGoal)}%`);
-  setWidth("sleepMeter",`${pct(d.sleep,s.sleepGoal)}%`);
-  setWidth("shotMeter",d.shotTaken?"100%":"0%");
-}
+function renderToday(){const s=settings(),d=read(KEYS.daily,[]).find(x=>x.date===todayString())||{};waterValue.textContent=`${d.water||0} / ${s.waterGoal} oz`;proteinValue.textContent=`${d.protein||0} / ${s.proteinGoal} g`;movementValue.textContent=`${d.movement||0} / ${s.movementGoal} min`;sleepValue.textContent=`${d.sleep||0} / ${s.sleepGoal} hr`;shotValue.textContent=d.shotTaken?"Complete":"Not logged";currentDose.textContent=d.dose||dose.value||"2.5 mg";waterMeter.style.width=`${pct(d.water,s.waterGoal)}%`;proteinMeter.style.width=`${pct(d.protein,s.proteinGoal)}%`;movementMeter.style.width=`${pct(d.movement,s.movementGoal)}%`;sleepMeter.style.width=`${pct(d.sleep,s.sleepGoal)}%`;shotMeter.style.width=d.shotTaken?"100%":"0%"}
 dailyForm.addEventListener("submit",e=>{e.preventDefault();const entry={date:todayString(),water:+water.value||0,protein:+protein.value||0,movement:+movement.value||0,sleep:+sleep.value||0,mood:mood.value,energy:energy.value,appetite:appetite.value,shotTaken:shotTaken.checked,dose:dose.value};const arr=read(KEYS.daily,[]),i=arr.findIndex(x=>x.date===entry.date);i>=0?arr[i]=entry:arr.push(entry);arr.sort((a,b)=>new Date(a.date)-new Date(b.date));write(KEYS.daily,arr);renderAll();renderMilestones();alert("Today was saved.")});
 let selectedWins=new Set();document.querySelectorAll("[data-win]").forEach(b=>b.onclick=()=>{selectedWins.has(b.dataset.win)?(selectedWins.delete(b.dataset.win),b.classList.remove("selected")):(selectedWins.add(b.dataset.win),b.classList.add("selected"))});
 saveWinBtn.onclick=()=>{const custom=customWin.value.trim(),arr=read(KEYS.wins,[]);let today=arr.find(x=>x.date===todayString());if(!today){today={date:todayString(),wins:[]};arr.push(today)}today.wins=[...new Set([...today.wins,...selectedWins,...(custom?[custom]:[])])];write(KEYS.wins,arr);selectedWins.clear();document.querySelectorAll("[data-win]").forEach(b=>b.classList.remove("selected"));customWin.value="";renderWins()};
@@ -156,16 +140,7 @@ exportDataBtn.onclick=()=>{const d=read(KEYS.daily,[]);dl("my-zepbound-journey-d
 weightDate.value=todayString();weightForm.addEventListener("submit",e=>{e.preventDefault();const date=weightDate.value,w=+weight.value;if(!date||!w)return;const arr=read(KEYS.weights,[]);arr.push({date,weight:w});arr.sort((a,b)=>new Date(a.date)-new Date(b.date));write(KEYS.weights,arr);weight.value="";renderProgress()})
 function renderProgress(){const s=settings(),arr=read(KEYS.weights,[]);startWeight.textContent=`${(+s.startingWeight).toFixed(1)} lb`;if(!arr.length){currentWeight.textContent="—";weightChange.textContent="—";drawChart([]);return}const c=arr.at(-1).weight,ch=s.startingWeight-c;currentWeight.textContent=`${c.toFixed(1)} lb`;weightChange.textContent=ch>=0?`${ch.toFixed(1)} lb down`:`${Math.abs(ch).toFixed(1)} lb up`;drawChart(arr)}
 function drawChart(arr){const c=weightChart,x=c.getContext("2d"),w=c.width,h=c.height;x.clearRect(0,0,w,h);x.fillStyle="#fff";x.fillRect(0,0,w,h);if(!arr.length){x.fillStyle="#6b7280";x.font="20px system-ui";x.textAlign="center";x.fillText("Add a weight entry whenever you are ready.",w/2,h/2);return}const p={l:60,r:30,t:25,b:50},v=arr.map(a=>a.weight);let mn=Math.min(...v)-3,mx=Math.max(...v)+3;const X=i=>p.l+(arr.length===1?(w-p.l-p.r)/2:i*(w-p.l-p.r)/(arr.length-1)),Y=n=>p.t+(mx-n)*(h-p.t-p.b)/(mx-mn);x.strokeStyle="#e6ebf3";for(let i=0;i<=4;i++){const py=p.t+i*(h-p.t-p.b)/4;x.beginPath();x.moveTo(p.l,py);x.lineTo(w-p.r,py);x.stroke()}const g=x.createLinearGradient(0,0,w,0);g.addColorStop(0,"#2563eb");g.addColorStop(1,"#8b5cf6");x.strokeStyle=g;x.lineWidth=5;x.beginPath();arr.forEach((a,i)=>i?x.lineTo(X(i),Y(a.weight)):x.moveTo(X(i),Y(a.weight)));x.stroke()}
-document.querySelectorAll(".nav-item").forEach(b=>b.onclick=()=>{
-  document.querySelectorAll(".nav-item").forEach(x=>x.classList.remove("active"));
-  document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"));
-  b.classList.add("active");
-  const view=document.getElementById(b.dataset.view);
-  if(view)view.classList.add("active");
-  scrollTo({top:0,behavior:"smooth"});
-  const targetId=b.dataset.target;
-  if(targetId)setTimeout(()=>document.getElementById(targetId)?.scrollIntoView({behavior:"smooth",block:"start"}),220);
-})
+document.querySelectorAll(".nav-item").forEach(b=>b.onclick=()=>{document.querySelectorAll(".nav-item").forEach(x=>x.classList.remove("active"));document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"));b.classList.add("active");document.getElementById(b.dataset.view).classList.add("active");scrollTo({top:0,behavior:"smooth"})})
 settingsBtn.onclick=()=>{const s=settings();settingName.value=s.name;settingStartDate.value=s.startDate;settingStartWeight.value=s.startingWeight;settingWaterGoal.value=s.waterGoal;settingProteinGoal.value=s.proteinGoal;settingMovementGoal.value=s.movementGoal;settingSleepGoal.value=s.sleepGoal;settingsDialog.showModal()}
 saveSettingsBtn.onclick=()=>{write(KEYS.settings,{name:settingName.value.trim()||"Kevin Wiltz",startDate:settingStartDate.value||todayString(),startingWeight:+settingStartWeight.value||328,waterGoal:+settingWaterGoal.value||80,proteinGoal:+settingProteinGoal.value||100,movementGoal:+settingMovementGoal.value||30,sleepGoal:+settingSleepGoal.value||8});settingsDialog.close();renderAll()}
 function renderAll(){setGreeting();renderToday();renderWins();renderMeals();renderJournal();renderStory();renderProgress()}
@@ -422,8 +397,8 @@ function initNutrition(){
     const field=document.getElementById(id);
     ["input","change","keyup","blur"].forEach(eventName=>field.addEventListener(eventName,nutritionPreview));
   });
-  document.getElementById("nutritionFoodForm")?.addEventListener("input",nutritionPreview);
-  document.getElementById("nutritionFoodForm")?.addEventListener("change",nutritionPreview);
+  document.getElementById("nutritionFoodForm").addEventListener("input",nutritionPreview);
+  document.getElementById("nutritionFoodForm").addEventListener("change",nutritionPreview);
   document.getElementById("nutritionAmount").addEventListener("keydown",event=>{
     if(event.key==="Enter"){
       event.preventDefault();
@@ -431,7 +406,7 @@ function initNutrition(){
       document.getElementById("nutritionFoodForm").requestSubmit();
     }
   });
-  document.getElementById("nutritionFoodForm")?.addEventListener("submit",e=>{
+  document.getElementById("nutritionFoodForm").addEventListener("submit",e=>{
     e.preventDefault();
     const amount=Number(document.getElementById("nutritionAmount").value)||1;
     const servingAmount=Number(document.getElementById("nutritionServingAmount").value)||1;
@@ -446,7 +421,7 @@ function initNutrition(){
     renderNutrition();
     nutritionPreview()
   });
-  document.getElementById("nutritionClearDayBtn")?.addEventListener("click",()=>{const d=nutritionSelectedDate();if(confirm(`Clear all food logged for ${d}?`)){nutritionEntries=nutritionEntries.filter(e=>e.date!==d);saveNutrition()}});
+  document.getElementById("nutritionClearDayBtn").addEventListener("click",()=>{const d=nutritionSelectedDate();if(confirm(`Clear all food logged for ${d}?`)){nutritionEntries=nutritionEntries.filter(e=>e.date!==d);saveNutrition()}});
   document.getElementById("nutritionCopyProteinBtn").addEventListener("click",()=>{const total=nutritionRound(nutritionTotals().protein);document.getElementById("protein").value=total;quickCheckMessage.textContent=`Nutrition total copied: ${total} g protein. Save today when finished.`;document.querySelector('[data-view="homeView"]').click();setTimeout(()=>document.getElementById("protein").scrollIntoView({behavior:"smooth",block:"center"}),200)});
   renderNutritionSearch();renderNutrition();nutritionPreview()
 }
@@ -576,40 +551,43 @@ function renderGrocery(){
   }))
 }
 function renderHomeNutrition(){
+  if(!document.getElementById("homeCalories"))return;
   const totals=totalsForDate(todayString());
   const meals=new Set(nutritionTodayEntries().map(e=>e.mealType)).size;
-  const setText=(id,value)=>{const el=document.getElementById(id);if(el)el.textContent=value;};
-  const setWidth=(id,value)=>{const el=document.getElementById(id);if(el)el.style.width=value;};
-  setText("homeCalories",Math.round(totals.calories).toLocaleString());
-  setText("homeProtein",`${nutritionRound(totals.protein)} g`);
-  setText("homeFiber",`${nutritionRound(totals.fiber)} g`);
-  setText("homeMealsLogged",meals);
-  setText("homeCaloriesGoal",`of ${nutritionGoals.calories.toLocaleString()}`);
-  setText("homeProteinGoal",`of ${nutritionGoals.protein} g`);
-  setText("homeFiberGoal",`of ${nutritionGoals.fiber} g`);
-  setWidth("homeCaloriesMeter",`${clampPercent(totals.calories,nutritionGoals.calories)}%`);
-  setWidth("homeProteinMeter",`${clampPercent(totals.protein,nutritionGoals.protein)}%`);
-  setWidth("homeFiberMeter",`${clampPercent(totals.fiber,nutritionGoals.fiber)}%`);
-  setWidth("homeMealsMeter",`${Math.min(100,meals/3*100)}%`);
+  document.getElementById("homeCalories").textContent=Math.round(totals.calories).toLocaleString();
+  document.getElementById("homeProtein").textContent=`${nutritionRound(totals.protein)} g`;
+  document.getElementById("homeFiber").textContent=`${nutritionRound(totals.fiber)} g`;
+  document.getElementById("homeMealsLogged").textContent=meals;
+  document.getElementById("homeCaloriesGoal").textContent=`of ${nutritionGoals.calories.toLocaleString()}`;
+  document.getElementById("homeProteinGoal").textContent=`of ${nutritionGoals.protein} g`;
+  document.getElementById("homeFiberGoal").textContent=`of ${nutritionGoals.fiber} g`;
+  document.getElementById("homeCaloriesMeter").style.width=`${clampPercent(totals.calories,nutritionGoals.calories)}%`;
+  document.getElementById("homeProteinMeter").style.width=`${clampPercent(totals.protein,nutritionGoals.protein)}%`;
+  document.getElementById("homeFiberMeter").style.width=`${clampPercent(totals.fiber,nutritionGoals.fiber)}%`;
+  document.getElementById("homeMealsMeter").style.width=`${Math.min(100,meals/3*100)}%`;
+
   const proteinRemaining=Math.max(0,nutritionGoals.protein-totals.protein);
   let title="Your next good choice",message="Log your first meal when you are ready.";
-  if(totals.protein>=nutritionGoals.protein){title="Protein goal reached";message="You reached today’s protein target. Nice work."}
-  else if(totals.calories>0&&proteinRemaining>30){title="Protein can lead the next meal";message=`About ${nutritionRound(proteinRemaining)} g remains toward today’s protein goal.`}
-  else if(totals.calories>0){title="You are building a solid day";message=`You are within ${nutritionRound(proteinRemaining)} g of your protein goal. Keep going one choice at a time.`}
-  setText("dailyCoachTitle",title);setText("dailyCoachMessage",message);
+  if(meals===0){message="Nothing is logged yet. Start with what you actually ate—there is no need to make the day look perfect."}
+  else if(proteinRemaining>35){title="Protein needs attention";message=`You have ${nutritionRound(proteinRemaining)} g left to reach your protein target. A protein-rich meal or snack can help.`}
+  else if(totals.fiber<nutritionGoals.fiber*.5&&meals>=2){title="A little more fiber may help";message="Fruit, vegetables, beans, or oatmeal could gently raise today’s fiber."}
+  else if(proteinRemaining<=0){title="Protein goal reached";message="You reached your protein target. Keep the rest of the day comfortable, hydrated, and balanced."}
+  else{title="You are building a solid day";message=`You are within ${nutritionRound(proteinRemaining)} g of your protein goal. Keep going one choice at a time.`}
+  document.getElementById("dailyCoachTitle").textContent=title;
+  document.getElementById("dailyCoachMessage").textContent=message
 }
 function renderNutritionCoach(){
   renderGoalProgress();renderMealTotals();renderRecentFoods();renderFavorites();renderProteinCoach();renderWeeklyNutrition();renderGrocery();renderHomeNutrition()
 }
 function initNutritionCoach(){
   const goalsDialog=document.getElementById("nutritionGoalsDialog");
-  document.getElementById("nutritionGoalSettingsBtn")?.addEventListener("click",()=>{
+  document.getElementById("nutritionGoalSettingsBtn").addEventListener("click",()=>{
     document.getElementById("goalCaloriesInput").value=nutritionGoals.calories;
     document.getElementById("goalProteinInput").value=nutritionGoals.protein;
     document.getElementById("goalFiberInput").value=nutritionGoals.fiber;
     goalsDialog.showModal()
   });
-  document.getElementById("saveNutritionGoalsBtn")?.addEventListener("click",()=>{
+  document.getElementById("saveNutritionGoalsBtn").addEventListener("click",()=>{
     nutritionGoals={
       calories:Number(document.getElementById("goalCaloriesInput").value)||1900,
       protein:Number(document.getElementById("goalProteinInput").value)||130,
@@ -617,17 +595,17 @@ function initNutritionCoach(){
     };
     write(NUTRITION_GOALS_KEY,nutritionGoals);goalsDialog.close();renderNutritionCoach()
   });
-  document.getElementById("groceryForm")?.addEventListener("submit",e=>{
+  document.getElementById("groceryForm").addEventListener("submit",e=>{
     e.preventDefault();const input=document.getElementById("groceryInput");const text=input.value.trim();
     if(text){groceryItems.push({text,checked:false});write(GROCERY_KEY,groceryItems);input.value="";renderGrocery()}
   });
-  document.getElementById("clearGroceryBtn")?.addEventListener("click",()=>{
+  document.getElementById("clearGroceryBtn").addEventListener("click",()=>{
     groceryItems=groceryItems.filter(i=>!i.checked);write(GROCERY_KEY,groceryItems);renderGrocery()
   });
-  document.getElementById("openNutritionBtn")?.addEventListener("click",()=>document.querySelector('[data-view="mealsView"]').click());
-  document.getElementById("nutritionDate")?.addEventListener("change",renderNutritionCoach);
-  document.getElementById("nutritionFoodForm")?.addEventListener("submit",()=>setTimeout(renderNutritionCoach,0));
-  document.getElementById("nutritionClearDayBtn")?.addEventListener("click",()=>setTimeout(renderNutritionCoach,0));
+  document.getElementById("openNutritionBtn").addEventListener("click",()=>document.querySelector('[data-view="mealsView"]').click());
+  document.getElementById("nutritionDate").addEventListener("change",renderNutritionCoach);
+  document.getElementById("nutritionFoodForm").addEventListener("submit",()=>setTimeout(renderNutritionCoach,0));
+  document.getElementById("nutritionClearDayBtn").addEventListener("click",()=>setTimeout(renderNutritionCoach,0));
   renderNutritionCoach()
 }
 initNutritionCoach();
@@ -692,7 +670,7 @@ function initAutomaticFoodMatching(){
   input.addEventListener("blur",()=>autoMatchTypedFood(true));
   input.addEventListener("keydown",event=>{if(event.key==="Enter"||event.key==="Tab")autoMatchTypedFood(true)});
   ["nutritionAmount","nutritionUnit","nutritionMealType"].forEach(id=>document.getElementById(id)?.addEventListener("focus",()=>autoMatchTypedFood(true)));
-  document.getElementById("nutritionFoodForm")?.addEventListener("submit",event=>{
+  document.getElementById("nutritionFoodForm").addEventListener("submit",event=>{
     const nutrientTotal=nutritionNutrients.reduce((sum,key)=>sum+(Number(document.getElementById("nutrition"+key[0].toUpperCase()+key.slice(1))?.value)||0),0);
     if(nutrientTotal===0&&input.value.trim()){const matched=autoMatchTypedFood(true);if(matched){event.preventDefault();setTimeout(()=>document.getElementById("nutritionFoodForm").requestSubmit(),0)}}
   },true)
@@ -1055,17 +1033,17 @@ function v11InitDining(){
     document.querySelectorAll("[data-dining-filter]").forEach(x=>x.classList.toggle("active",x===btn));
     v11RenderDining();
   }));
-  document.getElementById("diningSearchInput")?.addEventListener("input",v11RenderDining);
-  document.getElementById("clearDiningSearchBtn")?.addEventListener("click",()=>{
+  document.getElementById("diningSearchInput").addEventListener("input",v11RenderDining);
+  document.getElementById("clearDiningSearchBtn").addEventListener("click",()=>{
     document.getElementById("diningSearchInput").value="";
     v11DiningRestaurant="All";v11DiningFilter="all";
     chips.querySelectorAll(".restaurant-chip").forEach((x,i)=>x.classList.toggle("active",i===0));
     document.querySelectorAll("[data-dining-filter]").forEach(x=>x.classList.toggle("active",x.dataset.diningFilter==="all"));
     v11RenderDining();
   });
-  document.getElementById("diningOpenNutritionBtn")?.addEventListener("click",()=>document.querySelector('[data-view="mealsView"]').click());
-  document.getElementById("homeDiningShortcut")?.addEventListener("click",()=>document.querySelector('[data-view="diningView"]').click());
-  document.querySelector('[data-view="diningView"]')?.addEventListener("click",()=>setTimeout(v11RenderDining,0));
+  document.getElementById("diningOpenNutritionBtn").addEventListener("click",()=>document.querySelector('[data-view="mealsView"]').click());
+  document.getElementById("homeDiningShortcut").addEventListener("click",()=>document.querySelector('[data-view="diningView"]').click());
+  document.querySelector('[data-view="diningView"]').addEventListener("click",()=>setTimeout(v11RenderDining,0));
   v11RenderDining();
 }
 v11InitDining();
@@ -1088,7 +1066,7 @@ function doseAverage(entry){
 }
 function doseFindShots(){
   const shots=[];
-  read(KEYS.daily,[]).forEach(entry=>{
+  (dailyEntries||[]).forEach(entry=>{
     if(entry.shotTaken){
       shots.push({date:entry.date,dose:entry.dose||"Dose not recorded"});
     }
@@ -1605,51 +1583,7 @@ initPhotoProgress();
     document.getElementById('moreNavBtn')?.addEventListener('click',()=>more?.showModal());
     document.getElementById('closeMoreMenuBtn')?.addEventListener('click',()=>more?.close());
     document.querySelectorAll('[data-v12-view]').forEach(btn=>btn.addEventListener('click',()=>{more?.close();openView(btn.dataset.v12View);}));
-
-    // Version 12.0.1: make the four dashboard shortcuts direct and reliable.
-    // Each shortcut opens the correct page and then moves the user to the useful control.
-    const openAndFocus=(viewId,targetId)=>{
-      more?.close();
-      openView(viewId);
-      window.setTimeout(()=>{
-        const target=document.getElementById(targetId);
-        if(target){target.scrollIntoView({behavior:'smooth',block:'start'});}
-      },180);
-    };
-    document.getElementById('v12LogFoodBtn')?.addEventListener('click',()=>openAndFocus('mealsView','nutritionLogForm'));
-    document.getElementById('v12WeighInBtn')?.addEventListener('click',()=>openAndFocus('progressView','weightForm'));
-    document.getElementById('v12WeeklyPhotoBtn')?.addEventListener('click',()=>openAndFocus('photosView','photoFileInput'));
-    document.getElementById('v12ExerciseBtn')?.addEventListener('click',()=>openAndFocus('exerciseView','exerciseRows'));
-
     document.getElementById('v12SettingsBtn')?.addEventListener('click',()=>{more?.close();document.getElementById('settingsBtn')?.click();});
     refreshSnapshot();setTimeout(refreshSnapshot,400);setInterval(refreshSnapshot,1500);
-  });
-})();
-
-
-/* Version 12.1.1 — repair initialization chain and add direct injection logging */
-(function initDoseInjectionEntry(){
-  const form=document.getElementById("doseInjectionForm");
-  if(!form)return;
-  const dateInput=document.getElementById("doseInjectionDate");
-  const doseInput=document.getElementById("doseInjectionDose");
-  const message=document.getElementById("doseInjectionMessage");
-  dateInput.value=todayString();
-  const latest=doseFindShots?.()[0];
-  if(latest?.dose)doseInput.value=latest.dose;
-  form.addEventListener("submit",event=>{
-    event.preventDefault();
-    const date=dateInput.value||todayString();
-    const entries=read(KEYS.daily,[]);
-    let entry=entries.find(item=>item.date===date);
-    if(!entry){entry={date,water:0,protein:0,movement:0,sleep:0,mood:"",energy:"",appetite:"",shotTaken:true,dose:doseInput.value};entries.push(entry)}
-    else{entry.shotTaken=true;entry.dose=doseInput.value}
-    entries.sort((x,y)=>new Date(x.date)-new Date(y.date));
-    write(KEYS.daily,entries);
-    if(date===todayString()){loadToday();renderToday()}
-    renderDoseEffectiveness();
-    if(message)message.textContent=`Injection saved for ${formatDate(date)} at ${doseInput.value}. You can now log effectiveness below.`;
-    const effectForm=document.getElementById("doseEffectivenessForm");
-    effectForm?.scrollIntoView({behavior:"smooth",block:"start"});
   });
 })();

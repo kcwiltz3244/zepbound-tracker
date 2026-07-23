@@ -1,5 +1,5 @@
-const CACHE_NAME = "mzj-v12-2";
-const CORE_ASSETS = ["./", "./index.html", "./styles.css?v=12.2", "./app.js?v=12.2", "./manifest.json", "./photo-label-guide.png"];
+const CACHE_NAME = "mzj-v12-1-1";
+const CORE_ASSETS = ["./", "./index.html", "./styles.css?v=12.1.1", "./app.js?v=12.1.1", "./manifest.json"];
 
 self.addEventListener("install", event => {
   event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(CORE_ASSETS)));
@@ -20,12 +20,10 @@ self.addEventListener("fetch", event => {
   event.respondWith(
     fetch(event.request)
       .then(response => {
-        if (response && response.ok) {
-          const copy = response.clone();
-          caches.open(CACHE_NAME).then(cache => cache.put(event.request, copy));
-        }
+        const copy = response.clone();
+        caches.open(CACHE_NAME).then(cache => cache.put(event.request, copy));
         return response;
       })
-      .catch(() => caches.match(event.request).then(hit => hit || caches.match("./index.html")))
+      .catch(() => caches.match(event.request))
   );
 });

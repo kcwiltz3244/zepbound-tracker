@@ -85,7 +85,7 @@ Added **Tilapia, cooked** to the built-in food database. Default serving: 4 oz c
 Photos are stored only in this browser/app on this device. Clearing site data, uninstalling the app, or changing devices may remove them. Keep important originals in the phone's Photos app or another backup location.
 
 
-## Version 11.3 — Photo Gallery and Full-Screen Viewer
+## Version 11.3.1 — Photo Gallery and Full-Screen Viewer
 
 - Added a clear **View photo** button to every weekly photo card.
 - Weekly photo thumbnails can also be tapped to open the picture.

@@ -527,3 +527,13 @@ fieldset{border:1px solid var(--border);border-radius:18px;margin:1rem 0}legend{
 .photo-viewer-details>div{background:#f8fafc;border:1px solid var(--border);border-radius:14px;padding:12px}.photo-viewer-details span{display:block;color:var(--muted);font-size:.78rem;font-weight:850;text-transform:uppercase;letter-spacing:.04em}.photo-viewer-details strong{display:block;margin-top:5px}.photo-viewer-notes{grid-column:1/-1}.photo-viewer-notes p{margin:6px 0 0;line-height:1.5;color:var(--ink)}
 .photo-viewer-controls{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;padding:0 18px 12px}.photo-viewer-controls button:disabled{opacity:.4;cursor:not-allowed}.photo-viewer-tip{text-align:center;color:var(--muted);font-size:.8rem;margin:0;padding:0 18px 18px}.photo-viewer-open{overflow:hidden}
 @media(max-width:600px){.photo-viewer{padding:0}.photo-viewer-card{width:100%;height:100dvh;max-height:none;border-radius:0}.photo-viewer-image-wrap{min-height:45dvh}.photo-viewer-image-wrap img{max-height:58dvh}.photo-viewer-details{grid-template-columns:1fr 1fr;padding:14px}.photo-viewer-notes{grid-column:1/-1}.photo-viewer-controls{grid-template-columns:1fr 1fr}.photo-viewer-controls .primary-button{grid-column:1/-1;grid-row:1}.photo-viewer-tip{padding-bottom:24px}}
+
+/* Version 11.3.1 — reliable native iPhone photo picker */
+.native-photo-picker{position:relative;width:100%;min-height:58px;overflow:hidden;border-radius:15px}
+.native-photo-picker .photo-picker-button{display:flex;width:100%;height:58px;pointer-events:none}
+.native-photo-picker input[type="file"]{position:absolute;inset:0;width:100%;height:100%;opacity:.001;cursor:pointer;font-size:100px;z-index:3}
+.photo-upload-status{margin-top:10px;padding:10px 12px;border-radius:12px;background:#eef2ff;color:#334155;font-weight:750}
+.photo-upload-status.is-loading{background:#fff7ed;color:#9a3412}
+.photo-upload-status.is-ready{background:#ecfdf5;color:#166534}
+.photo-upload-status.is-error{background:#fef2f2;color:#991b1b}
+.photo-save-success{margin-top:12px;padding:12px 14px;border-radius:12px;background:#ecfdf5;color:#166534;font-weight:850}

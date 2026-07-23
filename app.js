@@ -1218,7 +1218,7 @@ function initDoseEffectiveness(){
 initDoseEffectiveness();
 
 
-// Version 11.2.6 — direct weekly progress photo storage
+// Version 11.3.1 — direct weekly progress photo storage with iPhone picker fix
 const PHOTO_PROGRESS_KEY="mzjV11PhotoProgress";
 const PHOTO_DB_NAME="mzjProgressPhotos";
 const PHOTO_DB_STORE="photos";
@@ -1283,6 +1283,12 @@ function makePhotoUrl(blob){
   if(!blob)return "";
   const url=URL.createObjectURL(blob);photoObjectUrls.add(url);return url;
 }
+function setPhotoUploadStatus(message,state=""){
+  const el=document.getElementById("photoUploadStatus");
+  if(!el)return;
+  el.textContent=message;
+  el.className=`photo-upload-status${state?` is-${state}`:""}`;
+}
 function showSelectedPhoto(file){
   const preview=document.getElementById("photoUploadPreview");
   const removeBtn=document.getElementById("removeSelectedPhotoBtn");
@@ -1291,10 +1297,24 @@ function showSelectedPhoto(file){
   if(!preview)return;
   if(!file){
     preview.innerHTML='<div class="photo-preview-placeholder"><span>🖼️</span><strong>No photo selected</strong><small>Your selected picture will appear here.</small></div>';
-    if(removeBtn)removeBtn.hidden=true;return;
+    if(removeBtn)removeBtn.hidden=true;
+    setPhotoUploadStatus("No photo chosen yet.");
+    return;
   }
+  setPhotoUploadStatus(`Photo selected: ${file.name||"iPhone photo"}. Preparing preview…`,"loading");
   selectedPhotoObjectUrl=URL.createObjectURL(file);
-  preview.innerHTML=`<img src="${selectedPhotoObjectUrl}" alt="Selected weekly progress photo">`;
+  const img=new Image();
+  img.alt="Selected weekly progress photo";
+  img.onload=()=>{
+    preview.replaceChildren(img);
+    setPhotoUploadStatus("Photo selected and ready to save.","ready");
+  };
+  img.onerror=()=>{
+    preview.innerHTML='<div class="photo-preview-placeholder"><span>✅</span><strong>Photo selected</strong><small>This image format cannot be previewed here, but the app can still try to save it.</small></div>';
+    setPhotoUploadStatus("Photo selected. Preview unavailable; tap Save week to store it.","ready");
+    URL.revokeObjectURL(selectedPhotoObjectUrl);selectedPhotoObjectUrl="";
+  };
+  img.src=selectedPhotoObjectUrl;
   if(removeBtn)removeBtn.hidden=false;
 }
 async function loadPhotoEntry(week){
@@ -1407,13 +1427,16 @@ function initPhotoProgress(){
   photoWeek.value=suggestedPhotoWeek();photoDate.value=todayString();
   const todayDaily=read(KEYS.daily,[]).find(x=>x.date===todayString());if(todayDaily?.dose)photoDose.value=todayDaily.dose;
   const weights=read(KEYS.weights,[]);if(weights.length)photoWeight.value=weights[weights.length-1].weight||"";
-  fileInput?.addEventListener("change",()=>{
-    const file=fileInput.files?.[0];
-    if(!file)return showSelectedPhoto(null);
-    if(!file.type.startsWith("image/")){alert("Please choose an image file.");fileInput.value="";return;}
-    if(file.size>20*1024*1024){alert("That photo is larger than 20 MB. Choose a smaller image.");fileInput.value="";return;}
+  const handleChosenPhoto=()=>{
+    const file=fileInput?.files?.[0];
+    if(!file){showSelectedPhoto(null);return;}
+    const imageLike=file.type.startsWith("image/")||/\.(heic|heif|jpg|jpeg|png|webp)$/i.test(file.name||"");
+    if(!imageLike){alert("Please choose a photo.");fileInput.value="";showSelectedPhoto(null);return;}
+    if(file.size>35*1024*1024){alert("That photo is larger than 35 MB. Choose a smaller image.");fileInput.value="";showSelectedPhoto(null);return;}
     showSelectedPhoto(file);
-  });
+  };
+  fileInput?.addEventListener("change",handleChosenPhoto);
+  fileInput?.addEventListener("input",handleChosenPhoto);
   document.getElementById("removeSelectedPhotoBtn")?.addEventListener("click",()=>{if(fileInput)fileInput.value="";showSelectedPhoto(null);});
   form.addEventListener("submit",async e=>{
     e.preventDefault();
@@ -1421,13 +1444,30 @@ function initPhotoProgress(){
     if(!week||!photoDate.value){alert("Enter a week number and date.");return;}
     const existing=photoProgressEntries.find(x=>Number(x.week)===week);
     let photoKey=existing?.photoKey||"";
+    const saveBtn=document.getElementById("savePhotoWeekBtn");
     try{
-      if(selectedPhotoFile){photoKey=`week-${week}`;await putProgressPhoto(photoKey,selectedPhotoFile);}
+      if(saveBtn){saveBtn.disabled=true;saveBtn.textContent="Saving photo…";}
+      if(selectedPhotoFile){
+        setPhotoUploadStatus("Saving photo securely on this device…","loading");
+        photoKey=`week-${week}`;
+        await putProgressPhoto(photoKey,selectedPhotoFile);
+        const testBlob=await getProgressPhoto(photoKey);
+        if(!testBlob)throw new Error("Photo verification failed");
+      }
       const entry={week,date:photoDate.value,weight:photoWeight.value?Number(photoWeight.value):null,dose:photoDose.value,notes:photoNotes.value.trim(),photoKey,updatedAt:new Date().toISOString()};
       const i=photoProgressEntries.findIndex(x=>Number(x.week)===week);if(i>=0)photoProgressEntries[i]=entry;else photoProgressEntries.push(entry);
       write(PHOTO_PROGRESS_KEY,photoProgressEntries);await renderPhotoProgress();
-      if(photoKey){await openPhotoViewer(week);}else{alert(`Week ${week} saved. Add a photo anytime by editing this week.`);}
-    }catch(err){console.error(err);alert("The photo could not be saved. Your device may be low on storage.");}
+      if(photoKey){
+        setPhotoUploadStatus("Photo saved successfully. It now appears in your weekly gallery.","ready");
+        await openPhotoViewer(week);
+      }else{alert(`Week ${week} saved. Add a photo anytime by editing this week.`);}
+    }catch(err){
+      console.error(err);
+      setPhotoUploadStatus("The photo could not be saved. Try opening the app in Safari and choose the photo again.","error");
+      alert("The photo could not be saved. Try again in Safari. If it still fails, choose a screenshot or JPEG copy of the photo.");
+    }finally{
+      if(saveBtn){saveBtn.disabled=false;saveBtn.textContent="Save week";}
+    }
   });
   copyPhotoLabelBtn.onclick=()=>{const entry={week:Number(photoWeek.value||suggestedPhotoWeek()),date:photoDate.value||todayString(),weight:photoWeight.value,dose:photoDose.value,notes:photoNotes.value.trim()};navigator.clipboard.writeText(photoEntryLabel(entry)).then(()=>alert("Photo label copied. Paste it into Markup or your photo editor."));};
   clearPhotoFormBtn.onclick=()=>{form.reset();if(fileInput)fileInput.value="";showSelectedPhoto(null);photoWeek.value=suggestedPhotoWeek();photoDate.value=todayString();photoDose.value="2.5 mg";};

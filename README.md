@@ -94,3 +94,11 @@ Photos are stored only in this browser/app on this device. Clearing site data, u
 - Added an Edit Week button from the viewer.
 - Newly saved photos open automatically so you can immediately confirm they were stored.
 - Existing Version 11.2.6 photos remain available because the same IndexedDB storage and record keys are retained.
+
+
+## Version 11.3.2 — iPhone Photo Picker Repair
+- Replaced the transparent file-input overlay with a real button that opens the native iPhone picker.
+- Replaced unreliable element-ID globals with explicit `getElementById` references.
+- Fixed the initialization error that prevented the photo-change listener from being attached in Safari and installed iPhone PWAs.
+- Retains the same IndexedDB database and keys, so previously saved photos remain available.
+- Updated cache identifiers so the repaired JavaScript loads after deployment.

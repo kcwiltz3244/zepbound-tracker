@@ -4,9 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#2563eb" />
-  <title>My Zepbound Journey — Version 11.3.1</title>
+  <title>My Zepbound Journey — Version 11.3.2</title>
   <link rel="manifest" href="manifest.json" />
-  <link rel="stylesheet" href="styles.css?v=11.3.1" />
+  <link rel="stylesheet" href="styles.css?v=11.3.2" />
 </head>
 <body>
   <section id="dayOneOverlay" class="day-one-overlay hidden">
@@ -904,8 +904,8 @@
           </div>
           <p class="photo-help">Tap below to take a new picture or choose one already saved on your phone.</p>
           <div class="native-photo-picker">
-            <span class="photo-picker-button" aria-hidden="true">📷 Take or choose photo</span>
-            <input id="photoFileInput" type="file" accept="image/*" aria-label="Take or choose a progress photo">
+            <button id="choosePhotoBtn" type="button" class="photo-picker-button">📷 Take or choose photo</button>
+            <input id="photoFileInput" type="file" accept="image/*,.heic,.heif" aria-label="Take or choose a progress photo" hidden>
           </div>
           <div id="photoUploadStatus" class="photo-upload-status" role="status" aria-live="polite">No photo chosen yet.</div>
           <div id="photoUploadPreview" class="photo-upload-preview">
@@ -991,7 +991,7 @@
         </section>
       </section>
       <section class="about-card">
-        <strong>My Zepbound Journey — Version 11.2.6</strong>
+        <strong>My Zepbound Journey — Version 11.3.2</strong>
         <span>Created by Kevin Wiltz</span>
         <small>One Day. One Choice. One Step at a Time.</small>
       </section>
@@ -1093,7 +1093,7 @@
     </form>
   </dialog>
 
-  <script src="app.js?v=11.3.1"></script>
+  <script src="app.js?v=11.3.2"></script>
   <script>
     if ("serviceWorker" in navigator) {
       window.addEventListener("load", () => navigator.serviceWorker.register("./sw.js"));

@@ -252,6 +252,8 @@ const NUTRITION_FOODS=[
     sodium:5
   },
 
+{name:"Tillamook Original Smoked Sausages",aliases:["tillamook sausage","tillamook smoked sausage","smoked sausage","meat stick","beef sausage"],servingAmount:1,servingUnit:"oz",servingLabel:"1 oz (28 g)",calories:110,protein:8,carbs:0,sugar:0,fiber:0,fat:7,sodium:330},
+{name:"Tilapia, cooked",aliases:["tilapia","tilapia fillet","cooked tilapia","grilled tilapia","baked tilapia","fish fillet"],servingAmount:4,servingUnit:"oz",servingLabel:"4 oz cooked",calories:145,protein:30,carbs:0,sugar:0,fiber:0,fat:3,sodium:63},
 {name:"Bacon, pork, cooked",aliases:["bacon","pork bacon"],servingAmount:1,servingUnit:"strip",servingLabel:"1 cooked strip",calories:43,protein:3,carbs:.1,sugar:0,fiber:0,fat:3.3,sodium:137},
 {name:"Bacon, pork, thick-cut",aliases:["bacon","thick bacon"],servingAmount:1,servingUnit:"slice",servingLabel:"1 thick slice",calories:70,protein:5,carbs:0,sugar:0,fiber:0,fat:5.5,sodium:230},
 {name:"Bacon, center-cut pork",aliases:["bacon","center cut bacon"],servingAmount:2,servingUnit:"slice",servingLabel:"2 slices",calories:60,protein:6,carbs:0,sugar:0,fiber:0,fat:4,sodium:260},

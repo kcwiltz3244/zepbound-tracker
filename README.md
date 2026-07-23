@@ -59,3 +59,13 @@ Commit the files, wait for deployment, then fully close and reopen the installed
 
 
 Version 11.2.3 changes the Open album control to a standard browser hyperlink so Google Photos receives the exact saved share URL.
+
+
+## Version 11.2.4
+
+Added Tillamook Country Smoker Original Smoked Sausages to the built-in food database using the package nutrition label: 1 oz (28 g), 110 calories, 8 g protein, 0 g carbohydrate, 0 g sugar, 0 g fiber, 7 g fat, and 330 mg sodium.
+
+
+## Version 11.2.5
+
+Added **Tilapia, cooked** to the built-in food database. Default serving: 4 oz cooked (145 calories, 30 g protein, 0 g carbohydrate, 3 g fat, 63 mg sodium). Search terms include tilapia, tilapia fillet, grilled tilapia, baked tilapia, and fish fillet.

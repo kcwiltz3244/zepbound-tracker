@@ -140,7 +140,16 @@ exportDataBtn.onclick=()=>{const d=read(KEYS.daily,[]);dl("my-zepbound-journey-d
 weightDate.value=todayString();weightForm.addEventListener("submit",e=>{e.preventDefault();const date=weightDate.value,w=+weight.value;if(!date||!w)return;const arr=read(KEYS.weights,[]);arr.push({date,weight:w});arr.sort((a,b)=>new Date(a.date)-new Date(b.date));write(KEYS.weights,arr);weight.value="";renderProgress()})
 function renderProgress(){const s=settings(),arr=read(KEYS.weights,[]);startWeight.textContent=`${(+s.startingWeight).toFixed(1)} lb`;if(!arr.length){currentWeight.textContent="—";weightChange.textContent="—";drawChart([]);return}const c=arr.at(-1).weight,ch=s.startingWeight-c;currentWeight.textContent=`${c.toFixed(1)} lb`;weightChange.textContent=ch>=0?`${ch.toFixed(1)} lb down`:`${Math.abs(ch).toFixed(1)} lb up`;drawChart(arr)}
 function drawChart(arr){const c=weightChart,x=c.getContext("2d"),w=c.width,h=c.height;x.clearRect(0,0,w,h);x.fillStyle="#fff";x.fillRect(0,0,w,h);if(!arr.length){x.fillStyle="#6b7280";x.font="20px system-ui";x.textAlign="center";x.fillText("Add a weight entry whenever you are ready.",w/2,h/2);return}const p={l:60,r:30,t:25,b:50},v=arr.map(a=>a.weight);let mn=Math.min(...v)-3,mx=Math.max(...v)+3;const X=i=>p.l+(arr.length===1?(w-p.l-p.r)/2:i*(w-p.l-p.r)/(arr.length-1)),Y=n=>p.t+(mx-n)*(h-p.t-p.b)/(mx-mn);x.strokeStyle="#e6ebf3";for(let i=0;i<=4;i++){const py=p.t+i*(h-p.t-p.b)/4;x.beginPath();x.moveTo(p.l,py);x.lineTo(w-p.r,py);x.stroke()}const g=x.createLinearGradient(0,0,w,0);g.addColorStop(0,"#2563eb");g.addColorStop(1,"#8b5cf6");x.strokeStyle=g;x.lineWidth=5;x.beginPath();arr.forEach((a,i)=>i?x.lineTo(X(i),Y(a.weight)):x.moveTo(X(i),Y(a.weight)));x.stroke()}
-document.querySelectorAll(".nav-item").forEach(b=>b.onclick=()=>{document.querySelectorAll(".nav-item").forEach(x=>x.classList.remove("active"));document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"));b.classList.add("active");document.getElementById(b.dataset.view).classList.add("active");scrollTo({top:0,behavior:"smooth"})})
+document.querySelectorAll(".nav-item").forEach(b=>b.onclick=()=>{
+  document.querySelectorAll(".nav-item").forEach(x=>x.classList.remove("active"));
+  document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"));
+  b.classList.add("active");
+  const view=document.getElementById(b.dataset.view);
+  if(view)view.classList.add("active");
+  scrollTo({top:0,behavior:"smooth"});
+  const targetId=b.dataset.target;
+  if(targetId)setTimeout(()=>document.getElementById(targetId)?.scrollIntoView({behavior:"smooth",block:"start"}),220);
+})
 settingsBtn.onclick=()=>{const s=settings();settingName.value=s.name;settingStartDate.value=s.startDate;settingStartWeight.value=s.startingWeight;settingWaterGoal.value=s.waterGoal;settingProteinGoal.value=s.proteinGoal;settingMovementGoal.value=s.movementGoal;settingSleepGoal.value=s.sleepGoal;settingsDialog.showModal()}
 saveSettingsBtn.onclick=()=>{write(KEYS.settings,{name:settingName.value.trim()||"Kevin Wiltz",startDate:settingStartDate.value||todayString(),startingWeight:+settingStartWeight.value||328,waterGoal:+settingWaterGoal.value||80,proteinGoal:+settingProteinGoal.value||100,movementGoal:+settingMovementGoal.value||30,sleepGoal:+settingSleepGoal.value||8});settingsDialog.close();renderAll()}
 function renderAll(){setGreeting();renderToday();renderWins();renderMeals();renderJournal();renderStory();renderProgress()}

@@ -4,9 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#2563eb" />
-  <title>My Zepbound Journey — Version 12.0</title>
+  <title>My Zepbound Journey — Version 12.0.2</title>
   <link rel="manifest" href="manifest.json" />
-  <link rel="stylesheet" href="styles.css?v=12.0.0" />
+  <link rel="stylesheet" href="styles.css?v=12.0.2" />
 </head>
 <body>
   <section id="dayOneOverlay" class="day-one-overlay hidden">
@@ -109,10 +109,10 @@
         </section>
 
         <section class="v12-quick-actions" aria-label="Quick actions">
-          <button id="v12LogFoodBtn" type="button"><span>🍽️</span><strong>Log food</strong></button>
-          <button id="v12WeighInBtn" type="button"><span>⚖️</span><strong>Weigh in</strong></button>
-          <button id="v12WeeklyPhotoBtn" type="button"><span>📸</span><strong>Weekly photo</strong></button>
-          <button id="v12ExerciseBtn" type="button"><span>💪🏽</span><strong>Exercise</strong></button>
+          <button id="v12LogFoodBtn" type="button" class="nav-item v12-home-action" data-view="mealsView" data-target="nutritionLogForm"><span>🍽️</span><strong>Log food</strong></button>
+          <button id="v12WeighInBtn" type="button" class="nav-item v12-home-action" data-view="progressView" data-target="weightForm"><span>⚖️</span><strong>Weigh in</strong></button>
+          <button id="v12WeeklyPhotoBtn" type="button" class="nav-item v12-home-action" data-view="photosView" data-target="photoFileInput"><span>📸</span><strong>Weekly photo</strong></button>
+          <button id="v12ExerciseBtn" type="button" class="nav-item v12-home-action" data-view="exerciseView" data-target="exerciseRows"><span>💪🏽</span><strong>Exercise</strong></button>
         </section>
 
         <button id="homeDiningShortcut" type="button" class="home-dining-shortcut">
@@ -1132,6 +1132,34 @@
   </dialog>
 
   <script>
+  // Version 12.0.3: Home shortcuts use the exact same data-view navigation as the working bottom bar.
+  // This intentionally uses the same navigation buttons that already work
+  // in the bottom bar, with a manual fallback for pages housed under More.
+  window.v12OpenShortcut = function(viewId, targetId) {
+    try {
+      var more = document.getElementById("moreMenuDialog");
+      if (more && more.open) more.close();
+
+      var navButton = document.querySelector('.nav-item[data-view="' + viewId + '"]');
+      if (navButton) {
+        navButton.click();
+      } else {
+        document.querySelectorAll('.nav-item').forEach(function(btn) { btn.classList.remove('active'); });
+        document.querySelectorAll('.view').forEach(function(view) { view.classList.remove('active'); });
+        var requestedView = document.getElementById(viewId);
+        if (requestedView) requestedView.classList.add('active');
+        window.scrollTo(0, 0);
+      }
+
+      window.setTimeout(function() {
+        var target = document.getElementById(targetId);
+        if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 250);
+    } catch (error) {
+      console.error('Home shortcut could not open:', error);
+    }
+  };
+
   // Native inline fallback for iPhone Safari/PWA. This runs directly from the
   // file input change event, even if an older cached app.js is still active.
   window.handleNativePhotoSelection = function(input) {
@@ -1160,7 +1188,7 @@
     reader.readAsDataURL(file);
   };
 </script>
-<script src="app.js?v=12.0.1"></script>
+<script src="app.js?v=12.0.3"></script>
   <script>
     if ("serviceWorker" in navigator) {
       window.addEventListener("load", () => navigator.serviceWorker.register("./sw.js"));

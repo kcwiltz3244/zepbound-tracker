@@ -1,18 +1,3 @@
-# My Zepbound Journey 11.3.6
+# My Zepbound Journey 12.0.3
 
-Adds **Wild Planet Wildly Good Promise Skipjack Tuna** to the food database using the nutrition label shown on the can.
-
-Default serving: **1 can (142 g)**
-
-- Calories: 140
-- Protein: 32 g
-- Carbohydrates: 0 g
-- Fiber: 0 g
-- Sugar: 0 g
-- Fat: 1.5 g
-- Sodium: 450 mg
-
-Also adds “can” as a selectable food-log unit and refreshes the service-worker cache. Deploy every file in this ZIP together.
-
-
-Version 12.0.1 fixes the Home quick-action buttons so Weigh In, Weekly Photo, and Exercise open the correct screen and scroll directly to the relevant form.
+Home-screen quick actions now use the exact same `data-view` navigation handler as the working bottom navigation. Log Food, Weigh In, Weekly Photo, and Exercise also scroll to their matching controls.

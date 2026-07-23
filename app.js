@@ -1218,7 +1218,7 @@ function initDoseEffectiveness(){
 initDoseEffectiveness();
 
 
-// Version 11.3.2 — explicit element references and reliable iPhone photo picker
+// Version 11.3.3 — native label-activated iPhone photo picker
 const PHOTO_PROGRESS_KEY="mzjV11PhotoProgress";
 const PHOTO_DB_NAME="mzjProgressPhotos";
 const PHOTO_DB_STORE="photos";
@@ -1430,7 +1430,6 @@ function initPhotoProgress(){
   // Use explicit element references. Safari/iPhone PWAs do not reliably create
   // global JavaScript variables from element IDs.
   const fileInput=document.getElementById("photoFileInput");
-  const choosePhotoBtn=document.getElementById("choosePhotoBtn");
   const weekInput=document.getElementById("photoWeek");
   const dateInput=document.getElementById("photoDate");
   const weightInput=document.getElementById("photoWeight");
@@ -1473,12 +1472,10 @@ function initPhotoProgress(){
     showSelectedPhoto(file);
   };
 
-  // A real button triggers the native picker during the user's tap gesture.
-  // This is more reliable in installed iPhone PWAs than a transparent overlay.
-  choosePhotoBtn?.addEventListener("click",()=>{
-    fileInput.value="";
-    fileInput.click();
-  });
+  // The styled <label for="photoFileInput"> in index.html opens the native
+  // iPhone picker directly. Avoid fileInput.click(): Safari may block it when
+  // the file input is hidden or the app is running from the Home Screen.
+  fileInput.addEventListener("click",()=>{ fileInput.value=""; });
   fileInput.addEventListener("change",handleChosenPhoto);
 
   document.getElementById("removeSelectedPhotoBtn")?.addEventListener("click",()=>{

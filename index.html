@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#2563eb" />
   <title>My Zepbound Journey — Version 11.3.2</title>
   <link rel="manifest" href="manifest.json" />
-  <link rel="stylesheet" href="styles.css?v=11.3.2" />
+  <link rel="stylesheet" href="styles.css?v=11.3.3" />
 </head>
 <body>
   <section id="dayOneOverlay" class="day-one-overlay hidden">
@@ -904,8 +904,8 @@
           </div>
           <p class="photo-help">Tap below to take a new picture or choose one already saved on your phone.</p>
           <div class="native-photo-picker">
-            <button id="choosePhotoBtn" type="button" class="photo-picker-button">📷 Take or choose photo</button>
-            <input id="photoFileInput" type="file" accept="image/*,.heic,.heif" aria-label="Take or choose a progress photo" hidden>
+            <input id="photoFileInput" class="native-photo-input" type="file" accept="image/*" aria-label="Take or choose a progress photo">
+            <label id="choosePhotoLabel" for="photoFileInput" class="photo-picker-button">📷 Take or choose photo</label>
           </div>
           <div id="photoUploadStatus" class="photo-upload-status" role="status" aria-live="polite">No photo chosen yet.</div>
           <div id="photoUploadPreview" class="photo-upload-preview">
@@ -1093,7 +1093,7 @@
     </form>
   </dialog>
 
-  <script src="app.js?v=11.3.2"></script>
+  <script src="app.js?v=11.3.3"></script>
   <script>
     if ("serviceWorker" in navigator) {
       window.addEventListener("load", () => navigator.serviceWorker.register("./sw.js"));

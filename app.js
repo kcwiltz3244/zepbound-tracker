@@ -254,7 +254,6 @@ const NUTRITION_FOODS=[
 
 {name:"Tillamook Original Smoked Sausages",aliases:["tillamook sausage","tillamook smoked sausage","smoked sausage","meat stick","beef sausage"],servingAmount:1,servingUnit:"oz",servingLabel:"1 oz (28 g)",calories:110,protein:8,carbs:0,sugar:0,fiber:0,fat:7,sodium:330},
 {name:"Tilapia, cooked",aliases:["tilapia","tilapia fillet","cooked tilapia","grilled tilapia","baked tilapia","fish fillet"],servingAmount:4,servingUnit:"oz",servingLabel:"4 oz cooked",calories:145,protein:30,carbs:0,sugar:0,fiber:0,fat:3,sodium:63},
-{name:"Wild Planet Wildly Good Promise Skipjack Tuna",aliases:["wild planet tuna","wild planet skipjack tuna","skipjack tuna","canned tuna","tuna can","tuna"],servingAmount:1,servingUnit:"can",servingLabel:"1 can (142 g)",calories:140,protein:32,carbs:0,sugar:0,fiber:0,fat:1.5,sodium:450},
 {name:"Bacon, pork, cooked",aliases:["bacon","pork bacon"],servingAmount:1,servingUnit:"strip",servingLabel:"1 cooked strip",calories:43,protein:3,carbs:.1,sugar:0,fiber:0,fat:3.3,sodium:137},
 {name:"Bacon, pork, thick-cut",aliases:["bacon","thick bacon"],servingAmount:1,servingUnit:"slice",servingLabel:"1 thick slice",calories:70,protein:5,carbs:0,sugar:0,fiber:0,fat:5.5,sodium:230},
 {name:"Bacon, center-cut pork",aliases:["bacon","center cut bacon"],servingAmount:2,servingUnit:"slice",servingLabel:"2 slices",calories:60,protein:6,carbs:0,sugar:0,fiber:0,fat:4,sodium:260},
@@ -1219,13 +1218,12 @@ function initDoseEffectiveness(){
 initDoseEffectiveness();
 
 
-// Version 11.3.5 — native iPhone preview and save bridge
+// Version 11.2.6 — direct weekly progress photo storage
 const PHOTO_PROGRESS_KEY="mzjV11PhotoProgress";
 const PHOTO_DB_NAME="mzjProgressPhotos";
 const PHOTO_DB_STORE="photos";
 let photoProgressEntries=read(PHOTO_PROGRESS_KEY,[]);
 let selectedPhotoFile=null;
-window.__pendingProgressPhoto=null;
 let selectedPhotoObjectUrl="";
 const photoObjectUrls=new Set();
 
@@ -1285,47 +1283,24 @@ function makePhotoUrl(blob){
   if(!blob)return "";
   const url=URL.createObjectURL(blob);photoObjectUrls.add(url);return url;
 }
-function setPhotoUploadStatus(message,state=""){
-  const el=document.getElementById("photoUploadStatus");
-  if(!el)return;
-  el.textContent=message;
-  el.className=`photo-upload-status${state?` is-${state}`:""}`;
-}
 function showSelectedPhoto(file){
   const preview=document.getElementById("photoUploadPreview");
   const removeBtn=document.getElementById("removeSelectedPhotoBtn");
   if(selectedPhotoObjectUrl){URL.revokeObjectURL(selectedPhotoObjectUrl);selectedPhotoObjectUrl="";}
   selectedPhotoFile=file||null;
-  window.__pendingProgressPhoto=selectedPhotoFile;
   if(!preview)return;
   if(!file){
     preview.innerHTML='<div class="photo-preview-placeholder"><span>🖼️</span><strong>No photo selected</strong><small>Your selected picture will appear here.</small></div>';
-    if(removeBtn)removeBtn.hidden=true;
-    setPhotoUploadStatus("No photo chosen yet.");
-    return;
+    if(removeBtn)removeBtn.hidden=true;return;
   }
-  setPhotoUploadStatus(`Photo selected: ${file.name||"iPhone photo"}. Preparing preview…`,"loading");
   selectedPhotoObjectUrl=URL.createObjectURL(file);
-  const img=new Image();
-  img.alt="Selected weekly progress photo";
-  img.onload=()=>{
-    preview.replaceChildren(img);
-    setPhotoUploadStatus("Photo selected and ready to save.","ready");
-  };
-  img.onerror=()=>{
-    preview.innerHTML='<div class="photo-preview-placeholder"><span>✅</span><strong>Photo selected</strong><small>This image format cannot be previewed here, but the app can still try to save it.</small></div>';
-    setPhotoUploadStatus("Photo selected. Preview unavailable; tap Save week to store it.","ready");
-    URL.revokeObjectURL(selectedPhotoObjectUrl);selectedPhotoObjectUrl="";
-  };
-  img.src=selectedPhotoObjectUrl;
+  preview.innerHTML=`<img src="${selectedPhotoObjectUrl}" alt="Selected weekly progress photo">`;
   if(removeBtn)removeBtn.hidden=false;
 }
 async function loadPhotoEntry(week){
   const e=photoProgressEntries.find(x=>Number(x.week)===Number(week));
   if(!e)return;
-  const weekInput=document.getElementById("photoWeek"),dateInput=document.getElementById("photoDate"),weightInput=document.getElementById("photoWeight"),doseInput=document.getElementById("photoDose"),notesInput=document.getElementById("photoNotes");
-  if(!weekInput||!dateInput||!weightInput||!doseInput||!notesInput)return;
-  weekInput.value=e.week;dateInput.value=e.date;weightInput.value=e.weight||"";doseInput.value=e.dose||"2.5 mg";notesInput.value=e.notes||"";
+  photoWeek.value=e.week;photoDate.value=e.date;photoWeight.value=e.weight||"";photoDose.value=e.dose||"2.5 mg";photoNotes.value=e.notes||"";
   showSelectedPhoto(null);
   if(e.photoKey){
     try{
@@ -1427,163 +1402,37 @@ function initPhotoViewer(){
 }
 
 function initPhotoProgress(){
-  const form=document.getElementById("photoWeekForm");
-  if(!form)return;
-
-  // Use explicit element references. Safari/iPhone PWAs do not reliably create
-  // global JavaScript variables from element IDs.
+  const form=document.getElementById("photoWeekForm");if(!form)return;
   const fileInput=document.getElementById("photoFileInput");
-  const weekInput=document.getElementById("photoWeek");
-  const dateInput=document.getElementById("photoDate");
-  const weightInput=document.getElementById("photoWeight");
-  const doseInput=document.getElementById("photoDose");
-  const notesInput=document.getElementById("photoNotes");
-  const copyLabelBtn=document.getElementById("copyPhotoLabelBtn");
-  const clearFormBtn=document.getElementById("clearPhotoFormBtn");
-  const compareA=document.getElementById("comparePhotoA");
-  const compareB=document.getElementById("comparePhotoB");
-
-  if(!fileInput||!weekInput||!dateInput||!weightInput||!doseInput||!notesInput){
-    console.error("Photo form could not initialize because a required field is missing.");
-    setPhotoUploadStatus("The photo form did not load correctly. Refresh the app.","error");
-    return;
-  }
-
-  weekInput.value=suggestedPhotoWeek();
-  dateInput.value=todayString();
-  const todayDaily=read(KEYS.daily,[]).find(x=>x.date===todayString());
-  if(todayDaily?.dose)doseInput.value=todayDaily.dose;
-  const weights=read(KEYS.weights,[]);
-  if(weights.length)weightInput.value=weights[weights.length-1].weight||"";
-
-  const handleChosenPhoto=()=>{
-    const file=(fileInput.files&&fileInput.files[0])||window.__pendingProgressPhoto;
-    if(!file){showSelectedPhoto(null);return;}
-    const imageLike=(file.type&&file.type.startsWith("image/"))||/\.(heic|heif|jpg|jpeg|png|webp)$/i.test(file.name||"");
-    if(!imageLike){
-      alert("Please choose a photo.");
-      fileInput.value="";
-      showSelectedPhoto(null);
-      return;
-    }
-    if(file.size>35*1024*1024){
-      alert("That photo is larger than 35 MB. Choose a smaller image.");
-      fileInput.value="";
-      showSelectedPhoto(null);
-      return;
-    }
+  photoWeek.value=suggestedPhotoWeek();photoDate.value=todayString();
+  const todayDaily=read(KEYS.daily,[]).find(x=>x.date===todayString());if(todayDaily?.dose)photoDose.value=todayDaily.dose;
+  const weights=read(KEYS.weights,[]);if(weights.length)photoWeight.value=weights[weights.length-1].weight||"";
+  fileInput?.addEventListener("change",()=>{
+    const file=fileInput.files?.[0];
+    if(!file)return showSelectedPhoto(null);
+    if(!file.type.startsWith("image/")){alert("Please choose an image file.");fileInput.value="";return;}
+    if(file.size>20*1024*1024){alert("That photo is larger than 20 MB. Choose a smaller image.");fileInput.value="";return;}
     showSelectedPhoto(file);
-  };
-
-  // Keep the real file input visible. iOS Safari and installed PWAs can block
-  // synthetic clicks or labels that target visually hidden file inputs.
-  // A direct tap on this native control is the most reliable approach.
-  fileInput.addEventListener("change",handleChosenPhoto);
-  fileInput.addEventListener("input",handleChosenPhoto);
-
-  document.getElementById("removeSelectedPhotoBtn")?.addEventListener("click",()=>{
-    fileInput.value="";
-    window.__pendingProgressPhoto=null;
-    showSelectedPhoto(null);
   });
-
+  document.getElementById("removeSelectedPhotoBtn")?.addEventListener("click",()=>{if(fileInput)fileInput.value="";showSelectedPhoto(null);});
   form.addEventListener("submit",async e=>{
     e.preventDefault();
-    const week=Number(weekInput.value);
-    if(!week||!dateInput.value){alert("Enter a week number and date.");return;}
+    const week=Number(photoWeek.value);
+    if(!week||!photoDate.value){alert("Enter a week number and date.");return;}
     const existing=photoProgressEntries.find(x=>Number(x.week)===week);
     let photoKey=existing?.photoKey||"";
-    const saveBtn=document.getElementById("savePhotoWeekBtn");
     try{
-      if(saveBtn){saveBtn.disabled=true;saveBtn.textContent="Saving photo…";}
-      if(!selectedPhotoFile && window.__pendingProgressPhoto) selectedPhotoFile=window.__pendingProgressPhoto;
-      if(selectedPhotoFile){
-        setPhotoUploadStatus("Saving photo securely on this device…","loading");
-        photoKey=`week-${week}`;
-        await putProgressPhoto(photoKey,selectedPhotoFile);
-        const testBlob=await getProgressPhoto(photoKey);
-        if(!testBlob)throw new Error("Photo verification failed");
-      }
-      const entry={
-        week,
-        date:dateInput.value,
-        weight:weightInput.value?Number(weightInput.value):null,
-        dose:doseInput.value,
-        notes:notesInput.value.trim(),
-        photoKey,
-        updatedAt:new Date().toISOString()
-      };
-      const i=photoProgressEntries.findIndex(x=>Number(x.week)===week);
-      if(i>=0)photoProgressEntries[i]=entry;else photoProgressEntries.push(entry);
-      write(PHOTO_PROGRESS_KEY,photoProgressEntries);
-      await renderPhotoProgress();
-      if(photoKey){
-        setPhotoUploadStatus("Photo saved successfully. It now appears in your weekly gallery.","ready");
-        await openPhotoViewer(week);
-      }else{
-        alert(`Week ${week} saved. Add a photo anytime by editing this week.`);
-      }
-    }catch(err){
-      console.error(err);
-      setPhotoUploadStatus("The photo could not be saved. Try choosing a JPEG or screenshot copy.","error");
-      alert("The photo could not be saved. Try again. If it still fails, choose a screenshot or JPEG copy of the photo.");
-    }finally{
-      if(saveBtn){saveBtn.disabled=false;saveBtn.textContent="Save week";}
-    }
+      if(selectedPhotoFile){photoKey=`week-${week}`;await putProgressPhoto(photoKey,selectedPhotoFile);}
+      const entry={week,date:photoDate.value,weight:photoWeight.value?Number(photoWeight.value):null,dose:photoDose.value,notes:photoNotes.value.trim(),photoKey,updatedAt:new Date().toISOString()};
+      const i=photoProgressEntries.findIndex(x=>Number(x.week)===week);if(i>=0)photoProgressEntries[i]=entry;else photoProgressEntries.push(entry);
+      write(PHOTO_PROGRESS_KEY,photoProgressEntries);await renderPhotoProgress();
+      if(photoKey){await openPhotoViewer(week);}else{alert(`Week ${week} saved. Add a photo anytime by editing this week.`);}
+    }catch(err){console.error(err);alert("The photo could not be saved. Your device may be low on storage.");}
   });
-
-  copyLabelBtn?.addEventListener("click",()=>{
-    const entry={week:Number(weekInput.value||suggestedPhotoWeek()),date:dateInput.value||todayString(),weight:weightInput.value,dose:doseInput.value,notes:notesInput.value.trim()};
-    navigator.clipboard.writeText(photoEntryLabel(entry)).then(()=>alert("Photo label copied. Paste it into Markup or your photo editor."));
-  });
-
-  clearFormBtn?.addEventListener("click",()=>{
-    form.reset();
-    fileInput.value="";
-    window.__pendingProgressPhoto=null;
-    showSelectedPhoto(null);
-    weekInput.value=suggestedPhotoWeek();
-    dateInput.value=todayString();
-    doseInput.value="2.5 mg";
-  });
-
-  compareA?.addEventListener("change",renderPhotoComparison);
-  compareB?.addEventListener("change",renderPhotoComparison);
+  copyPhotoLabelBtn.onclick=()=>{const entry={week:Number(photoWeek.value||suggestedPhotoWeek()),date:photoDate.value||todayString(),weight:photoWeight.value,dose:photoDose.value,notes:photoNotes.value.trim()};navigator.clipboard.writeText(photoEntryLabel(entry)).then(()=>alert("Photo label copied. Paste it into Markup or your photo editor."));};
+  clearPhotoFormBtn.onclick=()=>{form.reset();if(fileInput)fileInput.value="";showSelectedPhoto(null);photoWeek.value=suggestedPhotoWeek();photoDate.value=todayString();photoDose.value="2.5 mg";};
+  comparePhotoA.onchange=renderPhotoComparison;comparePhotoB.onchange=renderPhotoComparison;
   renderPhotoProgress();
 }
 initPhotoViewer();
 initPhotoProgress();
-
-/* ===== Version 12.0 — Sprint 1 navigation + dashboard bridge ===== */
-(function v12SprintOne(){
-  function openView(viewId){
-    const navButton=document.querySelector(`.nav-item[data-view="${viewId}"]`);
-    if(navButton){navButton.click();return;}
-    document.querySelectorAll('.nav-item').forEach(x=>x.classList.remove('active'));
-    document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
-    const view=document.getElementById(viewId);
-    if(view){view.classList.add('active');window.scrollTo({top:0,behavior:'smooth'});}
-  }
-  function refreshSnapshot(){
-    try{
-      const week=document.getElementById('journeyWeek')?.textContent||'1';
-      const dose=document.getElementById('currentDose')?.textContent||'2.5 mg';
-      const water=document.getElementById('waterValue')?.textContent||'0 / 80 oz';
-      const [currentWater,waterGoal]=(water.match(/[\d.]+/g)||['0','80']);
-      const currentWeight=document.getElementById('currentWeight')?.textContent||'—';
-      const weightChange=document.getElementById('weightChange')?.textContent||'Add a weigh-in';
-      const set=(id,value)=>{const el=document.getElementById(id);if(el)el.textContent=value;};
-      set('v12Week',week);set('v12Dose',dose);set('v12CurrentWeight',currentWeight);set('v12WeightChange',weightChange);
-      set('v12Water',`${currentWater} oz`);set('v12WaterGoal',`of ${waterGoal} oz`);
-      const meter=document.getElementById('v12WaterMeter');if(meter)meter.style.width=`${Math.min(100,(Number(currentWater)/Math.max(1,Number(waterGoal)))*100)}%`;
-    }catch(err){console.warn('Version 12 snapshot refresh skipped',err);}
-  }
-  window.addEventListener('DOMContentLoaded',()=>{
-    const more=document.getElementById('moreMenuDialog');
-    document.getElementById('moreNavBtn')?.addEventListener('click',()=>more?.showModal());
-    document.getElementById('closeMoreMenuBtn')?.addEventListener('click',()=>more?.close());
-    document.querySelectorAll('[data-v12-view]').forEach(btn=>btn.addEventListener('click',()=>{more?.close();openView(btn.dataset.v12View);}));
-    document.getElementById('v12SettingsBtn')?.addEventListener('click',()=>{more?.close();document.getElementById('settingsBtn')?.click();});
-    refreshSnapshot();setTimeout(refreshSnapshot,400);setInterval(refreshSnapshot,1500);
-  });
-})();

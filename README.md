@@ -1,5 +1,15 @@
-# My Zepbound Journey 11.3.5
+# My Zepbound Journey 11.3.6
 
-Fixes the iPhone photo preview bridge. The selected image now appears in the preview box immediately and is passed to the weekly save routine.
+Adds **Wild Planet Wildly Good Promise Skipjack Tuna** to the food database using the nutrition label shown on the can.
 
-Deploy every file in this ZIP together so index.html, app.js, and sw.js stay on the same version.
+Default serving: **1 can (142 g)**
+
+- Calories: 140
+- Protein: 32 g
+- Carbohydrates: 0 g
+- Fiber: 0 g
+- Sugar: 0 g
+- Fat: 1.5 g
+- Sodium: 450 mg
+
+Also adds “can” as a selectable food-log unit and refreshes the service-worker cache. Deploy every file in this ZIP together.

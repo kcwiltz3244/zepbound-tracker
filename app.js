@@ -254,6 +254,7 @@ const NUTRITION_FOODS=[
 
 {name:"Tillamook Original Smoked Sausages",aliases:["tillamook sausage","tillamook smoked sausage","smoked sausage","meat stick","beef sausage"],servingAmount:1,servingUnit:"oz",servingLabel:"1 oz (28 g)",calories:110,protein:8,carbs:0,sugar:0,fiber:0,fat:7,sodium:330},
 {name:"Tilapia, cooked",aliases:["tilapia","tilapia fillet","cooked tilapia","grilled tilapia","baked tilapia","fish fillet"],servingAmount:4,servingUnit:"oz",servingLabel:"4 oz cooked",calories:145,protein:30,carbs:0,sugar:0,fiber:0,fat:3,sodium:63},
+{name:"Wild Planet Wildly Good Promise Skipjack Tuna",aliases:["wild planet tuna","wild planet skipjack tuna","skipjack tuna","canned tuna","tuna can","tuna"],servingAmount:1,servingUnit:"can",servingLabel:"1 can (142 g)",calories:140,protein:32,carbs:0,sugar:0,fiber:0,fat:1.5,sodium:450},
 {name:"Bacon, pork, cooked",aliases:["bacon","pork bacon"],servingAmount:1,servingUnit:"strip",servingLabel:"1 cooked strip",calories:43,protein:3,carbs:.1,sugar:0,fiber:0,fat:3.3,sodium:137},
 {name:"Bacon, pork, thick-cut",aliases:["bacon","thick bacon"],servingAmount:1,servingUnit:"slice",servingLabel:"1 thick slice",calories:70,protein:5,carbs:0,sugar:0,fiber:0,fat:5.5,sodium:230},
 {name:"Bacon, center-cut pork",aliases:["bacon","center cut bacon"],servingAmount:2,servingUnit:"slice",servingLabel:"2 slices",calories:60,protein:6,carbs:0,sugar:0,fiber:0,fat:4,sodium:260},
@@ -1552,3 +1553,37 @@ function initPhotoProgress(){
 }
 initPhotoViewer();
 initPhotoProgress();
+
+/* ===== Version 12.0 — Sprint 1 navigation + dashboard bridge ===== */
+(function v12SprintOne(){
+  function openView(viewId){
+    const navButton=document.querySelector(`.nav-item[data-view="${viewId}"]`);
+    if(navButton){navButton.click();return;}
+    document.querySelectorAll('.nav-item').forEach(x=>x.classList.remove('active'));
+    document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+    const view=document.getElementById(viewId);
+    if(view){view.classList.add('active');window.scrollTo({top:0,behavior:'smooth'});}
+  }
+  function refreshSnapshot(){
+    try{
+      const week=document.getElementById('journeyWeek')?.textContent||'1';
+      const dose=document.getElementById('currentDose')?.textContent||'2.5 mg';
+      const water=document.getElementById('waterValue')?.textContent||'0 / 80 oz';
+      const [currentWater,waterGoal]=(water.match(/[\d.]+/g)||['0','80']);
+      const currentWeight=document.getElementById('currentWeight')?.textContent||'—';
+      const weightChange=document.getElementById('weightChange')?.textContent||'Add a weigh-in';
+      const set=(id,value)=>{const el=document.getElementById(id);if(el)el.textContent=value;};
+      set('v12Week',week);set('v12Dose',dose);set('v12CurrentWeight',currentWeight);set('v12WeightChange',weightChange);
+      set('v12Water',`${currentWater} oz`);set('v12WaterGoal',`of ${waterGoal} oz`);
+      const meter=document.getElementById('v12WaterMeter');if(meter)meter.style.width=`${Math.min(100,(Number(currentWater)/Math.max(1,Number(waterGoal)))*100)}%`;
+    }catch(err){console.warn('Version 12 snapshot refresh skipped',err);}
+  }
+  window.addEventListener('DOMContentLoaded',()=>{
+    const more=document.getElementById('moreMenuDialog');
+    document.getElementById('moreNavBtn')?.addEventListener('click',()=>more?.showModal());
+    document.getElementById('closeMoreMenuBtn')?.addEventListener('click',()=>more?.close());
+    document.querySelectorAll('[data-v12-view]').forEach(btn=>btn.addEventListener('click',()=>{more?.close();openView(btn.dataset.v12View);}));
+    document.getElementById('v12SettingsBtn')?.addEventListener('click',()=>{more?.close();document.getElementById('settingsBtn')?.click();});
+    refreshSnapshot();setTimeout(refreshSnapshot,400);setInterval(refreshSnapshot,1500);
+  });
+})();

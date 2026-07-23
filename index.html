@@ -4,9 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#2563eb" />
-  <title>My Zepbound Journey — Version 11.3.2</title>
+  <title>My Zepbound Journey — Version 12.0</title>
   <link rel="manifest" href="manifest.json" />
-  <link rel="stylesheet" href="styles.css?v=11.3.4" />
+  <link rel="stylesheet" href="styles.css?v=12.0.0" />
 </head>
 <body>
   <section id="dayOneOverlay" class="day-one-overlay hidden">
@@ -57,14 +57,24 @@
         <section class="coach-dashboard panel">
           <div class="panel-heading">
             <div>
-              <p class="eyebrow">Daily coach</p>
-              <h2 id="dailyCoachTitle">Your next good choice</h2>
+              <p class="eyebrow">Today’s snapshot</p>
+              <h2 id="dailyCoachTitle">How you’re doing today</h2>
               <p id="dailyCoachMessage" class="coach-message">Log a meal or check in to begin today’s coaching.</p>
             </div>
             <button id="openNutritionBtn" type="button" class="primary-button">Open nutrition</button>
           </div>
 
-          <div class="home-nutrition-grid">
+          <div class="v12-status-row">
+            <span class="v12-week-chip">Week <strong id="v12Week">1</strong></span>
+            <span class="v12-dose-chip">Dose <strong id="v12Dose">2.5 mg</strong></span>
+          </div>
+          <div class="home-nutrition-grid v12-snapshot-grid">
+            <article class="v12-weight-card">
+              <span>Current weight</span>
+              <strong id="v12CurrentWeight">—</strong>
+              <small id="v12WeightChange">Add a weigh-in</small>
+              <div class="dashboard-meter"><span style="width:0"></span></div>
+            </article>
             <article>
               <span>Calories</span>
               <strong id="homeCalories">0</strong>
@@ -84,6 +94,12 @@
               <div class="dashboard-meter"><span id="homeFiberMeter"></span></div>
             </article>
             <article>
+              <span>Water</span>
+              <strong id="v12Water">0 oz</strong>
+              <small id="v12WaterGoal">of 80 oz</small>
+              <div class="dashboard-meter"><span id="v12WaterMeter"></span></div>
+            </article>
+            <article>
               <span>Meals logged</span>
               <strong id="homeMealsLogged">0</strong>
               <small>today</small>
@@ -92,6 +108,12 @@
           </div>
         </section>
 
+        <section class="v12-quick-actions" aria-label="Quick actions">
+          <button type="button" data-v12-view="mealsView"><span>🍽️</span><strong>Log food</strong></button>
+          <button type="button" data-v12-view="progressView"><span>⚖️</span><strong>Weigh in</strong></button>
+          <button type="button" data-v12-view="photosView"><span>📸</span><strong>Weekly photo</strong></button>
+          <button type="button" data-v12-view="exerciseView"><span>💪🏽</span><strong>Exercise</strong></button>
+        </section>
 
         <button id="homeDiningShortcut" type="button" class="home-dining-shortcut">
           <span class="home-dining-icon">🍴</span>
@@ -132,7 +154,7 @@
           <p id="quickCheckMessage" class="gentle-message">Welcome back. Let’s take today’s next step.</p>
         </section>
 
-        <section class="section-block">
+        <section class="section-block v12-duplicate-summary">
           <div class="section-heading">
             <div>
               <p class="eyebrow">Today's journey</p>
@@ -687,6 +709,7 @@
                       <option value="tsp">teaspoon</option>
                       <option value="oz">ounce</option>
                       <option value="g">gram</option>
+                      <option value="can">can</option>
                       <option value="container">container</option>
                       <option value="shake">shake</option>
                     </select>
@@ -992,22 +1015,18 @@
         </section>
       </section>
       <section class="about-card">
-        <strong>My Zepbound Journey — Version 11.3.2</strong>
+        <strong>My Zepbound Journey — Version 12.0</strong>
         <span>Created by Kevin Wiltz</span>
         <small>One Day. One Choice. One Step at a Time.</small>
       </section>
     </main>
 
-    <nav class="bottom-nav">
-      <button class="nav-item active" data-view="homeView"><span>🏠</span><strong>Today</strong></button>
-      <button class="nav-item" data-view="journalView"><span>📖</span><strong>Journal</strong></button>
-      <button class="nav-item" data-view="diningView"><span>🍴</span><strong>Dining</strong></button>
-      <button class="nav-item" data-view="mealsView"><span>🍽️</span><strong>Meals</strong></button>
-      <button class="nav-item" data-view="exerciseView"><span>🏋️</span><strong>Exercise</strong></button>
-      <button class="nav-item" data-view="milestonesView"><span>🏆</span><strong>Wins</strong></button>
-      <button class="nav-item" data-view="storyView"><span>🕰️</span><strong>Story</strong></button>
-      <button class="nav-item" data-view="photosView"><span>📸</span><strong>Photos</strong></button>
+    <nav class="bottom-nav v12-bottom-nav">
+      <button class="nav-item active" data-view="homeView"><span>🏠</span><strong>Home</strong></button>
+      <button class="nav-item" data-view="mealsView"><span>🍽️</span><strong>Nutrition</strong></button>
       <button class="nav-item" data-view="progressView"><span>📈</span><strong>Progress</strong></button>
+      <button class="nav-item" data-view="exerciseView"><span>💪🏽</span><strong>Fitness</strong></button>
+      <button id="moreNavBtn" class="nav-item more-nav-item" type="button"><span>☰</span><strong>More</strong></button>
     </nav>
   </div>
 
@@ -1031,6 +1050,24 @@
       <p class="photo-viewer-tip">Pinch to zoom on your phone. Swipe is not required—use Previous and Next.</p>
     </section>
   </div>
+
+
+  <dialog id="moreMenuDialog" class="v12-more-dialog">
+    <section class="dialog-card v12-more-card">
+      <div class="panel-heading">
+        <div><p class="eyebrow">My journey</p><h2>More</h2></div>
+        <button id="closeMoreMenuBtn" type="button" class="secondary-button">Close</button>
+      </div>
+      <div class="v12-more-grid">
+        <button type="button" data-v12-view="journalView"><span>📖</span><strong>Journal</strong><small>Mood, appetite and notes</small></button>
+        <button type="button" data-v12-view="diningView"><span>🍴</span><strong>Dining Out</strong><small>Smarter restaurant choices</small></button>
+        <button type="button" data-v12-view="photosView"><span>📸</span><strong>Photos</strong><small>Weekly gallery and compare</small></button>
+        <button type="button" data-v12-view="milestonesView"><span>🏆</span><strong>Wins</strong><small>Milestones and victories</small></button>
+        <button type="button" data-v12-view="storyView"><span>🕰️</span><strong>My Story</strong><small>Your journey timeline</small></button>
+        <button type="button" id="v12SettingsBtn"><span>⚙️</span><strong>Settings</strong><small>Goals and preferences</small></button>
+      </div>
+    </section>
+  </dialog>
 
   <dialog id="shoppingDialog">
     <form method="dialog" class="dialog-card">
@@ -1123,7 +1160,7 @@
     reader.readAsDataURL(file);
   };
 </script>
-<script src="app.js?v=11.3.5"></script>
+<script src="app.js?v=12.0.0"></script>
   <script>
     if ("serviceWorker" in navigator) {
       window.addEventListener("load", () => navigator.serviceWorker.register("./sw.js"));

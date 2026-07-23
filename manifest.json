@@ -1,9 +1,10 @@
 {
-  "name": "My Zepbound Journey 11.3.4",
-  "short_name": "Zepbound V11.3.2",
+  "name": "My Zepbound Journey 2026",
+  "short_name": "Zepbound Journey",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#0f2747",
   "theme_color": "#2563eb",
-  "description": "GLP-1 nutrition, dose-effectiveness tracking, and private weekly progress photos with a full-screen gallery stored on your device."
+  "description": "GLP-1 nutrition, dose-effectiveness tracking, and private weekly progress photos with a full-screen gallery stored on your device.",
+  "version": "12.0.0"
 }

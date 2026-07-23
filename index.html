@@ -109,10 +109,10 @@
         </section>
 
         <section class="v12-quick-actions" aria-label="Quick actions">
-          <button type="button" data-v12-view="mealsView"><span>🍽️</span><strong>Log food</strong></button>
-          <button type="button" data-v12-view="progressView"><span>⚖️</span><strong>Weigh in</strong></button>
-          <button type="button" data-v12-view="photosView"><span>📸</span><strong>Weekly photo</strong></button>
-          <button type="button" data-v12-view="exerciseView"><span>💪🏽</span><strong>Exercise</strong></button>
+          <button id="v12LogFoodBtn" type="button"><span>🍽️</span><strong>Log food</strong></button>
+          <button id="v12WeighInBtn" type="button"><span>⚖️</span><strong>Weigh in</strong></button>
+          <button id="v12WeeklyPhotoBtn" type="button"><span>📸</span><strong>Weekly photo</strong></button>
+          <button id="v12ExerciseBtn" type="button"><span>💪🏽</span><strong>Exercise</strong></button>
         </section>
 
         <button id="homeDiningShortcut" type="button" class="home-dining-shortcut">
@@ -1160,7 +1160,7 @@
     reader.readAsDataURL(file);
   };
 </script>
-<script src="app.js?v=12.0.0"></script>
+<script src="app.js?v=12.0.1"></script>
   <script>
     if ("serviceWorker" in navigator) {
       window.addEventListener("load", () => navigator.serviceWorker.register("./sw.js"));

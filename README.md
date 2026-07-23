@@ -13,3 +13,6 @@ Default serving: **1 can (142 g)**
 - Sodium: 450 mg
 
 Also adds “can” as a selectable food-log unit and refreshes the service-worker cache. Deploy every file in this ZIP together.
+
+
+Version 12.0.1 fixes the Home quick-action buttons so Weigh In, Weekly Photo, and Exercise open the correct screen and scroll directly to the relevant form.

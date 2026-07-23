@@ -1583,6 +1583,22 @@ initPhotoProgress();
     document.getElementById('moreNavBtn')?.addEventListener('click',()=>more?.showModal());
     document.getElementById('closeMoreMenuBtn')?.addEventListener('click',()=>more?.close());
     document.querySelectorAll('[data-v12-view]').forEach(btn=>btn.addEventListener('click',()=>{more?.close();openView(btn.dataset.v12View);}));
+
+    // Version 12.0.1: make the four dashboard shortcuts direct and reliable.
+    // Each shortcut opens the correct page and then moves the user to the useful control.
+    const openAndFocus=(viewId,targetId)=>{
+      more?.close();
+      openView(viewId);
+      window.setTimeout(()=>{
+        const target=document.getElementById(targetId);
+        if(target){target.scrollIntoView({behavior:'smooth',block:'start'});}
+      },180);
+    };
+    document.getElementById('v12LogFoodBtn')?.addEventListener('click',()=>openAndFocus('mealsView','nutritionLogForm'));
+    document.getElementById('v12WeighInBtn')?.addEventListener('click',()=>openAndFocus('progressView','weightForm'));
+    document.getElementById('v12WeeklyPhotoBtn')?.addEventListener('click',()=>openAndFocus('photosView','photoFileInput'));
+    document.getElementById('v12ExerciseBtn')?.addEventListener('click',()=>openAndFocus('exerciseView','exerciseRows'));
+
     document.getElementById('v12SettingsBtn')?.addEventListener('click',()=>{more?.close();document.getElementById('settingsBtn')?.click();});
     refreshSnapshot();setTimeout(refreshSnapshot,400);setInterval(refreshSnapshot,1500);
   });

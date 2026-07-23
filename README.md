@@ -1,5 +1,5 @@
-# My Zepbound Journey — Version 11.3.4
+# My Zepbound Journey 11.3.5
 
-This build replaces the hidden/styled photo button with a fully visible native iPhone file control. Tap **Choose File**, then select **Photo Library** or **Take Photo**. No JavaScript-generated click and no hidden input are used.
+Fixes the iPhone photo preview bridge. The selected image now appears in the preview box immediately and is passed to the weekly save routine.
 
-After deployment, remove the old Home Screen app and add the Cloudflare URL to the Home Screen again if the prior interface remains cached.
+Deploy every file in this ZIP together so index.html, app.js, and sw.js stay on the same version.

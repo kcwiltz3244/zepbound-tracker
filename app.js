@@ -1218,12 +1218,13 @@ function initDoseEffectiveness(){
 initDoseEffectiveness();
 
 
-// Version 11.3.4 — visible native iPhone photo input
+// Version 11.3.5 — native iPhone preview and save bridge
 const PHOTO_PROGRESS_KEY="mzjV11PhotoProgress";
 const PHOTO_DB_NAME="mzjProgressPhotos";
 const PHOTO_DB_STORE="photos";
 let photoProgressEntries=read(PHOTO_PROGRESS_KEY,[]);
 let selectedPhotoFile=null;
+window.__pendingProgressPhoto=null;
 let selectedPhotoObjectUrl="";
 const photoObjectUrls=new Set();
 
@@ -1294,6 +1295,7 @@ function showSelectedPhoto(file){
   const removeBtn=document.getElementById("removeSelectedPhotoBtn");
   if(selectedPhotoObjectUrl){URL.revokeObjectURL(selectedPhotoObjectUrl);selectedPhotoObjectUrl="";}
   selectedPhotoFile=file||null;
+  window.__pendingProgressPhoto=selectedPhotoFile;
   if(!preview)return;
   if(!file){
     preview.innerHTML='<div class="photo-preview-placeholder"><span>🖼️</span><strong>No photo selected</strong><small>Your selected picture will appear here.</small></div>';
@@ -1454,7 +1456,7 @@ function initPhotoProgress(){
   if(weights.length)weightInput.value=weights[weights.length-1].weight||"";
 
   const handleChosenPhoto=()=>{
-    const file=fileInput.files&&fileInput.files[0];
+    const file=(fileInput.files&&fileInput.files[0])||window.__pendingProgressPhoto;
     if(!file){showSelectedPhoto(null);return;}
     const imageLike=(file.type&&file.type.startsWith("image/"))||/\.(heic|heif|jpg|jpeg|png|webp)$/i.test(file.name||"");
     if(!imageLike){
@@ -1480,6 +1482,7 @@ function initPhotoProgress(){
 
   document.getElementById("removeSelectedPhotoBtn")?.addEventListener("click",()=>{
     fileInput.value="";
+    window.__pendingProgressPhoto=null;
     showSelectedPhoto(null);
   });
 
@@ -1492,6 +1495,7 @@ function initPhotoProgress(){
     const saveBtn=document.getElementById("savePhotoWeekBtn");
     try{
       if(saveBtn){saveBtn.disabled=true;saveBtn.textContent="Saving photo…";}
+      if(!selectedPhotoFile && window.__pendingProgressPhoto) selectedPhotoFile=window.__pendingProgressPhoto;
       if(selectedPhotoFile){
         setPhotoUploadStatus("Saving photo securely on this device…","loading");
         photoKey=`week-${week}`;
@@ -1535,6 +1539,7 @@ function initPhotoProgress(){
   clearFormBtn?.addEventListener("click",()=>{
     form.reset();
     fileInput.value="";
+    window.__pendingProgressPhoto=null;
     showSelectedPhoto(null);
     weekInput.value=suggestedPhotoWeek();
     dateInput.value=todayString();

@@ -905,7 +905,7 @@
           <p class="photo-help">Tap below to take a new picture or choose one already saved on your phone.</p>
           <div class="native-photo-picker native-photo-picker-visible">
             <label class="native-photo-field-label" for="photoFileInput">Progress photo</label>
-            <input id="photoFileInput" class="native-photo-input-visible" type="file" accept="image/*" aria-describedby="photoPickerHelp photoUploadStatus">
+            <input id="photoFileInput" class="native-photo-input-visible" type="file" accept="image/*" aria-describedby="photoPickerHelp photoUploadStatus" onchange="window.handleNativePhotoSelection && window.handleNativePhotoSelection(this)">
             <small id="photoPickerHelp" class="photo-picker-help">Tap <strong>Choose File</strong>, then select Photo Library or Take Photo.</small>
           </div>
           <div id="photoUploadStatus" class="photo-upload-status" role="status" aria-live="polite">No photo chosen yet.</div>
@@ -1094,7 +1094,36 @@
     </form>
   </dialog>
 
-  <script src="app.js?v=11.3.4"></script>
+  <script>
+  // Native inline fallback for iPhone Safari/PWA. This runs directly from the
+  // file input change event, even if an older cached app.js is still active.
+  window.handleNativePhotoSelection = function(input) {
+    const file = input && input.files && input.files[0];
+    const status = document.getElementById("photoUploadStatus");
+    const preview = document.getElementById("photoUploadPreview");
+    const removeBtn = document.getElementById("removeSelectedPhotoBtn");
+    if (!file) return;
+    window.__pendingProgressPhoto = file;
+    if (status) {
+      status.textContent = "Photo selected and ready to save.";
+      status.className = "photo-upload-status is-ready";
+    }
+    if (removeBtn) removeBtn.hidden = false;
+    if (!preview) return;
+    const reader = new FileReader();
+    reader.onload = function(event) {
+      const img = document.createElement("img");
+      img.alt = "Selected weekly progress photo";
+      img.src = event.target.result;
+      preview.replaceChildren(img);
+    };
+    reader.onerror = function() {
+      preview.innerHTML = '<div class="photo-preview-placeholder"><span>✅</span><strong>Photo selected</strong><small>Preview unavailable, but the photo is ready to save.</small></div>';
+    };
+    reader.readAsDataURL(file);
+  };
+</script>
+<script src="app.js?v=11.3.5"></script>
   <script>
     if ("serviceWorker" in navigator) {
       window.addEventListener("load", () => navigator.serviceWorker.register("./sw.js"));

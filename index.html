@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#2563eb" />
   <title>My Zepbound Journey</title>
   <link rel="manifest" href="manifest.json" />
-  <link rel="stylesheet" href="styles.css?v=11.2.1" />
+  <link rel="stylesheet" href="styles.css?v=11.2.6" />
 </head>
 <body>
   <section id="dayOneOverlay" class="day-one-overlay hidden">
@@ -894,21 +894,22 @@
         <section class="view-hero photos-hero">
           <p class="eyebrow light">My progress in pictures</p>
           <h2>See the changes week by week.</h2>
-          <p>Keep your photos in Google Photos and your weekly details organized here.</p>
+          <p>Take a photo or choose one from your phone, then save it with your weekly details.</p>
         </section>
 
-        <section class="panel photo-album-panel">
+        <section class="panel photo-upload-panel">
           <div class="panel-heading">
-            <div><p class="eyebrow">Google Photos album</p><h2>My Zepbound Journey</h2></div>
+            <div><p class="eyebrow">Add progress photo</p><h2>Upload directly from your phone</h2></div>
             <span class="mini-icon">📸</span>
           </div>
-          <p class="photo-help">Paste the album address from your browser address bar. The app will remember it on this device.</p>
-          <div class="photo-album-controls">
-            <input id="photoAlbumUrl" type="url" placeholder="Paste your Google Photos album link">
-            <button id="savePhotoAlbumBtn" type="button" class="secondary-button">Save link</button>
-            <a id="openPhotoAlbumBtn" class="primary-button" href="#" target="_blank" rel="noopener" role="button">Open album</a>
+          <p class="photo-help">Tap below to take a new picture or choose one already saved on your phone.</p>
+          <label class="photo-picker-button" for="photoFileInput">📷 Take or choose photo</label>
+          <input id="photoFileInput" class="visually-hidden" type="file" accept="image/*">
+          <div id="photoUploadPreview" class="photo-upload-preview">
+            <div class="photo-preview-placeholder"><span>🖼️</span><strong>No photo selected</strong><small>Your selected picture will appear here.</small></div>
           </div>
-          <small class="privacy-note">Your album stays private unless you change its sharing settings in Google Photos.</small>
+          <button id="removeSelectedPhotoBtn" type="button" class="secondary-button photo-remove-selection" hidden>Remove selected photo</button>
+          <small class="privacy-note">Photos stay inside this app on this device. They are not uploaded or shared online.</small>
         </section>
 
         <section class="panel">
@@ -921,7 +922,6 @@
             <label>Weight<div class="input-with-unit"><input id="photoWeight" type="number" step="0.1" min="100" max="700"><span>lb</span></div></label>
             <label>Dose<select id="photoDose"><option>2.5 mg</option><option>5 mg</option><option>7.5 mg</option><option>10 mg</option><option>12.5 mg</option><option>15 mg</option></select></label>
             <label class="photo-notes-label">Notes<textarea id="photoNotes" rows="3" placeholder="How are you feeling? What changes do you notice?"></textarea></label>
-            <label class="toggle-row photo-confirm"><input id="photoAdded" type="checkbox"><span>Photo added to my Google Photos album</span></label>
             <div class="button-group photo-form-actions">
               <button type="submit" class="primary-button">Save week</button>
               <button id="copyPhotoLabelBtn" type="button" class="secondary-button">Copy photo label</button>
@@ -988,7 +988,7 @@
         </section>
       </section>
       <section class="about-card">
-        <strong>My Zepbound Journey — Version 11.2.5</strong>
+        <strong>My Zepbound Journey — Version 11.2.6</strong>
         <span>Created by Kevin Wiltz</span>
         <small>One Day. One Choice. One Step at a Time.</small>
       </section>
@@ -1069,7 +1069,7 @@
     </form>
   </dialog>
 
-  <script src="app.js?v=11.2.1"></script>
+  <script src="app.js?v=11.2.6"></script>
   <script>
     if ("serviceWorker" in navigator) {
       window.addEventListener("load", () => navigator.serviceWorker.register("./sw.js"));

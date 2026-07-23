@@ -69,3 +69,17 @@ Added Tillamook Country Smoker Original Smoked Sausages to the built-in food dat
 ## Version 11.2.5
 
 Added **Tilapia, cooked** to the built-in food database. Default serving: 4 oz cooked (145 calories, 30 g protein, 0 g carbohydrate, 3 g fat, 63 mg sodium). Search terms include tilapia, tilapia fillet, grilled tilapia, baked tilapia, and fish fillet.
+
+
+## Version 11.2.6 — Direct Phone Photo Upload
+
+- Removed all Google Photos URL, Save link, and Open album controls.
+- Added **Take or choose photo** for direct photo selection on phones and tablets.
+- Stores weekly photos privately in IndexedDB on the current device.
+- Shows photo previews in the weekly gallery.
+- Displays saved photos side by side in Compare Progress.
+- Editing a week keeps its existing photo unless a replacement is selected.
+- Deleting a weekly record also deletes its locally stored photo.
+
+### Important privacy and backup note
+Photos are stored only in this browser/app on this device. Clearing site data, uninstalling the app, or changing devices may remove them. Keep important originals in the phone's Photos app or another backup location.

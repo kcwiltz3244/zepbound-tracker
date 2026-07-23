@@ -1218,10 +1218,15 @@ function initDoseEffectiveness(){
 initDoseEffectiveness();
 
 
-// Version 11.2 — Google Photos weekly progress log
+// Version 11.2.6 — direct weekly progress photo storage
 const PHOTO_PROGRESS_KEY="mzjV11PhotoProgress";
-const PHOTO_ALBUM_KEY="mzjV11PhotoAlbumUrl";
+const PHOTO_DB_NAME="mzjProgressPhotos";
+const PHOTO_DB_STORE="photos";
 let photoProgressEntries=read(PHOTO_PROGRESS_KEY,[]);
+let selectedPhotoFile=null;
+let selectedPhotoObjectUrl="";
+const photoObjectUrls=new Set();
+
 function photoEntryLabel(entry){
   return `WEEK ${entry.week}\n${formatDate(entry.date)}\n${entry.weight?entry.weight+" lbs":""}\nDose: ${entry.dose}${entry.notes?"\n"+entry.notes:""}`.trim();
 }
@@ -1231,106 +1236,157 @@ function suggestedPhotoWeek(){
   const now=new Date(todayString()+"T00:00:00");
   return Math.max(1,Math.floor((now-start)/604800000)+1);
 }
-function normalizePhotoAlbumUrl(value){
-  let url=(value||"").trim();
-  if(!url)return "";
-  if(!/^https?:\/\//i.test(url))url=`https://${url.replace(/^\/+/,"")}`;
-  try{
-    const parsed=new URL(url);
-    const allowed=parsed.hostname==="photos.google.com"||parsed.hostname.endsWith(".photos.google.com")||parsed.hostname==="photos.app.goo.gl";
-    if(!allowed)return "";
-    return parsed.href;
-  }catch{return "";}
+function openPhotoDb(){
+  return new Promise((resolve,reject)=>{
+    const request=indexedDB.open(PHOTO_DB_NAME,1);
+    request.onupgradeneeded=()=>{
+      const db=request.result;
+      if(!db.objectStoreNames.contains(PHOTO_DB_STORE))db.createObjectStore(PHOTO_DB_STORE);
+    };
+    request.onsuccess=()=>resolve(request.result);
+    request.onerror=()=>reject(request.error||new Error("Could not open photo storage."));
+  });
 }
-function photoAlbumLinkProblem(url){
-  try{
-    const parsed=new URL(url);
-    if(parsed.hostname==="photos.google.com" && parsed.pathname.startsWith("/share/") && !parsed.searchParams.get("key")){
-      return "That Google Photos share address is incomplete. Open the album itself and copy the full address from the browser address bar, or create a share link that includes the complete key.";
-    }
-  }catch{}
-  return "";
+async function putProgressPhoto(key,blob){
+  const db=await openPhotoDb();
+  await new Promise((resolve,reject)=>{
+    const tx=db.transaction(PHOTO_DB_STORE,"readwrite");
+    tx.objectStore(PHOTO_DB_STORE).put(blob,key);
+    tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error);tx.onabort=()=>reject(tx.error);
+  });
+  db.close();
 }
-function updatePhotoAlbumLink(){
-  const link=document.getElementById("openPhotoAlbumBtn");
-  const input=document.getElementById("photoAlbumUrl");
-  if(!link||!input)return;
-  const url=normalizePhotoAlbumUrl(input.value||localStorage.getItem(PHOTO_ALBUM_KEY)||"");
-  link.href=url||"#";
-  link.setAttribute("aria-disabled",url?"false":"true");
-  link.classList.toggle("disabled",!url);
+async function getProgressPhoto(key){
+  if(!key)return null;
+  const db=await openPhotoDb();
+  const result=await new Promise((resolve,reject)=>{
+    const tx=db.transaction(PHOTO_DB_STORE,"readonly");
+    const req=tx.objectStore(PHOTO_DB_STORE).get(key);
+    req.onsuccess=()=>resolve(req.result||null);req.onerror=()=>reject(req.error);
+  });
+  db.close();return result;
 }
-function openPhotoAlbum(event){
-  const input=document.getElementById("photoAlbumUrl");
-  const url=normalizePhotoAlbumUrl(input?.value||localStorage.getItem(PHOTO_ALBUM_KEY)||"");
-  if(!url){
-    event.preventDefault();
-    alert("Paste a valid Google Photos album link, then tap Save link.");
-    return;
+async function deleteProgressPhoto(key){
+  if(!key)return;
+  const db=await openPhotoDb();
+  await new Promise((resolve,reject)=>{
+    const tx=db.transaction(PHOTO_DB_STORE,"readwrite");
+    tx.objectStore(PHOTO_DB_STORE).delete(key);
+    tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error);tx.onabort=()=>reject(tx.error);
+  });
+  db.close();
+}
+function releasePhotoObjectUrls(){
+  photoObjectUrls.forEach(url=>URL.revokeObjectURL(url));photoObjectUrls.clear();
+}
+function makePhotoUrl(blob){
+  if(!blob)return "";
+  const url=URL.createObjectURL(blob);photoObjectUrls.add(url);return url;
+}
+function showSelectedPhoto(file){
+  const preview=document.getElementById("photoUploadPreview");
+  const removeBtn=document.getElementById("removeSelectedPhotoBtn");
+  if(selectedPhotoObjectUrl){URL.revokeObjectURL(selectedPhotoObjectUrl);selectedPhotoObjectUrl="";}
+  selectedPhotoFile=file||null;
+  if(!preview)return;
+  if(!file){
+    preview.innerHTML='<div class="photo-preview-placeholder"><span>🖼️</span><strong>No photo selected</strong><small>Your selected picture will appear here.</small></div>';
+    if(removeBtn)removeBtn.hidden=true;return;
   }
-  const problem=photoAlbumLinkProblem(url);
-  if(problem){event.preventDefault();alert(problem);return;}
-  if(input)input.value=url;
-  localStorage.setItem(PHOTO_ALBUM_KEY,url);
-  const link=document.getElementById("openPhotoAlbumBtn");
-  if(link)link.href=url;
-  // Do not call window.open here. Let the browser follow the real hyperlink
-  // from the user's click so Google Photos receives the exact saved URL.
+  selectedPhotoObjectUrl=URL.createObjectURL(file);
+  preview.innerHTML=`<img src="${selectedPhotoObjectUrl}" alt="Selected weekly progress photo">`;
+  if(removeBtn)removeBtn.hidden=false;
 }
-function loadPhotoEntry(week){
+async function loadPhotoEntry(week){
   const e=photoProgressEntries.find(x=>Number(x.week)===Number(week));
   if(!e)return;
-  photoWeek.value=e.week;photoDate.value=e.date;photoWeight.value=e.weight||"";photoDose.value=e.dose||"2.5 mg";photoNotes.value=e.notes||"";photoAdded.checked=!!e.added;
+  photoWeek.value=e.week;photoDate.value=e.date;photoWeight.value=e.weight||"";photoDose.value=e.dose||"2.5 mg";photoNotes.value=e.notes||"";
+  showSelectedPhoto(null);
+  if(e.photoKey){
+    try{
+      const blob=await getProgressPhoto(e.photoKey);
+      if(blob){
+        selectedPhotoFile=new File([blob],`week-${e.week}.jpg`,{type:blob.type||"image/jpeg"});
+        showSelectedPhoto(selectedPhotoFile);
+      }
+    }catch(err){console.error(err);}
+  }
   document.getElementById("photoWeekForm")?.scrollIntoView({behavior:"smooth",block:"start"});
 }
-function deletePhotoEntry(week){
-  if(!confirm(`Delete the Week ${week} record? This will not delete the photo from Google Photos.`))return;
+async function deletePhotoEntry(week){
+  const entry=photoProgressEntries.find(x=>Number(x.week)===Number(week));
+  if(!entry||!confirm(`Delete the Week ${week} record and its saved photo?`))return;
+  try{await deleteProgressPhoto(entry.photoKey);}catch(err){console.error(err);}
   photoProgressEntries=photoProgressEntries.filter(x=>Number(x.week)!==Number(week));
-  write(PHOTO_PROGRESS_KEY,photoProgressEntries);renderPhotoProgress();
+  write(PHOTO_PROGRESS_KEY,photoProgressEntries);await renderPhotoProgress();
 }
-function renderPhotoProgress(){
+async function photoCardMarkup(e){
+  let image='<div class="photo-card-placeholder">📷<span>No photo</span></div>';
+  if(e.photoKey){
+    try{const blob=await getProgressPhoto(e.photoKey);if(blob)image=`<img class="photo-card-image" src="${makePhotoUrl(blob)}" alt="Week ${Number(e.week)} progress photo">`;}catch(err){console.error(err);}
+  }
+  return `<article class="photo-week-card ${e.photoKey?"photo-complete":""}">
+    ${image}
+    <div class="photo-week-card-body">
+      <div class="photo-week-card-top"><span class="photo-week-badge">Week ${e.week}</span><span class="photo-status">${e.photoKey?"✓ Photo saved":"Photo pending"}</span></div>
+      <strong>${formatDate(e.date)}</strong>
+      <div class="photo-week-details"><span>⚖️ ${e.weight?esc(e.weight)+" lb":"No weight"}</span><span>💉 ${esc(e.dose||"—")}</span></div>
+      ${e.notes?`<p>${esc(e.notes)}</p>`:""}
+      <div class="photo-card-actions"><button type="button" class="secondary-button" onclick="loadPhotoEntry(${Number(e.week)})">Edit</button><button type="button" class="secondary-button" onclick="navigator.clipboard.writeText(photoEntryLabel(photoProgressEntries.find(x=>Number(x.week)===${Number(e.week)}))).then(()=>alert('Label copied.'))">Copy label</button><button type="button" class="danger-button" onclick="deletePhotoEntry(${Number(e.week)})">Delete</button></div>
+    </div>
+  </article>`;
+}
+async function renderPhotoProgress(){
   const grid=document.getElementById("photoWeekGrid");if(!grid)return;
+  releasePhotoObjectUrls();
   photoProgressEntries.sort((a,b)=>Number(a.week)-Number(b.week));
-  grid.innerHTML=photoProgressEntries.length?photoProgressEntries.map(e=>`<article class="photo-week-card ${e.added?"photo-complete":""}">
-    <div class="photo-week-card-top"><span class="photo-week-badge">Week ${e.week}</span><span class="photo-status">${e.added?"✓ Photo added":"Photo pending"}</span></div>
-    <strong>${formatDate(e.date)}</strong>
-    <div class="photo-week-details"><span>⚖️ ${e.weight?esc(e.weight)+" lb":"No weight"}</span><span>💉 ${esc(e.dose||"—")}</span></div>
-    ${e.notes?`<p>${esc(e.notes)}</p>`:""}
-    <div class="photo-card-actions"><button type="button" class="secondary-button" onclick="loadPhotoEntry(${Number(e.week)})">Edit</button><button type="button" class="secondary-button" onclick="navigator.clipboard.writeText(photoEntryLabel(photoProgressEntries.find(x=>Number(x.week)===${Number(e.week)}))).then(()=>alert('Label copied.'))">Copy label</button><button type="button" class="danger-button" onclick="deletePhotoEntry(${Number(e.week)})">Delete</button></div>
-  </article>`).join(""):"<div class='photo-empty'><div>📷</div><strong>No weekly photos logged yet.</strong><p>Start with Week 1 and build your visual journey one picture at a time.</p></div>";
+  if(photoProgressEntries.length){grid.innerHTML=(await Promise.all(photoProgressEntries.map(photoCardMarkup))).join("");}
+  else grid.innerHTML="<div class='photo-empty'><div>📷</div><strong>No weekly photos logged yet.</strong><p>Start with Week 1 and build your visual journey one picture at a time.</p></div>";
   const a=document.getElementById("comparePhotoA"),b=document.getElementById("comparePhotoB");
   const opts=photoProgressEntries.map(e=>`<option value="${e.week}">Week ${e.week}</option>`).join("");
-  if(a&&b){const av=a.value,bv=b.value;a.innerHTML=opts;b.innerHTML=opts;if(photoProgressEntries.length){a.value=photoProgressEntries.some(e=>String(e.week)===av)?av:String(photoProgressEntries[0].week);b.value=photoProgressEntries.some(e=>String(e.week)===bv)?bv:String(photoProgressEntries[photoProgressEntries.length-1].week);}renderPhotoComparison();}
+  if(a&&b){const av=a.value,bv=b.value;a.innerHTML=opts;b.innerHTML=opts;if(photoProgressEntries.length){a.value=photoProgressEntries.some(e=>String(e.week)===av)?av:String(photoProgressEntries[0].week);b.value=photoProgressEntries.some(e=>String(e.week)===bv)?bv:String(photoProgressEntries[photoProgressEntries.length-1].week);}await renderPhotoComparison();}
 }
-function renderPhotoComparison(){
+async function comparisonCard(entry){
+  let image='<div class="photo-compare-placeholder">No photo saved</div>';
+  if(entry.photoKey){try{const blob=await getProgressPhoto(entry.photoKey);if(blob)image=`<img class="photo-compare-image" src="${makePhotoUrl(blob)}" alt="Week ${Number(entry.week)} comparison photo">`;}catch(err){console.error(err);}}
+  return `<article>${image}<div class="photo-compare-copy"><span>Week ${entry.week}</span><strong>${entry.weight?entry.weight+" lb":"—"}</strong><small>${formatDate(entry.date)} • ${esc(entry.dose)}</small><p>${esc(entry.notes||"No notes")}</p></div></article>`;
+}
+async function renderPhotoComparison(){
   const out=document.getElementById("photoCompareResult");if(!out)return;
   const a=photoProgressEntries.find(e=>String(e.week)===document.getElementById("comparePhotoA")?.value),b=photoProgressEntries.find(e=>String(e.week)===document.getElementById("comparePhotoB")?.value);
   if(!a||!b){out.innerHTML="<p>Add at least one weekly record to compare.</p>";return;}
   const change=(a.weight&&b.weight)?(Number(b.weight)-Number(a.weight)).toFixed(1):null;
-  out.innerHTML=`<article><span>Week ${a.week}</span><strong>${a.weight?a.weight+" lb":"—"}</strong><small>${formatDate(a.date)} • ${esc(a.dose)}</small><p>${esc(a.notes||"No notes")}</p></article><div class="compare-arrow">→</div><article><span>Week ${b.week}</span><strong>${b.weight?b.weight+" lb":"—"}</strong><small>${formatDate(b.date)} • ${esc(b.dose)}</small><p>${esc(b.notes||"No notes")}</p></article>${change!==null?`<div class="compare-change">Weight change: <strong>${Number(change)>0?"+":""}${change} lb</strong></div>`:""}`;
+  out.innerHTML=`${await comparisonCard(a)}<div class="compare-arrow">→</div>${await comparisonCard(b)}${change!==null?`<div class="compare-change">Weight change: <strong>${Number(change)>0?"+":""}${change} lb</strong></div>`:""}`;
 }
 function initPhotoProgress(){
   const form=document.getElementById("photoWeekForm");if(!form)return;
-  photoAlbumUrl.value=localStorage.getItem(PHOTO_ALBUM_KEY)||"";
+  const fileInput=document.getElementById("photoFileInput");
   photoWeek.value=suggestedPhotoWeek();photoDate.value=todayString();
   const todayDaily=read(KEYS.daily,[]).find(x=>x.date===todayString());if(todayDaily?.dose)photoDose.value=todayDaily.dose;
   const weights=read(KEYS.weights,[]);if(weights.length)photoWeight.value=weights[weights.length-1].weight||"";
-  savePhotoAlbumBtn.onclick=()=>{
-    const u=normalizePhotoAlbumUrl(photoAlbumUrl.value);
-    if(!u){alert("That does not look like a Google Photos album address. Open the album and copy the full address from the browser address bar.");return;}
-    const problem=photoAlbumLinkProblem(u);
-    if(problem){alert(problem);return;}
-    photoAlbumUrl.value=u;
-    localStorage.setItem(PHOTO_ALBUM_KEY,u);
-    updatePhotoAlbumLink();
-    alert("Album link saved on this device.");
-  };
-  photoAlbumUrl.addEventListener("input",updatePhotoAlbumLink);
-  openPhotoAlbumBtn.addEventListener("click",openPhotoAlbum);
-  updatePhotoAlbumLink();
-  form.addEventListener("submit",e=>{e.preventDefault();const entry={week:Number(photoWeek.value),date:photoDate.value,weight:photoWeight.value?Number(photoWeight.value):null,dose:photoDose.value,notes:photoNotes.value.trim(),added:photoAdded.checked,updatedAt:new Date().toISOString()};const i=photoProgressEntries.findIndex(x=>Number(x.week)===entry.week);if(i>=0)photoProgressEntries[i]=entry;else photoProgressEntries.push(entry);write(PHOTO_PROGRESS_KEY,photoProgressEntries);renderPhotoProgress();alert(`Week ${entry.week} saved.`);});
+  fileInput?.addEventListener("change",()=>{
+    const file=fileInput.files?.[0];
+    if(!file)return showSelectedPhoto(null);
+    if(!file.type.startsWith("image/")){alert("Please choose an image file.");fileInput.value="";return;}
+    if(file.size>20*1024*1024){alert("That photo is larger than 20 MB. Choose a smaller image.");fileInput.value="";return;}
+    showSelectedPhoto(file);
+  });
+  document.getElementById("removeSelectedPhotoBtn")?.addEventListener("click",()=>{if(fileInput)fileInput.value="";showSelectedPhoto(null);});
+  form.addEventListener("submit",async e=>{
+    e.preventDefault();
+    const week=Number(photoWeek.value);
+    if(!week||!photoDate.value){alert("Enter a week number and date.");return;}
+    const existing=photoProgressEntries.find(x=>Number(x.week)===week);
+    let photoKey=existing?.photoKey||"";
+    try{
+      if(selectedPhotoFile){photoKey=`week-${week}`;await putProgressPhoto(photoKey,selectedPhotoFile);}
+      const entry={week,date:photoDate.value,weight:photoWeight.value?Number(photoWeight.value):null,dose:photoDose.value,notes:photoNotes.value.trim(),photoKey,updatedAt:new Date().toISOString()};
+      const i=photoProgressEntries.findIndex(x=>Number(x.week)===week);if(i>=0)photoProgressEntries[i]=entry;else photoProgressEntries.push(entry);
+      write(PHOTO_PROGRESS_KEY,photoProgressEntries);await renderPhotoProgress();alert(`Week ${week} saved${photoKey?" with photo":""}.`);
+    }catch(err){console.error(err);alert("The photo could not be saved. Your device may be low on storage.");}
+  });
   copyPhotoLabelBtn.onclick=()=>{const entry={week:Number(photoWeek.value||suggestedPhotoWeek()),date:photoDate.value||todayString(),weight:photoWeight.value,dose:photoDose.value,notes:photoNotes.value.trim()};navigator.clipboard.writeText(photoEntryLabel(entry)).then(()=>alert("Photo label copied. Paste it into Markup or your photo editor."));};
-  clearPhotoFormBtn.onclick=()=>{form.reset();photoWeek.value=suggestedPhotoWeek();photoDate.value=todayString();photoDose.value="2.5 mg";};
+  clearPhotoFormBtn.onclick=()=>{form.reset();if(fileInput)fileInput.value="";showSelectedPhoto(null);photoWeek.value=suggestedPhotoWeek();photoDate.value=todayString();photoDose.value="2.5 mg";};
   comparePhotoA.onchange=renderPhotoComparison;comparePhotoB.onchange=renderPhotoComparison;
   renderPhotoProgress();
 }

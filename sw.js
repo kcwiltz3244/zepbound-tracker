@@ -1,5 +1,5 @@
-const CACHE_NAME = "my-zepbound-journey-v11-2-6-direct-photos";
-const CORE_ASSETS = ["./", "./index.html", "./styles.css?v=11.2.6", "./app.js?v=11.2.6", "./manifest.json"];
+const CACHE_NAME = "my-zepbound-journey-v11-3-photo-gallery";
+const CORE_ASSETS = ["./", "./index.html", "./styles.css?v=11.3", "./app.js?v=11.3", "./manifest.json"];
 
 self.addEventListener("install", event => {
   event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(CORE_ASSETS)));

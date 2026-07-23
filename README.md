@@ -83,3 +83,14 @@ Added **Tilapia, cooked** to the built-in food database. Default serving: 4 oz c
 
 ### Important privacy and backup note
 Photos are stored only in this browser/app on this device. Clearing site data, uninstalling the app, or changing devices may remove them. Keep important originals in the phone's Photos app or another backup location.
+
+
+## Version 11.3 — Photo Gallery and Full-Screen Viewer
+
+- Added a clear **View photo** button to every weekly photo card.
+- Weekly photo thumbnails can also be tapped to open the picture.
+- Added a full-screen viewer showing the photo, week, date, weight, dose, and notes.
+- Added Previous and Next buttons to move through saved weekly pictures.
+- Added an Edit Week button from the viewer.
+- Newly saved photos open automatically so you can immediately confirm they were stored.
+- Existing Version 11.2.6 photos remain available because the same IndexedDB storage and record keys are retained.

@@ -4,9 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#2563eb" />
-  <title>My Zepbound Journey</title>
+  <title>My Zepbound Journey — Version 11.3</title>
   <link rel="manifest" href="manifest.json" />
-  <link rel="stylesheet" href="styles.css?v=11.2.6" />
+  <link rel="stylesheet" href="styles.css?v=11.3" />
 </head>
 <body>
   <section id="dayOneOverlay" class="day-one-overlay hidden">
@@ -1007,6 +1007,27 @@
     </nav>
   </div>
 
+  <div id="photoViewer" class="photo-viewer" hidden aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="photoViewerTitle">
+    <div class="photo-viewer-backdrop" data-close-photo-viewer></div>
+    <section class="photo-viewer-card">
+      <header class="photo-viewer-header">
+        <div>
+          <p class="eyebrow">Progress photo</p>
+          <h2 id="photoViewerTitle">Week 1</h2>
+        </div>
+        <button id="closePhotoViewerBtn" type="button" class="photo-viewer-close" aria-label="Close photo viewer">✕</button>
+      </header>
+      <div id="photoViewerImageWrap" class="photo-viewer-image-wrap"></div>
+      <div id="photoViewerDetails" class="photo-viewer-details"></div>
+      <div class="photo-viewer-controls">
+        <button id="previousPhotoBtn" type="button" class="secondary-button">← Previous</button>
+        <button id="editViewedPhotoBtn" type="button" class="primary-button">Edit week</button>
+        <button id="nextPhotoBtn" type="button" class="secondary-button">Next →</button>
+      </div>
+      <p class="photo-viewer-tip">Pinch to zoom on your phone. Swipe is not required—use Previous and Next.</p>
+    </section>
+  </div>
+
   <dialog id="shoppingDialog">
     <form method="dialog" class="dialog-card">
       <div class="panel-heading">
@@ -1069,7 +1090,7 @@
     </form>
   </dialog>
 
-  <script src="app.js?v=11.2.6"></script>
+  <script src="app.js?v=11.3"></script>
   <script>
     if ("serviceWorker" in navigator) {
       window.addEventListener("load", () => navigator.serviceWorker.register("./sw.js"));

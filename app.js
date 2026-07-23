@@ -1323,7 +1323,7 @@ async function deletePhotoEntry(week){
 async function photoCardMarkup(e){
   let image='<div class="photo-card-placeholder">📷<span>No photo</span></div>';
   if(e.photoKey){
-    try{const blob=await getProgressPhoto(e.photoKey);if(blob)image=`<img class="photo-card-image" src="${makePhotoUrl(blob)}" alt="Week ${Number(e.week)} progress photo">`;}catch(err){console.error(err);}
+    try{const blob=await getProgressPhoto(e.photoKey);if(blob)image=`<button type="button" class="photo-card-image-button" onclick="openPhotoViewer(${Number(e.week)})" aria-label="View Week ${Number(e.week)} photo"><img class="photo-card-image" src="${makePhotoUrl(blob)}" alt="Week ${Number(e.week)} progress photo"></button>`;}catch(err){console.error(err);}
   }
   return `<article class="photo-week-card ${e.photoKey?"photo-complete":""}">
     ${image}
@@ -1332,7 +1332,7 @@ async function photoCardMarkup(e){
       <strong>${formatDate(e.date)}</strong>
       <div class="photo-week-details"><span>⚖️ ${e.weight?esc(e.weight)+" lb":"No weight"}</span><span>💉 ${esc(e.dose||"—")}</span></div>
       ${e.notes?`<p>${esc(e.notes)}</p>`:""}
-      <div class="photo-card-actions"><button type="button" class="secondary-button" onclick="loadPhotoEntry(${Number(e.week)})">Edit</button><button type="button" class="secondary-button" onclick="navigator.clipboard.writeText(photoEntryLabel(photoProgressEntries.find(x=>Number(x.week)===${Number(e.week)}))).then(()=>alert('Label copied.'))">Copy label</button><button type="button" class="danger-button" onclick="deletePhotoEntry(${Number(e.week)})">Delete</button></div>
+      <div class="photo-card-actions"><button type="button" class="primary-button" onclick="openPhotoViewer(${Number(e.week)})" ${e.photoKey?"":"disabled"}>View photo</button><button type="button" class="secondary-button" onclick="loadPhotoEntry(${Number(e.week)})">Edit</button><button type="button" class="secondary-button" onclick="navigator.clipboard.writeText(photoEntryLabel(photoProgressEntries.find(x=>Number(x.week)===${Number(e.week)}))).then(()=>alert('Label copied.'))">Copy label</button><button type="button" class="danger-button" onclick="deletePhotoEntry(${Number(e.week)})">Delete</button></div>
     </div>
   </article>`;
 }
@@ -1358,6 +1358,49 @@ async function renderPhotoComparison(){
   const change=(a.weight&&b.weight)?(Number(b.weight)-Number(a.weight)).toFixed(1):null;
   out.innerHTML=`${await comparisonCard(a)}<div class="compare-arrow">→</div>${await comparisonCard(b)}${change!==null?`<div class="compare-change">Weight change: <strong>${Number(change)>0?"+":""}${change} lb</strong></div>`:""}`;
 }
+
+let photoViewerWeek=null;
+let photoViewerObjectUrl="";
+function photoEntriesWithImages(){return photoProgressEntries.filter(e=>e.photoKey).sort((a,b)=>Number(a.week)-Number(b.week));}
+function closePhotoViewer(){
+  const viewer=document.getElementById("photoViewer");
+  if(!viewer)return;
+  viewer.hidden=true;viewer.setAttribute("aria-hidden","true");document.body.classList.remove("photo-viewer-open");
+  if(photoViewerObjectUrl){URL.revokeObjectURL(photoViewerObjectUrl);photoViewerObjectUrl="";}
+  photoViewerWeek=null;
+}
+async function openPhotoViewer(week){
+  const entry=photoProgressEntries.find(e=>Number(e.week)===Number(week));
+  if(!entry?.photoKey){alert(`No photo is saved for Week ${week}.`);return;}
+  const viewer=document.getElementById("photoViewer"),wrap=document.getElementById("photoViewerImageWrap"),details=document.getElementById("photoViewerDetails");
+  if(!viewer||!wrap||!details)return;
+  try{
+    const blob=await getProgressPhoto(entry.photoKey);
+    if(!blob){alert("The saved photo could not be found on this device.");return;}
+    if(photoViewerObjectUrl)URL.revokeObjectURL(photoViewerObjectUrl);
+    photoViewerObjectUrl=URL.createObjectURL(blob);photoViewerWeek=Number(entry.week);
+    document.getElementById("photoViewerTitle").textContent=`Week ${entry.week}`;
+    wrap.innerHTML=`<img src="${photoViewerObjectUrl}" alt="Week ${Number(entry.week)} progress photo">`;
+    details.innerHTML=`<div><span>Date</span><strong>${formatDate(entry.date)}</strong></div><div><span>Weight</span><strong>${entry.weight?esc(entry.weight)+" lb":"—"}</strong></div><div><span>Dose</span><strong>${esc(entry.dose||"—")}</strong></div><div class="photo-viewer-notes"><span>Notes</span><p>${esc(entry.notes||"No notes added.")}</p></div>`;
+    const entries=photoEntriesWithImages(),index=entries.findIndex(e=>Number(e.week)===photoViewerWeek);
+    document.getElementById("previousPhotoBtn").disabled=index<=0;
+    document.getElementById("nextPhotoBtn").disabled=index<0||index>=entries.length-1;
+    viewer.hidden=false;viewer.setAttribute("aria-hidden","false");document.body.classList.add("photo-viewer-open");
+  }catch(err){console.error(err);alert("The photo could not be opened.");}
+}
+function movePhotoViewer(direction){
+  const entries=photoEntriesWithImages(),index=entries.findIndex(e=>Number(e.week)===Number(photoViewerWeek));
+  const next=entries[index+direction];if(next)openPhotoViewer(next.week);
+}
+function initPhotoViewer(){
+  document.getElementById("closePhotoViewerBtn")?.addEventListener("click",closePhotoViewer);
+  document.querySelectorAll("[data-close-photo-viewer]").forEach(el=>el.addEventListener("click",closePhotoViewer));
+  document.getElementById("previousPhotoBtn")?.addEventListener("click",()=>movePhotoViewer(-1));
+  document.getElementById("nextPhotoBtn")?.addEventListener("click",()=>movePhotoViewer(1));
+  document.getElementById("editViewedPhotoBtn")?.addEventListener("click",()=>{const week=photoViewerWeek;closePhotoViewer();if(week!==null)loadPhotoEntry(week);});
+  document.addEventListener("keydown",e=>{if(document.getElementById("photoViewer")?.hidden!==false)return;if(e.key==="Escape")closePhotoViewer();if(e.key==="ArrowLeft")movePhotoViewer(-1);if(e.key==="ArrowRight")movePhotoViewer(1);});
+}
+
 function initPhotoProgress(){
   const form=document.getElementById("photoWeekForm");if(!form)return;
   const fileInput=document.getElementById("photoFileInput");
@@ -1382,7 +1425,8 @@ function initPhotoProgress(){
       if(selectedPhotoFile){photoKey=`week-${week}`;await putProgressPhoto(photoKey,selectedPhotoFile);}
       const entry={week,date:photoDate.value,weight:photoWeight.value?Number(photoWeight.value):null,dose:photoDose.value,notes:photoNotes.value.trim(),photoKey,updatedAt:new Date().toISOString()};
       const i=photoProgressEntries.findIndex(x=>Number(x.week)===week);if(i>=0)photoProgressEntries[i]=entry;else photoProgressEntries.push(entry);
-      write(PHOTO_PROGRESS_KEY,photoProgressEntries);await renderPhotoProgress();alert(`Week ${week} saved${photoKey?" with photo":""}.`);
+      write(PHOTO_PROGRESS_KEY,photoProgressEntries);await renderPhotoProgress();
+      if(photoKey){await openPhotoViewer(week);}else{alert(`Week ${week} saved. Add a photo anytime by editing this week.`);}
     }catch(err){console.error(err);alert("The photo could not be saved. Your device may be low on storage.");}
   });
   copyPhotoLabelBtn.onclick=()=>{const entry={week:Number(photoWeek.value||suggestedPhotoWeek()),date:photoDate.value||todayString(),weight:photoWeight.value,dose:photoDose.value,notes:photoNotes.value.trim()};navigator.clipboard.writeText(photoEntryLabel(entry)).then(()=>alert("Photo label copied. Paste it into Markup or your photo editor."));};
@@ -1390,4 +1434,5 @@ function initPhotoProgress(){
   comparePhotoA.onchange=renderPhotoComparison;comparePhotoB.onchange=renderPhotoComparison;
   renderPhotoProgress();
 }
+initPhotoViewer();
 initPhotoProgress();

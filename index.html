@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#2563eb" />
   <title>My Zepbound Journey — Version 11.3.2</title>
   <link rel="manifest" href="manifest.json" />
-  <link rel="stylesheet" href="styles.css?v=11.3.3" />
+  <link rel="stylesheet" href="styles.css?v=11.3.4" />
 </head>
 <body>
   <section id="dayOneOverlay" class="day-one-overlay hidden">
@@ -903,9 +903,10 @@
             <span class="mini-icon">📸</span>
           </div>
           <p class="photo-help">Tap below to take a new picture or choose one already saved on your phone.</p>
-          <div class="native-photo-picker">
-            <input id="photoFileInput" class="native-photo-input" type="file" accept="image/*" aria-label="Take or choose a progress photo">
-            <label id="choosePhotoLabel" for="photoFileInput" class="photo-picker-button">📷 Take or choose photo</label>
+          <div class="native-photo-picker native-photo-picker-visible">
+            <label class="native-photo-field-label" for="photoFileInput">Progress photo</label>
+            <input id="photoFileInput" class="native-photo-input-visible" type="file" accept="image/*" aria-describedby="photoPickerHelp photoUploadStatus">
+            <small id="photoPickerHelp" class="photo-picker-help">Tap <strong>Choose File</strong>, then select Photo Library or Take Photo.</small>
           </div>
           <div id="photoUploadStatus" class="photo-upload-status" role="status" aria-live="polite">No photo chosen yet.</div>
           <div id="photoUploadPreview" class="photo-upload-preview">
@@ -1093,7 +1094,7 @@
     </form>
   </dialog>
 
-  <script src="app.js?v=11.3.3"></script>
+  <script src="app.js?v=11.3.4"></script>
   <script>
     if ("serviceWorker" in navigator) {
       window.addEventListener("load", () => navigator.serviceWorker.register("./sw.js"));

@@ -1218,7 +1218,7 @@ function initDoseEffectiveness(){
 initDoseEffectiveness();
 
 
-// Version 11.3.3 — native label-activated iPhone photo picker
+// Version 11.3.4 — visible native iPhone photo input
 const PHOTO_PROGRESS_KEY="mzjV11PhotoProgress";
 const PHOTO_DB_NAME="mzjProgressPhotos";
 const PHOTO_DB_STORE="photos";
@@ -1472,11 +1472,11 @@ function initPhotoProgress(){
     showSelectedPhoto(file);
   };
 
-  // The styled <label for="photoFileInput"> in index.html opens the native
-  // iPhone picker directly. Avoid fileInput.click(): Safari may block it when
-  // the file input is hidden or the app is running from the Home Screen.
-  fileInput.addEventListener("click",()=>{ fileInput.value=""; });
+  // Keep the real file input visible. iOS Safari and installed PWAs can block
+  // synthetic clicks or labels that target visually hidden file inputs.
+  // A direct tap on this native control is the most reliable approach.
   fileInput.addEventListener("change",handleChosenPhoto);
+  fileInput.addEventListener("input",handleChosenPhoto);
 
   document.getElementById("removeSelectedPhotoBtn")?.addEventListener("click",()=>{
     fileInput.value="";

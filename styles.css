@@ -551,3 +551,12 @@ fieldset{border:1px solid var(--border);border-radius:18px;margin:1rem 0}legend{
 .native-photo-picker .photo-picker-button{display:flex;width:100%;min-height:58px;border:0;align-items:center;justify-content:center;cursor:pointer;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent}
 .native-photo-picker .photo-picker-button:active{transform:scale(.99)}
 .native-photo-picker .native-photo-input:focus-visible + .photo-picker-button{outline:4px solid #f59e0b;outline-offset:3px}
+
+
+/* Version 11.3.4 — visible native iPhone file control (no hidden input or scripted click) */
+.native-photo-picker-visible{display:grid;gap:8px;position:static!important;min-height:0!important;overflow:visible!important}
+.native-photo-field-label{font-weight:850;color:var(--ink)}
+.native-photo-input-visible{position:static!important;display:block!important;width:100%!important;height:auto!important;min-height:58px!important;opacity:1!important;overflow:visible!important;pointer-events:auto!important;z-index:auto!important;font-size:16px!important;color:var(--ink);background:#fff;border:2px solid #c7d2fe;border-radius:15px;padding:8px;cursor:pointer;-webkit-appearance:none;appearance:none}
+.native-photo-input-visible::file-selector-button{min-height:40px;margin-right:10px;border:0;border-radius:11px;padding:10px 14px;background:#4f46e5;color:#fff;font:inherit;font-weight:850;cursor:pointer}
+.native-photo-input-visible::-webkit-file-upload-button{min-height:40px;margin-right:10px;border:0;border-radius:11px;padding:10px 14px;background:#4f46e5;color:#fff;font:inherit;font-weight:850;cursor:pointer}
+.photo-picker-help{display:block;color:var(--muted);line-height:1.4}

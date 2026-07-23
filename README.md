@@ -1,9 +1,9 @@
-# My Zepbound Journey — Version 12.1
+# My Zepbound Journey — Version 12.1.1
 
-Home redesign:
-- Summary-first Home page with automatically populated information
-- Daily check-in and dose effectiveness moved to their own pages
-- Reliable Home action buttons without bottom-navigation class conflicts
-- Eat Out Smart shortcut repaired
-- Return Home button on every top-level page
-- Cleaner compact cards and improved mobile layout
+Functional repair release:
+- Restores nutrition logging, food search, recent foods, and seven-day nutrition totals
+- Restores progress-photo saving and weekly gallery updates
+- Restores dose-effectiveness logging
+- Adds a direct injection log inside the Zepbound Center so effectiveness tracking can be started there
+- Keeps the cleaner Version 12.1 Home design and return buttons
+- Updates the service-worker cache so repaired files replace the broken build

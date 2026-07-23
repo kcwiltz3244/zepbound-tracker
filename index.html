@@ -238,8 +238,19 @@
 <strong id="doseTrackerFadeDay">Not enough data</strong>
 </article>
 </div>
+<section class="dose-injection-entry" aria-labelledby="doseInjectionHeading">
+<div class="panel-heading compact-heading">
+<div><p class="eyebrow">Injection log</p><h3 id="doseInjectionHeading">Start or update this week’s cycle</h3></div>
+</div>
+<form class="dose-injection-form" id="doseInjectionForm">
+<label>Injection date<input id="doseInjectionDate" required type="date"/></label>
+<label>Dose<select id="doseInjectionDose"><option>2.5 mg</option><option>5 mg</option><option>7.5 mg</option><option>10 mg</option><option>12.5 mg</option><option>15 mg</option></select></label>
+<button class="primary-button" type="submit">Save injection</button>
+</form>
+<p class="gentle-message" id="doseInjectionMessage">Save the injection first. Then the effectiveness sliders below will unlock.</p>
+</section>
 <div class="dose-guidance" id="doseTrackerNoShot">
-            Log “Injection taken today” above to begin a new seven-day tracking cycle.
+            Save an injection above to begin a new seven-day tracking cycle.
           </div>
 <form class="dose-checkin-form" id="doseEffectivenessForm">
 <input id="doseEffectivenessDate" type="hidden"/>
@@ -1040,7 +1051,7 @@
   });
 })();
 </script>
-<script src="app.js?v=12.1"></script>
+<script src="app.js?v=12.1.1"></script>
 <script>
     if ("serviceWorker" in navigator) {
       window.addEventListener("load", () => navigator.serviceWorker.register("./sw.js"));

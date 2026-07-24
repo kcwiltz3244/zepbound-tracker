@@ -1,3 +1,10 @@
+# Version 13.0.0-dev.10
+
+- Fixed recovered nutrition being hidden by an empty Version 13 storage array.
+- Merges Version 12.2 and Version 13 nutrition records by record ID.
+- Hardened More and Journal navigation with event delegation and a Journal fallback button.
+- Updated service-worker cache to dev.10.
+
 # Version 13.0.0-dev.9 — Nutrition + Journal Consolidation
 
 ## Fixed

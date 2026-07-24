@@ -5,9 +5,9 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <meta content="#2563eb" name="theme-color"/>
-<title>My Zepbound Journey — Version 12.2</title>
+<title>My Zepbound Journey — Version 12.2.1 Stable</title>
 <link href="manifest.json" rel="manifest"/>
-<link href="styles.css?v=12.2" rel="stylesheet"/>
+<link href="styles.css?v=12.2.1" rel="stylesheet"/>
 </head>
 <body>
 <section class="day-one-overlay hidden" id="dayOneOverlay">
@@ -855,7 +855,7 @@
 </section>
 </section>
 <section class="about-card">
-<strong>My Zepbound Journey — Version 12.2</strong>
+<strong>My Zepbound Journey — Version 12.2.1 Stable</strong>
 <span>Created by Kevin Wiltz</span>
 <small>One Day. One Choice. One Step at a Time.</small>
 </section>
@@ -901,9 +901,36 @@
 <button data-v12-view="milestonesView" type="button"><span>🏆</span><strong>Wins</strong><small>Milestones and victories</small></button>
 <button data-v12-view="storyView" type="button"><span>🕰️</span><strong>My Story</strong><small>Your journey timeline</small></button>
 <button id="v12SettingsBtn" type="button"><span>⚙️</span><strong>Settings</strong><small>Goals and preferences</small></button>
+<button id="backupCenterBtn" type="button"><span>🛡️</span><strong>Backup & Restore</strong><small>Protect, move, and inspect your data</small></button>
 </div>
 </section>
 </dialog>
+
+<dialog id="backupCenterDialog">
+<section class="dialog-card backup-center-dialog">
+<div class="panel-heading">
+<div><p class="eyebrow">Version 12.2.1 Stable</p><h2>Backup & Restore</h2></div>
+<button class="secondary-button" id="closeBackupCenterBtn" type="button">Close</button>
+</div>
+<p class="backup-intro">Create a complete copy of the information saved by My Zepbound Journey on this device. You can restore that file on another phone or computer.</p>
+<div class="backup-action-grid">
+<button class="backup-action-card" id="backupAllDataBtn" type="button"><span>⬇️</span><div><strong>Backup all data</strong><small>Download one JSON file containing every My Zepbound Journey storage record on this device.</small></div></button>
+<button class="backup-action-card" id="chooseRestoreFileBtn" type="button"><span>⬆️</span><div><strong>Restore a backup</strong><small>Select a backup file. Existing matching records will be replaced by the saved copy.</small></div></button>
+<button class="backup-action-card" id="refreshDiagnosticsBtn" type="button"><span>🔎</span><div><strong>Refresh diagnostics</strong><small>See exactly which storage keys exist, record counts, dates, and estimated size.</small></div></button>
+<button class="backup-action-card" id="copyDiagnosticsBtn" type="button"><span>📋</span><div><strong>Copy diagnostics</strong><small>Copy a text report that can be shared for troubleshooting.</small></div></button>
+</div>
+<input accept="application/json,.json" class="backup-file-input" id="restoreBackupFileInput" type="file"/>
+<div aria-live="polite" class="backup-status" id="backupStatus">No changes have been made. Diagnostics are read-only.</div>
+<div class="storage-summary">
+<article><small>Journey keys</small><strong id="diagnosticKeyCount">0</strong></article>
+<article><small>Estimated storage</small><strong id="diagnosticStorageSize">0 KB</strong></article>
+<article><small>Newest dated record</small><strong id="diagnosticNewestDate">—</strong></article>
+</div>
+<div class="storage-diagnostics-list" id="storageDiagnosticsList"></div>
+<p class="backup-note">Backups contain personal journey information. Keep the file somewhere private. Restoring does not affect data stored on another website address unless you restore the file there too.</p>
+</section>
+</dialog>
+
 <dialog id="shoppingDialog">
 <form class="dialog-card" method="dialog">
 <div class="panel-heading">
@@ -1049,7 +1076,7 @@
   });
 })();
 </script>
-<script src="app.js?v=12.2"></script>
+<script src="app.js?v=12.2.1"></script>
 <script>
     if ("serviceWorker" in navigator) {
       window.addEventListener("load", () => navigator.serviceWorker.register("./sw.js"));

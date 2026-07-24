@@ -1655,3 +1655,176 @@ initPhotoProgress();
     effectForm?.scrollIntoView({behavior:"smooth",block:"start"});
   });
 })();
+
+/* ===== Version 12.2.1 Stable — Complete Backup, Restore, and Diagnostics ===== */
+(function initBackupRestoreCenter(){
+  const APP_PREFIX = "mzj";
+  const BACKUP_FORMAT = "my-zepbound-journey-backup";
+  const BACKUP_VERSION = 1;
+
+  const dialog = document.getElementById("backupCenterDialog");
+  const openBtn = document.getElementById("backupCenterBtn");
+  const closeBtn = document.getElementById("closeBackupCenterBtn");
+  const backupBtn = document.getElementById("backupAllDataBtn");
+  const chooseRestoreBtn = document.getElementById("chooseRestoreFileBtn");
+  const restoreInput = document.getElementById("restoreBackupFileInput");
+  const refreshBtn = document.getElementById("refreshDiagnosticsBtn");
+  const copyBtn = document.getElementById("copyDiagnosticsBtn");
+  const status = document.getElementById("backupStatus");
+  const list = document.getElementById("storageDiagnosticsList");
+  if(!dialog || !openBtn) return;
+
+  function setStatus(message, kind=""){
+    status.textContent = message;
+    status.className = `backup-status${kind ? " "+kind : ""}`;
+  }
+  function journeyKeys(){
+    return Object.keys(localStorage).filter(key => key.toLowerCase().startsWith(APP_PREFIX)).sort();
+  }
+  function byteLength(text){
+    try{return new Blob([text]).size}catch{return String(text).length * 2}
+  }
+  function formatBytes(bytes){
+    if(bytes < 1024) return `${bytes} B`;
+    if(bytes < 1024*1024) return `${(bytes/1024).toFixed(1)} KB`;
+    return `${(bytes/1024/1024).toFixed(2)} MB`;
+  }
+  function parseValue(raw){
+    try{return JSON.parse(raw)}catch{return raw}
+  }
+  function recordCount(value){
+    if(Array.isArray(value)) return value.length;
+    if(value && typeof value === "object") return Object.keys(value).length;
+    return value === null || value === "" ? 0 : 1;
+  }
+  function valueType(value){
+    if(Array.isArray(value)) return "array";
+    if(value === null) return "null";
+    return typeof value;
+  }
+  function collectDates(value, found=[]){
+    if(!value || found.length > 3000) return found;
+    if(Array.isArray(value)){value.forEach(item=>collectDates(item,found));return found;}
+    if(typeof value === "object"){
+      Object.entries(value).forEach(([key,item])=>{
+        if(typeof item === "string" && /date|created|updated|timestamp|time/i.test(key)){
+          const match=item.match(/^\d{4}-\d{2}-\d{2}/);
+          if(match) found.push(match[0]);
+        }
+        collectDates(item,found);
+      });
+    }
+    return found;
+  }
+  function diagnostics(){
+    const rows = journeyKeys().map(key=>{
+      const raw = localStorage.getItem(key) ?? "";
+      const value = parseValue(raw);
+      const dates = collectDates(value,[]).sort();
+      return {key,raw,value,type:valueType(value),count:recordCount(value),bytes:byteLength(raw),newest:dates.at(-1)||""};
+    });
+    const allDates=rows.map(row=>row.newest).filter(Boolean).sort();
+    return {rows,totalBytes:rows.reduce((sum,row)=>sum+row.bytes,0),newest:allDates.at(-1)||""};
+  }
+  function renderDiagnostics(){
+    const report=diagnostics();
+    document.getElementById("diagnosticKeyCount").textContent=String(report.rows.length);
+    document.getElementById("diagnosticStorageSize").textContent=formatBytes(report.totalBytes);
+    document.getElementById("diagnosticNewestDate").textContent=report.newest||"—";
+    list.innerHTML = report.rows.length ? report.rows.map(row=>`
+      <article class="storage-key-row">
+        <header><code>${esc(row.key)}</code><strong>${formatBytes(row.bytes)}</strong></header>
+        <p>${row.type} · ${row.count} ${row.count===1?"record":"records"}${row.newest?` · newest date ${esc(row.newest)}`:""}</p>
+      </article>`).join("") : '<article class="storage-key-row"><strong>No My Zepbound Journey records were found on this website address.</strong><p>Opening a different GitHub or Cloudflare address can show a different storage area.</p></article>';
+    return report;
+  }
+  function buildBackup(){
+    const data={};
+    journeyKeys().forEach(key=>{data[key]=localStorage.getItem(key)});
+    return {
+      format:BACKUP_FORMAT,
+      formatVersion:BACKUP_VERSION,
+      appVersion:"12.2.1 Stable",
+      createdAt:new Date().toISOString(),
+      sourceOrigin:location.origin,
+      sourcePath:location.pathname,
+      keyCount:Object.keys(data).length,
+      data
+    };
+  }
+  function downloadJson(filename, value){
+    const blob=new Blob([JSON.stringify(value,null,2)],{type:"application/json"});
+    const url=URL.createObjectURL(blob);
+    const anchor=document.createElement("a");
+    anchor.href=url;anchor.download=filename;document.body.appendChild(anchor);anchor.click();anchor.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),1000);
+  }
+  function backupFilename(){return `My_Zepbound_Journey_Backup_${todayString()}.json`;}
+  function validateBackup(payload){
+    if(!payload || payload.format!==BACKUP_FORMAT || typeof payload.data!=="object" || Array.isArray(payload.data)) throw new Error("This is not a valid My Zepbound Journey backup file.");
+    const keys=Object.keys(payload.data);
+    if(!keys.length) throw new Error("The backup contains no saved journey records.");
+    if(keys.some(key=>!key.toLowerCase().startsWith(APP_PREFIX))) throw new Error("The backup contains an unexpected storage key and was not restored.");
+    return keys;
+  }
+  async function restoreFile(file){
+    const text=await file.text();
+    let payload;
+    try{payload=JSON.parse(text)}catch{throw new Error("The selected file is not readable JSON.")}
+    const keys=validateBackup(payload);
+    const source=payload.createdAt ? new Date(payload.createdAt).toLocaleString() : "an unknown date";
+    const confirmed=window.confirm(`Restore ${keys.length} saved data sections from the backup created ${source}?\n\nMatching data currently on this device will be replaced. Other local data will remain.`);
+    if(!confirmed){setStatus("Restore canceled. Nothing was changed.","warning");return;}
+    keys.forEach(key=>{
+      const raw=payload.data[key];
+      if(typeof raw!=="string") throw new Error(`Backup record ${key} is damaged.`);
+      // Validate JSON when possible, but preserve legacy plain-string records.
+      localStorage.setItem(key,raw);
+    });
+    setStatus(`Restore complete: ${keys.length} data sections were loaded. The app will refresh now.`,"success");
+    renderDiagnostics();
+    setTimeout(()=>location.reload(),900);
+  }
+  function textReport(){
+    const report=diagnostics();
+    const lines=[
+      "My Zepbound Journey — Storage Diagnostics",
+      `App version: 12.2.1 Stable`,
+      `Website: ${location.origin}${location.pathname}`,
+      `Generated: ${new Date().toLocaleString()}`,
+      `Journey keys: ${report.rows.length}`,
+      `Estimated storage: ${formatBytes(report.totalBytes)}`,
+      `Newest dated record: ${report.newest||"none found"}`,
+      "",
+      ...report.rows.map(row=>`${row.key} | ${row.type} | ${row.count} record(s) | ${formatBytes(row.bytes)}${row.newest?` | newest ${row.newest}`:""}`)
+    ];
+    return lines.join("\n");
+  }
+
+  openBtn.addEventListener("click",()=>{
+    document.getElementById("moreMenuDialog")?.close();
+    renderDiagnostics();
+    setStatus("No changes have been made. Diagnostics are read-only.");
+    dialog.showModal();
+  });
+  closeBtn.addEventListener("click",()=>dialog.close());
+  backupBtn.addEventListener("click",()=>{
+    try{
+      const backup=buildBackup();
+      downloadJson(backupFilename(),backup);
+      setStatus(`Backup created with ${backup.keyCount} data sections. Save the downloaded JSON file somewhere private.`,"success");
+      renderDiagnostics();
+    }catch(error){console.error(error);setStatus(`Backup failed: ${error.message}`,"error")}
+  });
+  chooseRestoreBtn.addEventListener("click",()=>{restoreInput.value="";restoreInput.click()});
+  restoreInput.addEventListener("change",async()=>{
+    const file=restoreInput.files?.[0];if(!file)return;
+    setStatus("Checking the selected backup file…");
+    try{await restoreFile(file)}catch(error){console.error(error);setStatus(`Restore failed: ${error.message}`,"error")}
+  });
+  refreshBtn.addEventListener("click",()=>{renderDiagnostics();setStatus("Diagnostics refreshed. No data was changed.","success")});
+  copyBtn.addEventListener("click",async()=>{
+    try{await navigator.clipboard.writeText(textReport());setStatus("Diagnostics copied to the clipboard.","success")}
+    catch{setStatus("The browser could not copy automatically. Try again from Safari or Chrome.","error")}
+  });
+})();

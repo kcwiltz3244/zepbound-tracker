@@ -1,3 +1,16 @@
+# My Zepbound Journey — Version 12.2.1 Stable
+
+This stable build is based directly on Version 12.2 Release Candidate.
+
+## Added in 12.2.1
+- Complete JSON backup of every `mzj...` localStorage record
+- Restore backup on another phone or computer
+- Read-only storage diagnostics with key counts, record counts, dates, and estimated size
+- Copyable diagnostics report
+- Updated cache/version identifiers
+
+No redesign or unrelated feature changes were made.
+
 # My Zepbound Journey — Version 12.2
 
 Sprint 1 release candidate: Home and Navigation.

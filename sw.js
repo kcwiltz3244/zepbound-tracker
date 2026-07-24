@@ -1,5 +1,5 @@
-const CACHE_NAME = "mzj-v12-2";
-const CORE_ASSETS = ["./", "./index.html", "./styles.css?v=12.2", "./app.js?v=12.2", "./manifest.json", "./photo-label-guide.png"];
+const CACHE_NAME = "mzj-v12-2-1";
+const CORE_ASSETS = ["./", "./index.html", "./styles.css?v=12.2.1", "./app.js?v=12.2.1", "./manifest.json", "./photo-label-guide.png"];
 
 self.addEventListener("install", event => {
   event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(CORE_ASSETS)));

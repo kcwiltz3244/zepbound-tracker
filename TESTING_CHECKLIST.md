@@ -1,4 +1,4 @@
-# Version 12.2 Release Candidate — Test Checklist
+# Version 13.0 All-Cloudflare Development — Test Checklist
 
 ## Home cards
 - Update Today opens Daily Check-in

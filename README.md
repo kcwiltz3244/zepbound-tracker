@@ -8,6 +8,6 @@ Version 13.0 Development uses Cloudflare for the complete running platform:
 - Cloudflare R2: private progress photos and backup objects
 - GitHub: source-code repository and deployment trigger only
 
-Version 12.2 remains the untouched Stable recovery reference until Version 13.0 passes the full testing checklist.
+Version 13.0 starts fresh. The recovered JSON backup will be imported only after cloud synchronization is verified.
 
 Start with `CLOUDFLARE_SETUP.md`.

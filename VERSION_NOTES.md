@@ -1,6 +1,6 @@
-# Version 13.0.0-dev.2 — Cloud Foundation
+# Version 13.0.0-dev.3 — All-Cloudflare Foundation
 
-- GitHub Pages remains the sole app host.
+- Cloudflare Pages is the app host.
 - Added Cloudflare Worker API with private bearer-token authentication.
 - Added D1 synchronized storage for all app data sections.
 - Added private R2 storage for progress photos.

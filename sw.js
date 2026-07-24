@@ -1,5 +1,5 @@
-const CACHE_NAME = "my-zepbound-journey-v11-3-photo-gallery";
-const CORE_ASSETS = ["./", "./index.html", "./styles.css?v=11.3", "./app.js?v=11.3", "./manifest.json"];
+const CACHE_NAME = "mzj-v12-2";
+const CORE_ASSETS = ["./", "./index.html", "./styles.css?v=12.2", "./app.js?v=12.2", "./manifest.json", "./photo-label-guide.png"];
 
 self.addEventListener("install", event => {
   event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(CORE_ASSETS)));
@@ -20,10 +20,12 @@ self.addEventListener("fetch", event => {
   event.respondWith(
     fetch(event.request)
       .then(response => {
-        const copy = response.clone();
-        caches.open(CACHE_NAME).then(cache => cache.put(event.request, copy));
+        if (response && response.ok) {
+          const copy = response.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(event.request, copy));
+        }
         return response;
       })
-      .catch(() => caches.match(event.request))
+      .catch(() => caches.match(event.request).then(hit => hit || caches.match("./index.html")))
   );
 });

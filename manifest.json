@@ -1,10 +1,10 @@
 {
-  "name": "My Zepbound Journey 2026",
-  "short_name": "Zepbound Journey",
+  "name": "My Zepbound Journey 13.0 Cloud Development",
+  "short_name": "Zepbound Dev",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#0f2747",
   "theme_color": "#2563eb",
-  "description": "GLP-1 nutrition, dose-effectiveness tracking, and private weekly progress photos with a full-screen gallery stored on your device.",
-  "version": "12.2"
+  "description": "Version 13 Development foundation with complete backup, restore, diagnostics, offline cache, and cloud-sync-ready data journaling.",
+  "version": "13.0.0-dev.1"
 }

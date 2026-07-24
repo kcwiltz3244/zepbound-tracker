@@ -1,18 +1,13 @@
-# My Zepbound Journey — Version 12.2
+# My Zepbound Journey v13.0 — All-Cloudflare Development
 
-Sprint 1 release candidate: Home and Navigation.
+Version 13.0 Development uses Cloudflare for the complete running platform:
 
-## What changed
-- Uses one consistent navigation path for Home cards, bottom navigation, More menu pages, and Return Home buttons
-- Keeps the Home page summary-first instead of turning it into a data-entry screen
-- Preserves the Version 12.1.1 functional repairs for nutrition, food search, photos, dose effectiveness, injection logging, and seven-day totals
-- Corrects all visible version labels and cache-busting file versions
-- Updates the service-worker cache so phones and computers load Version 12.2 instead of an older cached build
-- Adds safer navigation fallbacks and closes the More menu before changing pages
+- Cloudflare Pages: web app and PWA
+- Cloudflare Workers: private synchronization API
+- Cloudflare D1: structured records
+- Cloudflare R2: private progress photos and backup objects
+- GitHub: source-code repository and deployment trigger only
 
-## Release candidate test focus
-1. Open every Home action card
-2. Open each item in More
-3. Use Return Home on every page
-4. Test bottom navigation
-5. Confirm food, photo, injection, and effectiveness data still save
+Version 12.2 remains the untouched Stable recovery reference until Version 13.0 passes the full testing checklist.
+
+Start with `CLOUDFLARE_SETUP.md`.

@@ -7,7 +7,7 @@
 <meta content="#2563eb" name="theme-color"/>
 <title>My Zepbound Journey — Version 13.0 Development</title>
 <link href="manifest.json" rel="manifest"/>
-<link href="styles.css?v=13.0.0-dev.3" rel="stylesheet"/>
+<link href="styles.css?v=13.0.0-dev.6" rel="stylesheet"/>
 </head>
 <body>
 <section class="day-one-overlay hidden" id="dayOneOverlay">
@@ -38,6 +38,11 @@
 </header>
 <main>
 <section class="view active" id="homeView">
+<section id="v13FoundationCard" class="v13-foundation-card">
+<div class="v13-foundation-head"><div><span class="v13-dev-badge">VERSION 13.0 · CLOUDFLARE DEVELOPMENT</span><h2>Data safety and synchronization</h2><p id="v13StatusText">Preparing…</p></div><span class="v13-shield">☁️</span></div>
+<div class="v13-foundation-actions"><button id="v13RestoreBtn" type="button">Restore saved data</button><button id="v13BackupBtn" type="button">Complete backup</button><button id="v13SyncBtn" type="button">Sync now</button><button id="v13CloudSetupBtn" type="button">Cloud setup</button><button id="v13DiagnosticsBtn" type="button">Diagnostics</button><input id="v13RestoreFile" type="file" accept="application/json,.json" hidden></div>
+<small id="v13LastBackup"></small><p class="v13-cloud-note"><strong>Restore:</strong> Select the Version 12.2 backup file saved on your laptop. The importer accepts both the original recovered file and Version 13 backup files.</p>
+</section>
 <section class="hero-card">
 <div class="hero-copy">
 <span class="pill">Week <span id="journeyWeek">1</span> • <span id="currentDose">2.5 mg</span></span>
@@ -1049,7 +1054,31 @@
   });
 })();
 </script>
-<script src="app.js?v=13.0.0-dev.3"></script>
+
+<script id="v13-recovered-data-import">
+(function(){
+  const MIGRATION_KEY = "mzjV13RecoveredDataImported_2026_07_24";
+  if (localStorage.getItem(MIGRATION_KEY) === "yes") return;
+
+  const recovered = {"mzjV9Grocery": "[{\"text\":\"egg\",\"checked\":false}]", "zepboundProcessDailyV1": "[{\"date\":\"2026-07-10\",\"water\":0,\"protein\":0,\"activity\":0,\"sleep\":0,\"mealsPlanned\":0,\"energy\":\"\",\"shotTaken\":false,\"dose\":\"2.5 mg\",\"notes\":\"\"}]", "mzjV8Mission": "{\"date\":\"2026-07-23\",\"complete\":false}", "mzjV7Weights": "[{\"date\":\"2026-07-01\",\"weight\":331},{\"date\":\"2026-07-22\",\"weight\":331},{\"date\":\"2026-07-22\",\"weight\":332},{\"date\":\"2026-07-22\",\"weight\":331},{\"date\":\"2026-07-23\",\"weight\":327.5}]", "mzjV8DayOne": "{\"begun\":true,\"date\":\"2026-07-13\",\"dose\":\"2.5 mg\"}", "mzjV81Nutrition": "[{\"id\":\"bb2dbac5-6075-41db-94a2-9957675541df\",\"date\":\"2026-07-20\",\"name\":\"Bacon, pork, cooked\",\"mealType\":\"Breakfast\",\"amount\":3,\"unit\":\"strip\",\"servingAmount\":1,\"servingUnit\":\"strip\",\"calories\":129,\"protein\":9,\"carbs\":0.3,\"sugar\":0,\"fiber\":0,\"fat\":9.9,\"sodium\":411},{\"id\":\"175c4bde-0004-4b21-a1ea-64012b439a50\",\"date\":\"2026-07-20\",\"name\":\"Egg, large, whole\",\"mealType\":\"Breakfast\",\"amount\":3,\"unit\":\"egg\",\"servingAmount\":1,\"servingUnit\":\"egg\",\"calories\":216,\"protein\":18.9,\"carbs\":1.2,\"sugar\":0.6,\"fiber\":0,\"fat\":14.4,\"sodium\":213},{\"id\":\"3e663128-8c60-4784-8730-17d96416adfc\",\"date\":\"2026-07-20\",\"name\":\"Broccoli, cooked\",\"mealType\":\"Breakfast\",\"amount\":1,\"unit\":\"cup\",\"servingAmount\":1,\"servingUnit\":\"cup\",\"calories\":55,\"protein\":3.7,\"carbs\":11.2,\"sugar\":2.2,\"fiber\":5.1,\"fat\":0.6,\"sodium\":64},{\"id\":\"8b4ae30a-56de-4daf-8ec4-ee547602145d\",\"date\":\"2026-07-20\",\"name\":\"Grilled chicken breast\",\"mealType\":\"Breakfast\",\"amount\":6,\"unit\":\"oz\",\"servingAmount\":3,\"servingUnit\":\"oz\",\"calories\":256,\"protein\":52,\"carbs\":0,\"sugar\":0,\"fiber\":0,\"fat\":5.4,\"sodium\":88},{\"id\":\"a24b93be-248c-4d35-ab34-5563795c5ca7\",\"date\":\"2026-07-22\",\"name\":\"Tillamook Original Smoked Sausages\",\"mealType\":\"Snack\",\"amount\":3,\"unit\":\"oz\",\"servingAmount\":1,\"servingUnit\":\"oz\",\"calories\":330,\"protein\":24,\"carbs\":0,\"sugar\":0,\"fiber\":0,\"fat\":21,\"sodium\":990},{\"id\":\"d3f7c69f-c8c1-4cb8-a341-6f73bc481a9c\",\"date\":\"2026-07-22\",\"name\":\"Tilapia, cooked\",\"mealType\":\"Dinner\",\"amount\":4,\"unit\":\"oz\",\"servingAmount\":4,\"servingUnit\":\"oz\",\"calories\":145,\"protein\":30,\"carbs\":0,\"sugar\":0,\"fiber\":0,\"fat\":3,\"sodium\":63},{\"id\":\"a00f8784-c4a3-4cc4-9cc0-a32552fe34d0\",\"date\":\"2026-07-22\",\"name\":\"Tuna, canned in water\",\"mealType\":\"Breakfast\",\"amount\":8,\"unit\":\"oz\",\"servingAmount\":3,\"servingUnit\":\"oz\",\"calories\":264,\"protein\":58.7,\"carbs\":0,\"sugar\":0,\"fiber\":0,\"fat\":1.9,\"sodium\":853},{\"id\":\"1023134f-1b6b-4cf1-9004-9918f553bf73\",\"date\":\"2026-07-22\",\"name\":\"Hard-boiled egg\",\"mealType\":\"Breakfast\",\"amount\":1,\"unit\":\"egg\",\"servingAmount\":1,\"servingUnit\":\"egg\",\"calories\":78,\"protein\":6.3,\"carbs\":0.6,\"sugar\":0.6,\"fiber\":0,\"fat\":5.3,\"sodium\":62},{\"id\":\"853e150d-7806-4620-acb9-b23cfe7e117f\",\"date\":\"2026-07-22\",\"name\":\"Buldak Hot Chicken — Samyang\",\"mealType\":\"Dinner\",\"amount\":100,\"unit\":\"g\",\"servingAmount\":100,\"servingUnit\":\"g\",\"calories\":427,\"protein\":7,\"carbs\":66,\"sugar\":5,\"fiber\":2,\"fat\":15,\"sodium\":1200},{\"id\":\"495075aa-9be5-4945-bf6d-f31ed63d11d3\",\"date\":\"2026-07-23\",\"name\":\"Wild Planet Wildly Good Promise Skipjack Tuna\",\"mealType\":\"Lunch\",\"amount\":1,\"unit\":\"can\",\"servingAmount\":1,\"servingUnit\":\"can\",\"calories\":140,\"protein\":32,\"carbs\":0,\"sugar\":0,\"fiber\":0,\"fat\":1.5,\"sodium\":450},{\"id\":\"1a3b6e92-80ad-46bd-97b2-e3ac0c4af69c\",\"date\":\"2026-07-23\",\"name\":\"Scrambled egg, plain\",\"mealType\":\"Breakfast\",\"amount\":5,\"unit\":\"egg\",\"servingAmount\":1,\"servingUnit\":\"egg\",\"calories\":455,\"protein\":31.5,\"carbs\":5,\"sugar\":2,\"fiber\":0,\"fat\":34,\"sodium\":475},{\"id\":\"796947f6-cd88-4ee8-bcc6-f6ce91310f3b\",\"date\":\"2026-07-23\",\"name\":\"Hard-boiled egg\",\"mealType\":\"Lunch\",\"amount\":1,\"unit\":\"egg\",\"servingAmount\":1,\"servingUnit\":\"egg\",\"calories\":78,\"protein\":6.3,\"carbs\":0.6,\"sugar\":0.6,\"fiber\":0,\"fat\":5.3,\"sodium\":62}]"};
+  const snapshot = {};
+  Object.keys(recovered).forEach(function(key) {
+    snapshot[key] = localStorage.getItem(key);
+  });
+  localStorage.setItem(
+    "mzjV13PreRecoveredImportSnapshot",
+    JSON.stringify({ createdAt: new Date().toISOString(), storage: snapshot })
+  );
+
+  Object.entries(recovered).forEach(function(entry) {
+    localStorage.setItem(entry[0], entry[1]);
+  });
+  localStorage.setItem(MIGRATION_KEY, "yes");
+  localStorage.setItem("mzjV13RecoveredDataImportedAt", new Date().toISOString());
+  console.info("My Zepbound Journey: recovered Version 12.2 data imported into Version 13.");
+})();
+</script>
+<script src="app.js?v=13.0.0-dev.6"></script>
 <script>
     if ("serviceWorker" in navigator) {
       window.addEventListener("load", () => navigator.serviceWorker.register("./sw.js"));

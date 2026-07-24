@@ -1,9 +1,22 @@
-{
-  "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "my-zepbound-journey-dev-sync",
-  "main": "src/index.js",
-  "compatibility_date": "2026-07-23",
-  "d1_databases": [{"binding":"DB","database_name":"my-zepbound-journey-dev","database_id":"PASTE_D1_DATABASE_ID_HERE","migrations_dir":"migrations"}],
-  "r2_buckets": [{"binding":"PHOTOS","bucket_name":"my-zepbound-journey-photos-dev"}],
-  "vars": {"ALLOWED_ORIGIN":"https://PASTE-YOUR-DEVELOPMENT-PAGES-ORIGIN"}
-}
+CREATE TABLE IF NOT EXISTS records (
+  record_key TEXT PRIMARY KEY,
+  value_json TEXT,
+  updated_at TEXT NOT NULL,
+  device_id TEXT,
+  deleted INTEGER NOT NULL DEFAULT 0
+);
+CREATE INDEX IF NOT EXISTS idx_records_updated_at ON records(updated_at);
+CREATE TABLE IF NOT EXISTS photos (
+  photo_key TEXT PRIMARY KEY,
+  object_key TEXT NOT NULL,
+  content_type TEXT,
+  size_bytes INTEGER,
+  updated_at TEXT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS audit_log (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  action TEXT NOT NULL,
+  target_key TEXT,
+  device_id TEXT,
+  created_at TEXT NOT NULL
+);

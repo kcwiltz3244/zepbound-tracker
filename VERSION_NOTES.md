@@ -1,3 +1,19 @@
+# Version 13.0.0-dev.6 — Recovered Data Included
+
+- Includes the recovered Version 12.2 Zepbound data directly in the build.
+- Imports the recovered data once on first launch.
+- Creates a local safety snapshot before importing.
+- Excludes unrelated Drone Tracker, ClassConnect, Shopify, and debug storage.
+- Tuesday nutrition data remains absent because it was not present in the recovered backup.
+
+# Version 13.0 Development — dev.5
+
+- Added a permanent, visible **Restore saved data** button directly to the Home page.
+- Restore accepts the original Version 12.2 recovered JSON file as well as Version 13 backups.
+- Filters legacy imports to My Zepbound Journey keys only.
+- Added `zepboundProcess` records to backup and synchronization inventory.
+- Bumped the service-worker cache to dev.5.
+
 # Version 13.0.0-dev.3 — All-Cloudflare Foundation
 
 - Cloudflare Pages is the app host.

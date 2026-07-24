@@ -1,66 +1,71 @@
-# Cloudflare setup — Version 13.0 Development
-
-This release uses Cloudflare for the website, synchronization API, database, and private photo storage. GitHub stores the code and triggers deployments; the app is opened from the Cloudflare Pages address.
-
-## Part 1 — Create the Development Pages project
-
-1. In Cloudflare, open **Workers & Pages**.
-2. Choose **Create application** and then **Pages**.
-3. Connect the GitHub repository containing My Zepbound Journey.
-4. Select the `development` branch as the production branch for this Development project.
-5. Framework preset: **None**.
-6. Build command: leave blank.
-7. Build output directory: `/` if the app files are in the repository root.
-8. Deploy and copy the assigned Development address, such as:
-   `https://my-zepbound-journey-dev.pages.dev`
-
-Do not connect the Stable branch to this Development project.
-
-## Part 2 — Create D1, R2, and the Worker API
-
-1. Install Node.js on the Windows laptop if needed.
-2. Open a terminal inside `cloudflare-worker`.
-3. Run:
-   `npm install`
-4. Sign in:
-   `npx wrangler login`
-5. Create the D1 database:
-   `npx wrangler d1 create my-zepbound-journey-dev`
-6. Copy the returned database ID into `cloudflare-worker/wrangler.jsonc`.
-7. Create the private R2 bucket:
-   `npx wrangler r2 bucket create my-zepbound-journey-photos-dev`
-8. In `wrangler.jsonc`, set the bucket name to `my-zepbound-journey-photos-dev`.
-9. Replace `PASTE-YOUR-DEVELOPMENT-PAGES-ORIGIN` with the Development Pages origin from Part 1. Use only the origin, with no path and no trailing slash.
-10. Create a long private app token:
-    `npx wrangler secret put APP_TOKEN`
-11. Apply the database migration:
-    `npm run migrate:remote`
-12. Deploy the Worker:
-    `npm run deploy`
-13. Copy the resulting `.workers.dev` address.
-
-The APP_TOKEN is never placed in GitHub. The R2 bucket remains private.
-
-## Part 3 — Connect both devices
-
-1. Open the Development Cloudflare Pages app on the laptop.
-2. Open **Cloud setup**.
-3. Enter the Worker address and APP_TOKEN.
-4. Save and test the connection.
-5. Open the same Development Pages address on the iPhone.
-6. Enter the same Worker address and APP_TOKEN.
-7. Save and test the connection.
-
-## Part 4 — First synchronization test
-
-Use test records only:
-
-1. Add one test meal on the iPhone and tap **Sync now**.
-2. Open the laptop and tap **Sync now**; confirm the meal appears.
-3. Add one test weight on the laptop and sync.
-4. Sync the iPhone and confirm the weight appears.
-5. Test an offline entry.
-6. Test a progress photo last.
-7. Compare diagnostics on both devices.
-
-Do not move Version 13.0 to Stable until the entire testing checklist passes.
+function cors(env, origin) {
+  const allowed = (env.ALLOWED_ORIGIN || '').split(',').map(x => x.trim()).filter(Boolean);
+  const ok = allowed.includes('*') || allowed.includes(origin);
+  return {
+    'Access-Control-Allow-Origin': ok ? origin : (allowed[0] || 'null'),
+    'Access-Control-Allow-Headers': 'Authorization, Content-Type, X-Updated-At',
+    'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+    'Access-Control-Max-Age': '86400',
+    'Vary': 'Origin',
+    'Cache-Control': 'no-store'
+  };
+}
+function json(data, status, headers) { return new Response(JSON.stringify(data), {status, headers:{...headers,'Content-Type':'application/json; charset=utf-8'}}); }
+function authorized(request, env) {
+  const expected = env.APP_TOKEN;
+  const actual = request.headers.get('Authorization') || '';
+  return expected && actual === `Bearer ${expected}`;
+}
+function safeKey(value) { return /^[A-Za-z0-9._:-]{1,160}$/.test(value); }
+export default {
+  async fetch(request, env) {
+    const origin = request.headers.get('Origin') || '';
+    const headers = cors(env, origin);
+    if (request.method === 'OPTIONS') return new Response(null, {status:204, headers});
+    if (!authorized(request, env)) return json({error:'Unauthorized'}, 401, headers);
+    const url = new URL(request.url);
+    try {
+      if (url.pathname === '/api/health' && request.method === 'GET') return json({ok:true, service:'my-zepbound-journey-sync', time:new Date().toISOString()}, 200, headers);
+      if (url.pathname === '/api/records' && request.method === 'GET') {
+        const {results} = await env.DB.prepare('SELECT record_key, value_json, updated_at, device_id, deleted FROM records ORDER BY record_key').all();
+        return json({records:results.map(r=>({key:r.record_key,value:r.value_json?JSON.parse(r.value_json):null,updated_at:r.updated_at,device_id:r.device_id,deleted:!!r.deleted}))}, 200, headers);
+      }
+      if (url.pathname === '/api/records' && request.method === 'POST') {
+        const body = await request.json();
+        if (!safeKey(body.key)) return json({error:'Invalid record key'}, 400, headers);
+        const updatedAt = body.updatedAt || new Date().toISOString();
+        await env.DB.prepare(`INSERT INTO records(record_key,value_json,updated_at,device_id,deleted) VALUES(?,?,?,?,?)
+          ON CONFLICT(record_key) DO UPDATE SET value_json=excluded.value_json,updated_at=excluded.updated_at,device_id=excluded.device_id,deleted=excluded.deleted
+          WHERE excluded.updated_at >= records.updated_at`).bind(body.key, JSON.stringify(body.value ?? null), updatedAt, body.deviceId || '', body.deleted ? 1 : 0).run();
+        await env.DB.prepare('INSERT INTO audit_log(action,target_key,device_id,created_at) VALUES(?,?,?,?)').bind(body.deleted?'delete':'upsert',body.key,body.deviceId||'',new Date().toISOString()).run();
+        return json({ok:true,key:body.key,updatedAt}, 200, headers);
+      }
+      if (url.pathname === '/api/photos' && request.method === 'GET') {
+        const {results} = await env.DB.prepare('SELECT photo_key, content_type, size_bytes, updated_at FROM photos ORDER BY photo_key').all();
+        return json({photos:results.map(r=>({key:r.photo_key,content_type:r.content_type,size_bytes:r.size_bytes,updated_at:r.updated_at}))}, 200, headers);
+      }
+      const match = url.pathname.match(/^\/api\/photos\/([^/]+)$/);
+      if (match) {
+        const key = decodeURIComponent(match[1]); if (!safeKey(key)) return json({error:'Invalid photo key'},400,headers);
+        const objectKey = `progress/${key}`;
+        if (request.method === 'PUT') {
+          const updatedAt = request.headers.get('X-Updated-At') || new Date().toISOString();
+          const existing = await env.DB.prepare('SELECT updated_at FROM photos WHERE photo_key=?').bind(key).first();
+          if (!existing || updatedAt >= existing.updated_at) {
+            const body = await request.arrayBuffer(); const type = request.headers.get('Content-Type') || 'application/octet-stream';
+            await env.PHOTOS.put(objectKey, body, {httpMetadata:{contentType:type}, customMetadata:{updatedAt}});
+            await env.DB.prepare(`INSERT INTO photos(photo_key,object_key,content_type,size_bytes,updated_at) VALUES(?,?,?,?,?)
+              ON CONFLICT(photo_key) DO UPDATE SET object_key=excluded.object_key,content_type=excluded.content_type,size_bytes=excluded.size_bytes,updated_at=excluded.updated_at`).bind(key,objectKey,type,body.byteLength,updatedAt).run();
+          }
+          return json({ok:true,key,updatedAt},200,headers);
+        }
+        if (request.method === 'GET') {
+          const object = await env.PHOTOS.get(objectKey); if (!object) return json({error:'Photo not found'},404,headers);
+          const h = new Headers(headers);object.writeHttpMetadata(h);h.set('etag',object.httpEtag);h.set('Cache-Control','private, no-store');return new Response(object.body,{headers:h});
+        }
+        if (request.method === 'DELETE') { await env.PHOTOS.delete(objectKey);await env.DB.prepare('DELETE FROM photos WHERE photo_key=?').bind(key).run();return new Response(null,{status:204,headers}); }
+      }
+      return json({error:'Not found'},404,headers);
+    } catch (error) { console.error(error); return json({error:'Server error',detail:String(error.message||error)},500,headers); }
+  }
+};

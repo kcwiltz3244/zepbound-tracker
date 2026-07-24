@@ -1,13 +1,3 @@
-# My Zepbound Journey v13.0 — All-Cloudflare Development
+# My Zepbound Journey 13.0 Development
 
-Version 13.0 Development uses Cloudflare for the complete running platform:
-
-- Cloudflare Pages: web app and PWA
-- Cloudflare Workers: private synchronization API
-- Cloudflare D1: structured records
-- Cloudflare R2: private progress photos and backup objects
-- GitHub: source-code repository and deployment trigger only
-
-Version 13.0 starts fresh. The recovered JSON backup will be imported only after cloud synchronization is verified.
-
-Start with `CLOUDFLARE_SETUP.md`.
+Version 13.0.0-dev.9 combines the recovered-nutrition compatibility fix with the working More and Journal navigation. Upload every file in this folder together so `index.html`, scripts, manifest, and service worker remain matched.

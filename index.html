@@ -1,0 +1,1090 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<meta content="#2563eb" name="theme-color"/>
+<title>My Zepbound Journey — Version 13.0 Development</title>
+<link href="manifest.json" rel="manifest"/>
+<link href="styles.css?v=13.0.0-dev.10" rel="stylesheet"/>
+</head>
+<body>
+<section class="day-one-overlay hidden" id="dayOneOverlay">
+<div class="day-one-sky">
+<div class="day-one-sun"></div>
+<div class="day-one-path"></div>
+<div class="day-one-hill hill-a"></div>
+<div class="day-one-hill hill-b"></div>
+</div>
+<div class="day-one-content">
+<p class="day-one-brand">My Zepbound Journey</p>
+<h1>Welcome, Kevin.</h1>
+<h2>Today is Day One.</h2>
+<p>One Day. One Choice. One Step at a Time.</p>
+<button class="day-one-button" id="beginJourneyBtn" onclick="localStorage.setItem('mzjV8DayOne', JSON.stringify({begun:true,date:new Date().toISOString().split('T')[0],dose:'2.5 mg'})); document.getElementById('dayOneOverlay').classList.add('hidden');">
+      Begin My Journey
+    </button>
+<small>Every journey begins with a single step.</small>
+</div>
+</section>
+<div class="app-shell">
+<header class="topbar">
+<div>
+<p class="brand-kicker">My Zepbound Journey</p>
+<h1 id="greeting">Good morning, Kevin Wiltz</h1>
+</div>
+<button aria-label="Open settings" class="icon-button" id="settingsBtn">⚙️</button>
+</header>
+<main>
+<section class="view active" id="homeView">
+<section id="v13FoundationCard" class="v13-foundation-card">
+<div class="v13-foundation-head"><div><span class="v13-dev-badge">VERSION 13.0 · CLOUDFLARE DEVELOPMENT</span><h2>Data safety and synchronization</h2><p id="v13StatusText">Preparing…</p></div><span class="v13-shield">☁️</span></div>
+<div class="v13-foundation-actions"><button id="v13RestoreBtn" type="button">Restore saved data</button><button id="v13BackupBtn" type="button">Complete backup</button><button id="v13SyncBtn" type="button">Sync now</button><button id="v13CloudSetupBtn" type="button">Cloud setup</button><button id="v13DiagnosticsBtn" type="button">Diagnostics</button><input id="v13RestoreFile" type="file" accept="application/json,.json" hidden></div>
+<small id="v13LastBackup"></small><p class="v13-cloud-note"><strong>Restore:</strong> Select the Version 12.2 backup file saved on your laptop. The importer accepts both the original recovered file and Version 13 backup files.</p>
+</section>
+<section class="hero-card">
+<div class="hero-copy">
+<span class="pill">Week <span id="journeyWeek">1</span> • <span id="currentDose">2.5 mg</span></span>
+<h2>Just win today.</h2>
+<p>Building a healthier life, one day at a time.</p>
+</div>
+<div class="hero-art">
+<div class="sun"></div>
+<div class="hill hill-one"></div>
+<div class="hill hill-two"></div>
+</div>
+</section>
+<section aria-label="Today at a glance" class="v121-overview-card">
+<div class="v121-overview-heading">
+<div><p class="eyebrow">Today at a glance</p><h2>Your progress, automatically summarized</h2></div>
+<button class="v121-text-link" onclick="window.v12OpenShortcut('checkInView','dailyForm')" type="button">Update today</button>
+</div>
+<div class="v121-overview-grid">
+<article><span class="v121-icon">⚖️</span><div><small>Weight</small><strong id="v12CurrentWeight">—</strong><span id="v12WeightChange">Add a weigh-in</span></div></article>
+<article><span class="v121-icon">🔥</span><div><small>Calories</small><strong id="homeCalories">0</strong><span id="homeCaloriesGoal">of 1,900</span><div class="v121-mini-meter"><i id="homeCaloriesMeter"></i></div></div></article>
+<article><span class="v121-icon">💪🏽</span><div><small>Protein</small><strong id="homeProtein">0 g</strong><span id="homeProteinGoal">of 130 g</span><div class="v121-mini-meter"><i id="homeProteinMeter"></i></div></div></article>
+<article><span class="v121-icon">💧</span><div><small>Water</small><strong id="v12Water">0 oz</strong><span id="v12WaterGoal">of 80 oz</span><div class="v121-mini-meter"><i id="v12WaterMeter"></i></div></div></article>
+</div>
+<div class="v121-overview-footer">
+<span>🍽️ <strong id="homeMealsLogged">0</strong> meals logged today</span>
+<span>Week <strong id="v12Week">1</strong> · <strong id="v12Dose">2.5 mg</strong></span>
+<span hidden="" id="homeMealsMeter"></span>
+</div>
+</section>
+<section aria-label="Quick actions" class="v12-quick-actions"><button class="v121-action-card" onclick="window.v12OpenShortcut('mealsView','nutritionLogForm')" type="button"><span>🍽️</span><div><strong>Log food</strong><small>Add a meal</small></div><b>›</b></button><button class="v121-action-card" onclick="window.v12OpenShortcut('progressView','weightForm')" type="button"><span>⚖️</span><div><strong>Weigh in</strong><small>Record progress</small></div><b>›</b></button><button class="v121-action-card" onclick="window.v12OpenShortcut('photosView','photoFileInput')" type="button"><span>📸</span><div><strong>Weekly photo</strong><small>Capture your journey</small></div><b>›</b></button><button class="v121-action-card" onclick="window.v12OpenShortcut('exerciseView','exerciseRows')" type="button"><span>💪🏽</span><div><strong>Exercise</strong><small>Open your routine</small></div><b>›</b></button></section>
+<button class="v121-dining-card" id="homeDiningShortcut" onclick="window.v12OpenShortcut('diningView','restaurantSearch')" type="button">
+<span class="home-dining-icon">🍴</span>
+<span><strong>Eat Out Smart</strong><small>Restaurant choices ranked for your goals</small></span>
+<span class="home-dining-arrow">›</span>
+</button>
+<section class="mission-card">
+<div class="mission-icon" id="missionIcon">💧</div>
+<div>
+<p class="eyebrow light">Today's mission</p>
+<h2 id="missionTitle">Water first.</h2>
+<p id="missionText">Keep your water nearby and take steady sips throughout the day.</p>
+</div>
+<button class="mission-button" id="completeMissionBtn">Mark complete</button>
+</section><button class="v121-dose-summary" onclick="window.v12OpenShortcut('doseView','doseEffectivenessPanel')" type="button">
+<span class="v121-dose-icon">💉</span>
+<span class="v121-dose-copy"><small>Zepbound this week</small><strong id="homeDoseLine">Dose not logged</strong><em id="homeDoseInsight">Tap to update your injection and effectiveness</em></span>
+<b>›</b>
+</button>
+
+
+
+
+<section class="quote-card">
+<span>“</span>
+<p>The scale can wait. Today is about showing up.</p>
+</section>
+</section>
+<section class="view" id="checkInView"><div class="v121-page-intro"><button class="return-home-button" type="button">← Home</button><div><p class="eyebrow">Daily check-in</p><h2>Update today’s details</h2><p>Enter information here. The Home page will summarize it automatically.</p></div></div><section class="quick-check-panel panel">
+<div class="panel-heading">
+<div>
+<p class="eyebrow">Quick check-in</p>
+<h2>Thirty seconds is enough.</h2>
+</div>
+<span class="mini-icon">⚡</span>
+</div>
+<div class="quick-check-grid">
+<button data-quick="mood" data-value="Great" type="button">😀<span>Great</span></button>
+<button data-quick="mood" data-value="Good" type="button">🙂<span>Good</span></button>
+<button data-quick="mood" data-value="Okay" type="button">😐<span>Okay</span></button>
+<button data-quick="mood" data-value="Tired" type="button">😴<span>Tired</span></button>
+<button data-quick="mood" data-value="Rough day" type="button">😕<span>Rough</span></button>
+</div>
+<div class="quick-actions">
+<button class="secondary-button" id="quickWaterBtn" type="button">+ 8 oz water</button>
+<button class="secondary-button" id="quickProteinBtn" type="button">+ 20 g protein</button>
+<button class="secondary-button" id="quickMoveBtn" type="button">+ 10 min movement</button>
+</div>
+<p class="gentle-message" id="quickCheckMessage">Welcome back. Let’s take today’s next step.</p>
+</section><section class="content-grid">
+<article class="panel">
+<div class="panel-heading">
+<div>
+<p class="eyebrow">Daily check-in</p>
+<h2>How did today go?</h2>
+</div>
+<span class="mini-icon">☀️</span>
+</div>
+<form id="dailyForm">
+<div class="form-grid">
+<label>Water
+                  <div class="input-with-unit"><input id="water" max="300" min="0" type="number"/><span>oz</span></div>
+</label>
+<label>Protein
+                  <div class="input-with-unit"><input id="protein" max="400" min="0" type="number"/><span>g</span></div>
+</label>
+<label>Movement
+                  <div class="input-with-unit"><input id="movement" max="300" min="0" type="number"/><span>min</span></div>
+</label>
+<label>Sleep
+                  <div class="input-with-unit"><input id="sleep" max="24" min="0" step="0.1" type="number"/><span>hr</span></div>
+</label>
+</div>
+<div class="feeling-grid">
+<label>Mood
+                  <select id="mood">
+<option value="">Choose</option>
+<option>Great</option>
+<option>Good</option>
+<option>Okay</option>
+<option>Tired</option>
+<option>Rough day</option>
+</select>
+</label>
+<label>Energy
+                  <select id="energy">
+<option value="">Choose</option>
+<option>High</option>
+<option>Good</option>
+<option>Okay</option>
+<option>Low</option>
+</select>
+</label>
+<label>Appetite
+                  <select id="appetite">
+<option value="">Choose</option>
+<option>Very low</option>
+<option>Low</option>
+<option>Normal</option>
+<option>Hungry</option>
+</select>
+</label>
+</div>
+<div class="shot-box">
+<label class="toggle-row">
+<input id="shotTaken" type="checkbox"/>
+<span>Injection taken today</span>
+</label>
+<label>Dose
+                  <select id="dose">
+<option>2.5 mg</option>
+<option>5 mg</option>
+<option>7.5 mg</option>
+<option>10 mg</option>
+<option>12.5 mg</option>
+<option>15 mg</option>
+</select>
+</label>
+</div>
+<button class="primary-button" type="submit">Save today</button>
+</form>
+</article>
+<article class="panel wins-panel">
+<div class="panel-heading">
+<div>
+<p class="eyebrow">Today's wins</p>
+<h2>Celebrate the good stuff</h2>
+</div>
+<span class="mini-icon gold">⭐</span>
+</div>
+<div class="win-options">
+<button data-win="Planned my meals" type="button">🍽️ Planned meals</button>
+<button data-win="Met my protein goal" type="button">💪 Protein goal</button>
+<button data-win="Moved my body" type="button">👟 Moved my body</button>
+<button data-win="Stopped when full" type="button">😊 Stopped when full</button>
+<button data-win="Made a better choice" type="button">🏆 Better choice</button>
+<button data-win="Stayed consistent" type="button">🔥 Stayed consistent</button>
+</div>
+<label>Add your own win
+              <input id="customWin" placeholder="Example: walked farther today" type="text"/>
+</label>
+<button class="gold-button" id="saveWinBtn">Add win</button>
+<div class="wins-list" id="winsList"></div>
+</article>
+</section></section><section class="view" id="doseView"><div class="v121-page-intro"><button class="return-home-button" type="button">← Home</button><div><p class="eyebrow">Zepbound center</p><h2>Dose effectiveness</h2><p>Record the details here; only a simple summary appears on Home.</p></div></div><section class="panel dose-effectiveness-panel" id="doseEffectivenessPanel">
+<div class="panel-heading">
+<div>
+<p class="eyebrow">Dose effectiveness</p>
+<h2>How is this week’s injection working?</h2>
+<p>Track your own appetite control from injection day through the end of the week.</p>
+</div>
+<span class="mini-icon dose-icon">💉</span>
+</div>
+<div class="dose-cycle-summary">
+<article>
+<span>Current dose</span>
+<strong id="doseTrackerCurrentDose">Not logged</strong>
+</article>
+<article>
+<span>Injection date</span>
+<strong id="doseTrackerShotDate">—</strong>
+</article>
+<article>
+<span>Cycle day</span>
+<strong id="doseTrackerCycleDay">—</strong>
+</article>
+<article>
+<span>Possible fade day</span>
+<strong id="doseTrackerFadeDay">Not enough data</strong>
+</article>
+</div>
+<section class="dose-injection-entry" aria-labelledby="doseInjectionHeading">
+<div class="panel-heading compact-heading">
+<div><p class="eyebrow">Injection log</p><h3 id="doseInjectionHeading">Start or update this week’s cycle</h3></div>
+</div>
+<form class="dose-injection-form" id="doseInjectionForm">
+<label>Injection date<input id="doseInjectionDate" required type="date"/></label>
+<label>Dose<select id="doseInjectionDose"><option>2.5 mg</option><option>5 mg</option><option>7.5 mg</option><option>10 mg</option><option>12.5 mg</option><option>15 mg</option></select></label>
+<button class="primary-button" type="submit">Save injection</button>
+</form>
+<p class="gentle-message" id="doseInjectionMessage">Save the injection first. Then the effectiveness sliders below will unlock.</p>
+</section>
+<div class="dose-guidance" id="doseTrackerNoShot">
+            Save an injection above to begin a new seven-day tracking cycle.
+          </div>
+<form class="dose-checkin-form" id="doseEffectivenessForm">
+<input id="doseEffectivenessDate" type="hidden"/>
+<label class="dose-slider-label">
+<span><strong>Appetite control</strong><output id="doseAppetiteOutput">5 / 10</output></span>
+<input id="doseAppetiteControl" max="10" min="0" step="1" type="range" value="5"/>
+<small>0 = no appetite control · 10 = very strong appetite control</small>
+</label>
+<label class="dose-slider-label">
+<span><strong>Craving control</strong><output id="doseCravingOutput">5 / 10</output></span>
+<input id="doseCravingControl" max="10" min="0" step="1" type="range" value="5"/>
+<small>0 = strong cravings · 10 = cravings very well controlled</small>
+</label>
+<label class="dose-slider-label">
+<span><strong>Comfortable fullness</strong><output id="doseFullnessOutput">5 / 10</output></span>
+<input id="doseFullnessControl" max="10" min="0" step="1" type="range" value="5"/>
+<small>0 = not getting full easily · 10 = comfortably satisfied with small portions</small>
+</label>
+<label>Today’s observation
+              <textarea id="doseEffectivenessNotes" placeholder="Example: Hunger returned before dinner, but portions were still smaller." rows="3"></textarea>
+</label>
+<button class="primary-button" type="submit">Save effectiveness check-in</button>
+</form>
+<div class="dose-chart-heading">
+<div>
+<p class="eyebrow">This injection cycle</p>
+<h3>Your seven-day pattern</h3>
+</div>
+<span class="date-chip" id="doseTrackerAverage">No check-ins</span>
+</div>
+<div class="dose-effectiveness-chart" id="doseEffectivenessChart"></div>
+<p class="dose-insight" id="doseTrackerInsight">Add daily check-ins to identify your personal pattern.</p>
+<details class="dose-method-note">
+<summary>How the “possible fade day” is identified</summary>
+<p>The app looks for the first day your average control score drops below 6 after an earlier check-in of 6 or higher. It is only a personal trend marker—not a measurement of medication remaining in your body and not a reason to change your dose or injection schedule.</p>
+</details>
+</section></section><section class="view" id="journalView"><div class="v121-page-return"><button class="return-home-button" type="button">← Home</button></div>
+<section class="view-hero journal-hero journal-scene">
+<p class="eyebrow light">My Journey Journal</p>
+<h2>Tell the story of your day.</h2>
+<p>Activities, reflections, gratitude, and tomorrow’s focus.</p>
+</section>
+<section class="panel future-letter-panel">
+<div class="panel-heading">
+<div>
+<p class="eyebrow">Letter to Future Me</p>
+<h2>Why am I starting?</h2>
+</div>
+<span class="mini-icon gold">❤️</span>
+</div>
+<p class="letter-intro">Write this once and keep it. This is your message from the beginning of the journey.</p>
+<textarea id="futureLetter" placeholder="Dear Future Kevin..." rows="10"></textarea>
+<div class="button-group">
+<button class="primary-button" id="saveFutureLetterBtn">Save my letter</button>
+<button class="secondary-button" id="toggleFutureLetterBtn">Hide letter</button>
+</div>
+<p class="gentle-message hidden" id="futureLetterSaved">Your Day One letter is safely stored on this device.</p>
+</section>
+<section class="journal-layout">
+<article class="panel journal-editor">
+<div class="panel-heading">
+<div>
+<p class="eyebrow">Today's journal</p>
+<h2 id="journalDateHeading"></h2>
+</div>
+<span class="mini-icon">📖</span>
+</div>
+<form id="journalForm">
+<div class="journal-paper">
+<div class="journal-date-row">
+<label>Entry date
+                    <input id="journalEntryDate" type="date"/>
+</label>
+<label class="favorite-toggle">
+<input id="journalFavorite" type="checkbox"/>
+<span>⭐ Favorite entry</span>
+</label>
+</div>
+<div class="reflection-prompt">
+<span>Today’s prompt</span>
+<strong id="dailyPrompt">What made today meaningful?</strong>
+</div>
+<label>Today's story
+                  <textarea id="journalStory" placeholder="Write freely about your day..." rows="10"></textarea>
+</label>
+<div class="journal-two-column">
+<label>Today's adventure
+                    <textarea id="journalAdventure" placeholder="Where did you go? What did you do?" rows="4"></textarea>
+</label>
+<label>Something I am proud of
+                    <textarea id="journalProud" placeholder="A choice, a habit, or a moment worth celebrating" rows="4"></textarea>
+</label>
+</div>
+<div class="journal-two-column">
+<label>Something I am grateful for
+                    <textarea id="journalGratitude" rows="4"></textarea>
+</label>
+<label>Tomorrow's focus
+                    <textarea id="journalTomorrow" rows="4"></textarea>
+</label>
+</div>
+</div>
+<fieldset>
+<legend>Life tags</legend>
+<div class="tag-options">
+<button data-tag="Drone" type="button">🚁 Drone</button>
+<button data-tag="Family" type="button">👨‍👩‍👧 Family</button>
+<button data-tag="Exercise" type="button">🚶 Exercise</button>
+<button data-tag="Restaurant" type="button">🍽️ Restaurant</button>
+<button data-tag="Home" type="button">🏡 Home</button>
+<button data-tag="Travel" type="button">🚗 Travel</button>
+<button data-tag="Celebration" type="button">🎉 Celebration</button>
+<button data-tag="Work" type="button">💼 Work</button>
+</div>
+</fieldset>
+<div class="button-group">
+<button class="primary-button" type="submit">Save journal entry</button>
+<button class="secondary-button" id="newJournalBtn" type="button">New entry</button>
+<button class="danger-button" id="deleteJournalBtn" type="button">Delete entry</button>
+</div>
+</form>
+</article>
+<article class="panel">
+<div class="panel-heading">
+<div>
+<p class="eyebrow">Journal entries</p>
+<h2>Recent reflections</h2>
+</div>
+<div class="journal-tools">
+<input id="journalSearch" placeholder="Search journal" type="search"/>
+<select id="journalFilter">
+<option value="all">All entries</option>
+<option value="favorites">Favorites</option>
+</select>
+</div>
+</div>
+<div class="timeline" id="journalTimeline"></div>
+</article>
+</section>
+</section>
+<section class="view" id="diningView"><div class="v121-page-return"><button class="return-home-button" type="button">← Home</button></div>
+<section class="dining-hero">
+<div>
+<p class="eyebrow light">Smart Dining</p>
+<h2>Eat out without losing the plot.</h2>
+<p>See protein-forward choices, compare nutrition, and log an item with one tap.</p>
+</div>
+<div class="dining-hero-icon">🍽️</div>
+</section>
+<section class="dining-today-card panel">
+<div class="panel-heading">
+<div>
+<p class="eyebrow">Your day so far</p>
+<h2 id="diningCoachTitle">Let’s find your best next choice</h2>
+<p id="diningCoachMessage">Your recommendations adjust to today’s calories, protein, and fiber.</p>
+</div>
+<button class="secondary-button" id="diningOpenNutritionBtn" type="button">View food log</button>
+</div>
+<div class="dining-goal-strip">
+<article><span>Calories left</span><strong id="diningCaloriesLeft">—</strong></article>
+<article><span>Protein left</span><strong id="diningProteinLeft">—</strong></article>
+<article><span>Fiber left</span><strong id="diningFiberLeft">—</strong></article>
+</div>
+</section>
+<section class="dining-controls panel">
+<label class="dining-search-label">Find a restaurant or food
+            <input autocomplete="off" id="diningSearchInput" placeholder="Try Smoothie King, chicken, shake…" type="search"/>
+</label>
+<div class="restaurant-chip-row" id="diningRestaurantChips"></div>
+<div aria-label="Dining filters" class="dining-filter-row" role="group">
+<button class="dining-filter active" data-dining-filter="all" type="button">All choices</button>
+<button class="dining-filter" data-dining-filter="green" type="button">🟢 Best</button>
+<button class="dining-filter" data-dining-filter="yellow" type="button">🟡 Good</button>
+<button class="dining-filter" data-dining-filter="favorites" type="button">⭐ Favorites</button>
+</div>
+</section>
+<section class="dining-section-heading">
+<div>
+<p class="eyebrow">One-tap restaurant logging</p>
+<h2 id="diningResultsHeading">Recommended choices</h2>
+</div>
+<span class="date-chip" id="diningResultCount">0 items</span>
+</section>
+<div class="dining-results" id="diningResults"></div>
+<div class="panel dining-empty hidden" id="diningEmpty">
+<div>🔎</div>
+<h3>No choices match that search.</h3>
+<p>Try a restaurant name, “chicken,” “protein,” or clear the filters.</p>
+<button class="primary-button" id="clearDiningSearchBtn" type="button">Show everything</button>
+</div>
+<section class="dining-note panel">
+<strong>Nutrition reminder</strong>
+<p>Restaurant recipes and serving sizes can change. Use the restaurant’s current nutrition information when exact numbers matter.</p>
+</section>
+</section>
+<section class="view" id="mealsView"><div class="v121-page-return"><button class="return-home-button" type="button">← Home</button></div>
+<section class="view-hero meals-hero">
+<p class="eyebrow light">Meal planner</p>
+<h2>Simple food. Less thinking.</h2>
+<p>Plan the week once, then make the next good choice easier.</p>
+</section>
+<section class="nutrition-center panel">
+<div class="panel-heading">
+<div>
+<p class="eyebrow">Nutrition tracker</p>
+<h2>Today’s food and nutrition</h2><p class="nutrition-totals-status" id="nutritionTotalsStatus">Saved food totals</p>
+<p class="nutrition-intro">Log food and automatically total calories, protein, carbohydrates, sugar, fiber, fat, and sodium.</p>
+</div>
+<button class="danger-button" id="nutritionClearDayBtn" type="button">Clear today</button>
+</div>
+<div class="nutrition-date-row">
+<label>Log date
+              <input id="nutritionDate" type="date"/>
+</label>
+<button class="secondary-button" id="nutritionCopyProteinBtn" type="button">Use protein total in today’s check-in</button>
+</div>
+<div class="nutrition-stats-grid">
+<article><span>Calories</span><strong id="nutritionTotalCalories">0</strong><small>kcal</small></article>
+<article><span>Protein</span><strong id="nutritionTotalProtein">0</strong><small>g</small></article>
+<article><span>Carbs</span><strong id="nutritionTotalCarbs">0</strong><small>g</small></article>
+<article><span>Sugar</span><strong id="nutritionTotalSugar">0</strong><small>g</small></article>
+<article><span>Fiber</span><strong id="nutritionTotalFiber">0</strong><small>g</small></article>
+<article><span>Fat</span><strong id="nutritionTotalFat">0</strong><small>g</small></article>
+<article><span>Sodium</span><strong id="nutritionTotalSodium">0</strong><small>mg</small></article>
+</div>
+<section class="nutrition-goal-panel">
+<div class="panel-heading">
+<div>
+<p class="eyebrow">Daily targets</p>
+<h3>Nutrition progress</h3>
+</div>
+<button class="secondary-button" id="nutritionGoalSettingsBtn" type="button">Change goals</button>
+</div>
+<div class="goal-progress-list">
+<div><span>Calories</span><strong id="goalCaloriesText">0 / 1,900</strong><div class="goal-meter"><span id="goalCaloriesMeter"></span></div></div>
+<div><span>Protein</span><strong id="goalProteinText">0 / 130 g</strong><div class="goal-meter"><span id="goalProteinMeter"></span></div></div>
+<div><span>Fiber</span><strong id="goalFiberText">0 / 30 g</strong><div class="goal-meter"><span id="goalFiberMeter"></span></div></div>
+</div>
+</section>
+<section class="smart-food-grid">
+<article class="smart-food-card">
+<div class="panel-heading"><div><p class="eyebrow">Recent foods</p><h3>Log it again</h3></div></div>
+<div class="smart-chip-list" id="recentFoodsList"></div>
+<p class="nutrition-empty" id="recentFoodsEmpty">Your recently logged foods will appear here.</p>
+</article>
+<article class="smart-food-card">
+<div class="panel-heading"><div><p class="eyebrow">Favorites</p><h3>Your quick picks</h3></div></div>
+<div class="smart-chip-list" id="favoriteFoodsList"></div>
+<p class="nutrition-empty" id="favoriteFoodsEmpty">Tap the star beside a logged food to save it here.</p>
+</article>
+<article class="smart-food-card protein-coach-card">
+<div class="panel-heading"><div><p class="eyebrow">Protein coach</p><h3 id="proteinCoachHeading">Build toward your goal</h3></div></div>
+<p id="proteinCoachMessage">Log food to see what you still need.</p>
+<div class="smart-chip-list" id="proteinCoachSuggestions"></div>
+</article>
+</section>
+<section class="weekly-nutrition panel-inner">
+<div class="panel-heading">
+<div><p class="eyebrow">Weekly nutrition</p><h3>Your last seven days</h3></div>
+</div>
+<div class="weekly-grid" id="weeklyNutritionGrid"></div>
+</section>
+<section class="grocery-panel panel-inner">
+<div class="panel-heading">
+<div><p class="eyebrow">Grocery list</p><h3>Keep the basics handy</h3></div>
+<button class="secondary-button" id="clearGroceryBtn" type="button">Clear checked</button>
+</div>
+<form class="grocery-form" id="groceryForm">
+<input id="groceryInput" placeholder="Add eggs, yogurt, chicken…" required=""/>
+<button class="primary-button" type="submit">Add item</button>
+</form>
+<div class="grocery-list" id="groceryList"></div>
+</section>
+<div class="nutrition-layout">
+<section class="nutrition-entry-card">
+<div class="panel-heading">
+<div>
+<p class="eyebrow">Add food</p>
+<h3>What did you eat?</h3>
+</div>
+</div>
+<section aria-labelledby="smartFoodHeading" class="smart-food-search">
+<div class="smart-food-heading">
+<div>
+<p class="eyebrow">Smart food search</p>
+<h3 id="smartFoodHeading">Search, tap, and log</h3>
+</div>
+<span class="food-source-badge" id="foodSearchSourceBadge">Local + online</span>
+</div>
+<div class="smart-search-row">
+<input autocomplete="off" enterkeyhint="search" id="nutritionFoodSearch" placeholder="Type cabbage, chicken, Cheerios…" type="search"/>
+<button class="primary-button" id="onlineFoodSearchBtn" type="button">Search foods</button>
+</div>
+<p aria-live="polite" class="search-help" id="onlineFoodSearchStatus">Local matches appear immediately. Tap Search foods for the larger online database.</p>
+<div class="nutrition-food-results" id="nutritionFoodResults"></div>
+<div class="nutrition-food-results online-food-results" id="onlineFoodResults"></div>
+</section>
+<form id="nutritionFoodForm">
+<div class="nutrition-form-grid">
+<label class="nutrition-wide">Food name
+                    <input id="nutritionFoodName" placeholder="Example: Grilled chicken breast" required=""/>
+</label>
+<button class="secondary-button nutrition-find-button" id="findTypedFoodBtn" type="button">
+                    Find this food
+                  </button>
+<label>Meal
+                    <select id="nutritionMealType">
+<option>Breakfast</option>
+<option>Lunch</option>
+<option>Dinner</option>
+<option>Snack</option>
+</select>
+</label>
+<label>Amount
+                    <input id="nutritionAmount" min="0.1" required="" step="0.1" type="number" value="1"/>
+</label>
+<label>Unit
+                    <select id="nutritionUnit">
+<option value="serving">serving</option>
+<option value="piece">piece</option>
+<option value="slice">slice</option>
+<option value="egg">egg</option>
+<option value="strip">strip</option>
+<option value="cup">cup</option>
+<option value="tbsp">tablespoon</option>
+<option value="tsp">teaspoon</option>
+<option value="oz">ounce</option>
+<option value="g">gram</option>
+<option value="can">can</option>
+<option value="container">container</option>
+<option value="shake">shake</option>
+</select>
+</label>
+<div aria-live="polite" class="nutrition-wide amount-live-summary">
+<span>Calculated for <strong id="nutritionInlineAmount">1 serving</strong></span>
+<strong><span id="nutritionInlineCalories">0</span> calories • <span id="nutritionInlineProtein">0</span> g protein</strong>
+<small>This preview changes immediately. Today’s totals update after you press “Add calculated amount to food log.”</small>
+</div>
+<label class="nutrition-wide">Nutrition values are based on
+                    <div class="serving-definition locked-serving">
+<input id="nutritionServingAmount" readonly="" type="number" value="1"/>
+<input id="nutritionServingUnitDisplay" readonly="" type="text" value="serving"/>
+<input id="nutritionServingUnit" type="hidden" value="serving"/>
+</div>
+</label>
+<button aria-expanded="false" class="nutrition-wide secondary-button nutrition-details-toggle" id="toggleNutritionDetailsBtn" type="button">Show nutrition details</button>
+<div class="nutrition-details-fields nutrition-wide" id="nutritionDetailsFields">
+<label>Calories
+                    <input id="nutritionCalories" min="0" required="" step="1" type="number" value="0"/>
+</label>
+<label>Protein (g)
+                    <input id="nutritionProtein" min="0" required="" step="0.1" type="number" value="0"/>
+</label>
+<label>Carbs (g)
+                    <input id="nutritionCarbs" min="0" required="" step="0.1" type="number" value="0"/>
+</label>
+<label>Sugar (g)
+                    <input id="nutritionSugar" min="0" required="" step="0.1" type="number" value="0"/>
+</label>
+<label>Fiber (g)
+                    <input id="nutritionFiber" min="0" required="" step="0.1" type="number" value="0"/>
+</label>
+<label>Fat (g)
+                    <input id="nutritionFat" min="0" required="" step="0.1" type="number" value="0"/>
+</label>
+<label>Sodium (mg)
+                    <input id="nutritionSodium" min="0" required="" step="1" type="number" value="0"/>
+</label>
+</div>
+</div>
+<p class="nutrition-note">Change only the amount you ate. The serving basis stays locked to the selected food so the totals calculate correctly.</p>
+<section aria-live="polite" class="nutrition-preview">
+<p class="eyebrow">Calculated amount</p>
+<h3 id="nutritionPreviewHeading">1 serving</h3>
+<div class="nutrition-preview-grid">
+<span><strong id="nutritionPreviewCalories">0</strong> calories</span>
+<span><strong id="nutritionPreviewProtein">0</strong> g protein</span>
+<span><strong id="nutritionPreviewCarbs">0</strong> g carbs</span>
+<span><strong id="nutritionPreviewSugar">0</strong> g sugar</span>
+<span><strong id="nutritionPreviewFiber">0</strong> g fiber</span>
+<span><strong id="nutritionPreviewFat">0</strong> g fat</span>
+<span><strong id="nutritionPreviewSodium">0</strong> mg sodium</span>
+</div>
+</section>
+<button class="primary-button nutrition-add-sticky" id="nutritionAddFoodBtn" type="submit">Add food to today</button>
+</form>
+</section>
+<section class="nutrition-log-card">
+<div class="panel-heading">
+<div>
+<p class="eyebrow">Food log</p>
+<h3 id="nutritionLogHeading">Today’s meals</h3>
+</div>
+</div>
+<div id="nutritionMealGroups"></div>
+<p class="nutrition-empty" id="nutritionEmptyState">No food entered for this date yet.</p>
+</section>
+</div>
+<p class="exercise-note">Nutrition values are estimates and vary by brand, preparation, and serving size. Use package labels when precision matters.</p>
+</section>
+<section class="panel">
+<div class="panel-heading">
+<div>
+<p class="eyebrow">This week</p>
+<h2>Your meal plan</h2>
+</div>
+<div class="button-group">
+<button class="secondary-button" id="suggestMealsBtn">Suggest a week</button>
+<button class="secondary-button" id="shoppingListBtn">Shopping list</button>
+</div>
+</div>
+<div class="meal-controls">
+<label>Meal style
+              <select id="mealStyle">
+<option value="balanced">Balanced</option>
+<option value="highProtein">Higher protein</option>
+<option value="simple">Simple and quick</option>
+<option value="gentle">Gentle on the stomach</option>
+</select>
+</label>
+<label>Meals per day
+              <select id="mealsPerDay">
+<option value="3">3 meals</option>
+<option selected="" value="4">3 meals + snack</option>
+</select>
+</label>
+</div>
+<div class="meal-carousel" id="mealCarousel"></div>
+<div class="button-group bottom-actions">
+<button class="primary-button" id="saveMealsBtn">Save meal plan</button>
+<button class="secondary-button" id="exportMealsBtn">Export plan</button>
+</div>
+</section>
+</section>
+<section class="view" id="storyView"><div class="v121-page-return"><button class="return-home-button" type="button">← Home</button></div>
+<section class="view-hero story-hero">
+<p class="eyebrow light">My story</p>
+<h2>Every day adds a page.</h2>
+<p>Your habits, wins, and journal entries together in one timeline.</p>
+</section>
+<section class="panel">
+<div class="panel-heading">
+<div>
+<p class="eyebrow">Journey timeline</p>
+<h2>Your recent days</h2>
+</div>
+<button class="secondary-button" id="exportDataBtn">Export data</button>
+</div>
+<div class="timeline" id="storyTimeline"></div>
+</section>
+</section>
+<section class="view" id="exerciseView"><div class="v121-page-return"><button class="return-home-button" type="button">← Home</button></div>
+<section class="view-hero exercise-hero">
+<p class="eyebrow light">My Gym</p>
+<h2>Strength is built one workout at a time.</h2>
+<p>Log what you did, remember your last settings, and choose a routine that fits today.</p>
+</section>
+<section class="exercise-summary-grid">
+<article class="summary-tile blue-tile"><span>Gym visits this week</span><strong id="gymVisitsWeek">0 / 2–3</strong></article>
+<article class="summary-tile purple-tile"><span>Total workouts</span><strong id="totalWorkouts">0</strong></article>
+<article class="summary-tile orange-tile"><span>Last workout</span><strong id="lastWorkoutDate">—</strong></article>
+</section>
+<section class="panel">
+<div class="panel-heading">
+<div><p class="eyebrow">Recommended routines</p><h2>Choose what fits today.</h2></div>
+<select id="routineFilter">
+<option value="all">All routines</option><option value="gym">Gym</option>
+<option value="gentle">Gentle day</option><option value="home">At home</option>
+</select>
+</div>
+<p class="exercise-note">General suggestions only. Use comfortable ranges, slow control, and stop any exercise that causes sharp or increasing shoulder or hip pain.</p>
+<div class="routine-cards" id="routineCards"></div>
+</section>
+<section class="panel workout-editor">
+<div class="panel-heading">
+<div><p class="eyebrow">Workout log</p><h2 id="workoutHeading">Start a workout</h2></div>
+<span class="mini-icon">🏋️</span>
+</div>
+<form id="workoutForm">
+<div class="form-grid">
+<label>Date<input id="workoutDate" type="date"/></label>
+<label>Workout name<input id="workoutName" placeholder="YMCA Workout A" type="text"/></label>
+<label>How did you feel?
+                <select id="workoutFeeling">
+<option value="">Choose</option><option>Great</option><option>Good</option>
+<option>Okay</option><option>Tired</option><option>Shoulder sore</option><option>Hip sore</option>
+</select>
+</label>
+</div>
+<div class="exercise-rows" id="exerciseRows"></div>
+<div class="button-group">
+<button class="secondary-button" id="addExerciseBtn" type="button">+ Add exercise</button>
+<button class="primary-button" type="submit">Finish workout</button>
+<button class="danger-button" id="clearWorkoutBtn" type="button">Clear</button>
+</div>
+<label>Workout notes<textarea id="workoutNotes" placeholder="What felt good? Anything to adjust next time?" rows="3"></textarea></label>
+</form>
+</section>
+<section class="panel">
+<div class="panel-heading"><div><p class="eyebrow">Workout history</p><h2>Your gym notebook</h2></div></div>
+<div class="workout-history" id="workoutHistory"></div>
+</section>
+</section>
+<section class="view" id="milestonesView"><div class="v121-page-return"><button class="return-home-button" type="button">← Home</button></div>
+<section class="view-hero milestone-hero">
+<p class="eyebrow light">Milestones</p>
+<h2>Celebrate every victory.</h2>
+<p>The process deserves recognition, not just the final result.</p>
+</section>
+<section class="panel"><div class="milestone-grid" id="milestoneGrid"></div></section>
+</section>
+<section class="view" id="photosView"><div class="v121-page-return"><button class="return-home-button" type="button">← Home</button></div>
+<section class="view-hero photos-hero">
+<p class="eyebrow light">My progress in pictures</p>
+<h2>See the changes week by week.</h2>
+<p>Take a photo or choose one from your phone, then save it with your weekly details.</p>
+</section>
+<section class="panel photo-upload-panel">
+<div class="panel-heading">
+<div><p class="eyebrow">Add progress photo</p><h2>Upload directly from your phone</h2></div>
+<span class="mini-icon">📸</span>
+</div>
+<p class="photo-help">Tap below to take a new picture or choose one already saved on your phone.</p>
+<div class="native-photo-picker native-photo-picker-visible">
+<label class="native-photo-field-label" for="photoFileInput">Progress photo</label>
+<input accept="image/*" aria-describedby="photoPickerHelp photoUploadStatus" class="native-photo-input-visible" id="photoFileInput" onchange="window.handleNativePhotoSelection &amp;&amp; window.handleNativePhotoSelection(this)" type="file"/>
+<small class="photo-picker-help" id="photoPickerHelp">Tap <strong>Choose File</strong>, then select Photo Library or Take Photo.</small>
+</div>
+<div aria-live="polite" class="photo-upload-status" id="photoUploadStatus" role="status">No photo chosen yet.</div>
+<div class="photo-upload-preview" id="photoUploadPreview">
+<div class="photo-preview-placeholder"><span>🖼️</span><strong>No photo selected</strong><small>Your selected picture will appear here.</small></div>
+</div>
+<button class="secondary-button photo-remove-selection" hidden="" id="removeSelectedPhotoBtn" type="button">Remove selected photo</button>
+<small class="privacy-note">Photos stay inside this app on this device. They are not uploaded or shared online.</small>
+</section>
+<section class="panel">
+<div class="panel-heading">
+<div><p class="eyebrow">Weekly photo record</p><h2>Log this week's picture</h2></div>
+</div>
+<form class="photo-week-form" id="photoWeekForm">
+<label>Week number<input id="photoWeek" max="104" min="1" required="" type="number"/></label>
+<label>Date<input id="photoDate" required="" type="date"/></label>
+<label>Weight<div class="input-with-unit"><input id="photoWeight" max="700" min="100" step="0.1" type="number"/><span>lb</span></div></label>
+<label>Dose<select id="photoDose"><option>2.5 mg</option><option>5 mg</option><option>7.5 mg</option><option>10 mg</option><option>12.5 mg</option><option>15 mg</option></select></label>
+<label class="photo-notes-label">Notes<textarea id="photoNotes" placeholder="How are you feeling? What changes do you notice?" rows="3"></textarea></label>
+<div class="button-group photo-form-actions">
+<button class="primary-button" id="savePhotoWeekBtn" type="submit">Save week</button>
+<button class="secondary-button" id="copyPhotoLabelBtn" type="button">Copy photo label</button>
+<button class="secondary-button" id="clearPhotoFormBtn" type="button">Clear</button>
+</div>
+</form>
+</section>
+<section class="panel">
+<div class="panel-heading"><div><p class="eyebrow">Weekly gallery</p><h2>Your photo timeline</h2></div></div>
+<div class="photo-week-grid" id="photoWeekGrid"></div>
+</section>
+<section class="panel">
+<div class="panel-heading"><div><p class="eyebrow">Compare progress</p><h2>Choose two weeks</h2></div></div>
+<div class="photo-compare-controls">
+<label>Earlier week<select id="comparePhotoA"></select></label>
+<label>Later week<select id="comparePhotoB"></select></label>
+</div>
+<div class="photo-compare-result" id="photoCompareResult"></div>
+</section>
+<section class="panel photo-guide-panel">
+<div class="panel-heading"><div><p class="eyebrow">Consistent photo guide</p><h2>Use the same setup each week</h2></div></div>
+<img alt="Weekly Zepbound progress photo label examples" class="photo-guide-image" src="photo-label-guide.png"/>
+<p class="photo-help">Try to use the same location, lighting, distance, pose, and clothing for easier comparison.</p>
+</section>
+</section>
+<section class="view" id="progressView"><div class="v121-page-return"><button class="return-home-button" type="button">← Home</button></div>
+<section class="view-hero progress-hero">
+<p class="eyebrow light">My progress</p>
+<h2>Look when it helps.</h2>
+<p>Your weight journey lives here—not on the home screen.</p>
+</section>
+<section class="panel">
+<div class="progress-cards">
+<article>
+<span>Starting weight</span>
+<strong id="startWeight">328.0 lb</strong>
+</article>
+<article>
+<span>Current weight</span>
+<strong id="currentWeight">—</strong>
+</article>
+<article>
+<span>Change</span>
+<strong id="weightChange">—</strong>
+</article>
+</div>
+<form class="weight-form" id="weightForm">
+<label>Date
+              <input id="weightDate" type="date"/>
+</label>
+<label>Weight
+              <div class="input-with-unit"><input id="weight" max="700" min="100" step="0.1" type="number"/><span>lb</span></div>
+</label>
+<button class="primary-button" type="submit">Add weight</button>
+</form>
+<canvas height="340" id="weightChart" width="1000"></canvas>
+</section>
+</section>
+<section class="about-card">
+<strong>My Zepbound Journey — Version 13.0 Development</strong>
+<span>Created by Kevin Wiltz</span>
+<small>One Day. One Choice. One Step at a Time.</small>
+</section>
+</main>
+<nav class="bottom-nav v12-bottom-nav">
+<button class="nav-item active" data-view="homeView"><span>🏠</span><strong>Home</strong></button>
+<button class="nav-item" data-view="mealsView"><span>🍽️</span><strong>Nutrition</strong></button>
+<button class="nav-item" data-view="progressView"><span>📈</span><strong>Progress</strong></button>
+<button class="nav-item" data-view="exerciseView"><span>💪🏽</span><strong>Fitness</strong></button>
+<button class="nav-item more-nav-item" id="moreNavBtn" type="button"><span>☰</span><strong>More</strong></button>
+</nav>
+</div>
+<div aria-hidden="true" aria-labelledby="photoViewerTitle" aria-modal="true" class="photo-viewer" hidden="" id="photoViewer" role="dialog">
+<div class="photo-viewer-backdrop" data-close-photo-viewer=""></div>
+<section class="photo-viewer-card">
+<header class="photo-viewer-header">
+<div>
+<p class="eyebrow">Progress photo</p>
+<h2 id="photoViewerTitle">Week 1</h2>
+</div>
+<button aria-label="Close photo viewer" class="photo-viewer-close" id="closePhotoViewerBtn" type="button">✕</button>
+</header>
+<div class="photo-viewer-image-wrap" id="photoViewerImageWrap"></div>
+<div class="photo-viewer-details" id="photoViewerDetails"></div>
+<div class="photo-viewer-controls">
+<button class="secondary-button" id="previousPhotoBtn" type="button">← Previous</button>
+<button class="primary-button" id="editViewedPhotoBtn" type="button">Edit week</button>
+<button class="secondary-button" id="nextPhotoBtn" type="button">Next →</button>
+</div>
+<p class="photo-viewer-tip">Pinch to zoom on your phone. Swipe is not required—use Previous and Next.</p>
+</section>
+</div>
+<dialog class="v12-more-dialog" id="moreMenuDialog">
+<section class="dialog-card v12-more-card">
+<div class="panel-heading">
+<div><p class="eyebrow">My journey</p><h2>More</h2></div>
+<button class="secondary-button" id="closeMoreMenuBtn" type="button">Close</button>
+</div>
+<div class="v12-more-grid"><button data-v12-view="checkInView" type="button"><span>☀️</span><strong>Daily Check-in</strong><small>Water, mood, sleep and wins</small></button><button data-v12-view="doseView" type="button"><span>💉</span><strong>Zepbound</strong><small>Injection and effectiveness tracker</small></button>
+<button data-v12-view="journalView" type="button"><span>📖</span><strong>Journal</strong><small>Mood, appetite and notes</small></button>
+<button data-v12-view="diningView" type="button"><span>🍴</span><strong>Dining Out</strong><small>Smarter restaurant choices</small></button>
+<button data-v12-view="photosView" type="button"><span>📸</span><strong>Photos</strong><small>Weekly gallery and compare</small></button>
+<button data-v12-view="milestonesView" type="button"><span>🏆</span><strong>Wins</strong><small>Milestones and victories</small></button>
+<button data-v12-view="storyView" type="button"><span>🕰️</span><strong>My Story</strong><small>Your journey timeline</small></button>
+<button id="v12SettingsBtn" type="button"><span>⚙️</span><strong>Settings</strong><small>Goals and preferences</small></button>
+</div>
+</section>
+</dialog>
+<dialog id="shoppingDialog">
+<form class="dialog-card" method="dialog">
+<div class="panel-heading">
+<h2>Shopping list</h2>
+<button class="secondary-button" value="cancel">Close</button>
+</div>
+<div id="shoppingList"></div>
+<button class="primary-button" id="copyShoppingBtn" type="button">Copy list</button>
+</form>
+</dialog>
+<dialog id="nutritionGoalsDialog">
+<form class="dialog-card" method="dialog">
+<div class="panel-heading">
+<h2>Nutrition goals</h2>
+<button class="secondary-button" value="cancel">Close</button>
+</div>
+<label>Daily calorie goal
+        <input id="goalCaloriesInput" max="5000" min="800" step="50" type="number"/>
+</label>
+<label>Daily protein goal
+        <div class="input-with-unit"><input id="goalProteinInput" max="400" min="20" type="number"/><span>g</span></div>
+</label>
+<label>Daily fiber goal
+        <div class="input-with-unit"><input id="goalFiberInput" max="100" min="5" type="number"/><span>g</span></div>
+</label>
+<button class="primary-button" id="saveNutritionGoalsBtn" type="button">Save nutrition goals</button>
+</form>
+</dialog>
+<dialog id="settingsDialog">
+<form class="dialog-card" method="dialog">
+<div class="panel-heading">
+<h2>Settings</h2>
+<button class="secondary-button" value="cancel">Close</button>
+</div>
+<label>Name
+        <input id="settingName" type="text"/>
+</label>
+<label>Journey start date
+        <input id="settingStartDate" type="date"/>
+</label>
+<label>Starting weight
+        <input id="settingStartWeight" step="0.1" type="number"/>
+</label>
+<label>Water goal
+        <input id="settingWaterGoal" type="number"/>
+</label>
+<label>Protein goal
+        <input id="settingProteinGoal" type="number"/>
+</label>
+<label>Movement goal
+        <input id="settingMovementGoal" type="number"/>
+</label>
+<label>Sleep goal
+        <input id="settingSleepGoal" step="0.1" type="number"/>
+</label>
+<button class="primary-button" id="saveSettingsBtn" type="button">Save settings</button>
+</form>
+</dialog>
+<script>
+  // Version 12.0.3: Home shortcuts use the exact same data-view navigation as the working bottom bar.
+  // This intentionally uses the same navigation buttons that already work
+  // in the bottom bar, with a manual fallback for pages housed under More.
+  window.v12OpenShortcut = function(viewId, targetId) {
+    try {
+      var more = document.getElementById("moreMenuDialog");
+      if (more && more.open) more.close();
+
+      if (typeof window.mzjNavigate === "function") {
+        window.mzjNavigate(viewId, { targetId: targetId });
+        return;
+      }
+      document.querySelectorAll('.nav-item').forEach(function(btn) { btn.classList.remove('active'); });
+      document.querySelectorAll('.view').forEach(function(view) { view.classList.remove('active'); });
+      var requestedView = document.getElementById(viewId);
+      if (requestedView) requestedView.classList.add('active');
+      window.scrollTo(0, 0);
+
+      window.setTimeout(function() {
+        var target = document.getElementById(targetId);
+        if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 250);
+    } catch (error) {
+      console.error('Home shortcut could not open:', error);
+    }
+  };
+
+  // Native inline fallback for iPhone Safari/PWA. This runs directly from the
+  // file input change event, even if an older cached app.js is still active.
+  window.handleNativePhotoSelection = function(input) {
+    const file = input && input.files && input.files[0];
+    const status = document.getElementById("photoUploadStatus");
+    const preview = document.getElementById("photoUploadPreview");
+    const removeBtn = document.getElementById("removeSelectedPhotoBtn");
+    if (!file) return;
+    window.__pendingProgressPhoto = file;
+    if (status) {
+      status.textContent = "Photo selected and ready to save.";
+      status.className = "photo-upload-status is-ready";
+    }
+    if (removeBtn) removeBtn.hidden = false;
+    if (!preview) return;
+    const reader = new FileReader();
+    reader.onload = function(event) {
+      const img = document.createElement("img");
+      img.alt = "Selected weekly progress photo";
+      img.src = event.target.result;
+      preview.replaceChildren(img);
+    };
+    reader.onerror = function() {
+      preview.innerHTML = '<div class="photo-preview-placeholder"><span>✅</span><strong>Photo selected</strong><small>Preview unavailable, but the photo is ready to save.</small></div>';
+    };
+    reader.readAsDataURL(file);
+  };
+</script>
+
+<script>
+(function(){
+  function openHome(){
+    if(typeof window.mzjNavigate === "function"){ window.mzjNavigate("homeView"); return; }
+    document.querySelectorAll('.view').forEach(function(v){v.classList.remove('active')});
+    document.getElementById('homeView')?.classList.add('active');
+    window.scrollTo(0,0);
+  }
+  document.addEventListener('click',function(e){
+    var back=e.target.closest('.return-home-button');
+    if(back){e.preventDefault();openHome();}
+  });
+  function updateDoseHome(){
+    var dose=document.getElementById('doseTrackerCurrentDose')?.textContent?.trim()||'Not logged';
+    var day=document.getElementById('doseTrackerCycleDay')?.textContent?.trim()||'—';
+    var avg=document.getElementById('doseTrackerAverage')?.textContent?.trim()||'No check-ins';
+    var line=document.getElementById('homeDoseLine');
+    var insight=document.getElementById('homeDoseInsight');
+    if(line) line.textContent=dose==='Not logged'?'Dose not logged':dose+' · '+day;
+    if(insight) insight.textContent=dose==='Not logged'?'Tap to log your injection':avg;
+  }
+  window.addEventListener('load',function(){
+    updateDoseHome();
+    setTimeout(updateDoseHome,500);
+    ['dailyForm','doseEffectivenessForm'].forEach(function(id){document.getElementById(id)?.addEventListener('submit',function(){setTimeout(updateDoseHome,50)})});
+    var sources=['doseTrackerCurrentDose','doseTrackerCycleDay','doseTrackerAverage'];
+    sources.forEach(function(id){var el=document.getElementById(id);if(el)new MutationObserver(updateDoseHome).observe(el,{childList:true,subtree:true,characterData:true})});
+  });
+})();
+</script>
+
+<script id="v13-recovered-data-import">
+(function(){
+  const MIGRATION_KEY = "mzjV13RecoveredDataImported_2026_07_24";
+  if (localStorage.getItem(MIGRATION_KEY) === "yes") return;
+
+  const recovered = {"mzjV9Grocery": "[{\"text\":\"egg\",\"checked\":false}]", "zepboundProcessDailyV1": "[{\"date\":\"2026-07-10\",\"water\":0,\"protein\":0,\"activity\":0,\"sleep\":0,\"mealsPlanned\":0,\"energy\":\"\",\"shotTaken\":false,\"dose\":\"2.5 mg\",\"notes\":\"\"}]", "mzjV8Mission": "{\"date\":\"2026-07-23\",\"complete\":false}", "mzjV7Weights": "[{\"date\":\"2026-07-01\",\"weight\":331},{\"date\":\"2026-07-22\",\"weight\":331},{\"date\":\"2026-07-22\",\"weight\":332},{\"date\":\"2026-07-22\",\"weight\":331},{\"date\":\"2026-07-23\",\"weight\":327.5}]", "mzjV8DayOne": "{\"begun\":true,\"date\":\"2026-07-13\",\"dose\":\"2.5 mg\"}", "mzjV81Nutrition": "[{\"id\":\"bb2dbac5-6075-41db-94a2-9957675541df\",\"date\":\"2026-07-20\",\"name\":\"Bacon, pork, cooked\",\"mealType\":\"Breakfast\",\"amount\":3,\"unit\":\"strip\",\"servingAmount\":1,\"servingUnit\":\"strip\",\"calories\":129,\"protein\":9,\"carbs\":0.3,\"sugar\":0,\"fiber\":0,\"fat\":9.9,\"sodium\":411},{\"id\":\"175c4bde-0004-4b21-a1ea-64012b439a50\",\"date\":\"2026-07-20\",\"name\":\"Egg, large, whole\",\"mealType\":\"Breakfast\",\"amount\":3,\"unit\":\"egg\",\"servingAmount\":1,\"servingUnit\":\"egg\",\"calories\":216,\"protein\":18.9,\"carbs\":1.2,\"sugar\":0.6,\"fiber\":0,\"fat\":14.4,\"sodium\":213},{\"id\":\"3e663128-8c60-4784-8730-17d96416adfc\",\"date\":\"2026-07-20\",\"name\":\"Broccoli, cooked\",\"mealType\":\"Breakfast\",\"amount\":1,\"unit\":\"cup\",\"servingAmount\":1,\"servingUnit\":\"cup\",\"calories\":55,\"protein\":3.7,\"carbs\":11.2,\"sugar\":2.2,\"fiber\":5.1,\"fat\":0.6,\"sodium\":64},{\"id\":\"8b4ae30a-56de-4daf-8ec4-ee547602145d\",\"date\":\"2026-07-20\",\"name\":\"Grilled chicken breast\",\"mealType\":\"Breakfast\",\"amount\":6,\"unit\":\"oz\",\"servingAmount\":3,\"servingUnit\":\"oz\",\"calories\":256,\"protein\":52,\"carbs\":0,\"sugar\":0,\"fiber\":0,\"fat\":5.4,\"sodium\":88},{\"id\":\"a24b93be-248c-4d35-ab34-5563795c5ca7\",\"date\":\"2026-07-22\",\"name\":\"Tillamook Original Smoked Sausages\",\"mealType\":\"Snack\",\"amount\":3,\"unit\":\"oz\",\"servingAmount\":1,\"servingUnit\":\"oz\",\"calories\":330,\"protein\":24,\"carbs\":0,\"sugar\":0,\"fiber\":0,\"fat\":21,\"sodium\":990},{\"id\":\"d3f7c69f-c8c1-4cb8-a341-6f73bc481a9c\",\"date\":\"2026-07-22\",\"name\":\"Tilapia, cooked\",\"mealType\":\"Dinner\",\"amount\":4,\"unit\":\"oz\",\"servingAmount\":4,\"servingUnit\":\"oz\",\"calories\":145,\"protein\":30,\"carbs\":0,\"sugar\":0,\"fiber\":0,\"fat\":3,\"sodium\":63},{\"id\":\"a00f8784-c4a3-4cc4-9cc0-a32552fe34d0\",\"date\":\"2026-07-22\",\"name\":\"Tuna, canned in water\",\"mealType\":\"Breakfast\",\"amount\":8,\"unit\":\"oz\",\"servingAmount\":3,\"servingUnit\":\"oz\",\"calories\":264,\"protein\":58.7,\"carbs\":0,\"sugar\":0,\"fiber\":0,\"fat\":1.9,\"sodium\":853},{\"id\":\"1023134f-1b6b-4cf1-9004-9918f553bf73\",\"date\":\"2026-07-22\",\"name\":\"Hard-boiled egg\",\"mealType\":\"Breakfast\",\"amount\":1,\"unit\":\"egg\",\"servingAmount\":1,\"servingUnit\":\"egg\",\"calories\":78,\"protein\":6.3,\"carbs\":0.6,\"sugar\":0.6,\"fiber\":0,\"fat\":5.3,\"sodium\":62},{\"id\":\"853e150d-7806-4620-acb9-b23cfe7e117f\",\"date\":\"2026-07-22\",\"name\":\"Buldak Hot Chicken — Samyang\",\"mealType\":\"Dinner\",\"amount\":100,\"unit\":\"g\",\"servingAmount\":100,\"servingUnit\":\"g\",\"calories\":427,\"protein\":7,\"carbs\":66,\"sugar\":5,\"fiber\":2,\"fat\":15,\"sodium\":1200},{\"id\":\"495075aa-9be5-4945-bf6d-f31ed63d11d3\",\"date\":\"2026-07-23\",\"name\":\"Wild Planet Wildly Good Promise Skipjack Tuna\",\"mealType\":\"Lunch\",\"amount\":1,\"unit\":\"can\",\"servingAmount\":1,\"servingUnit\":\"can\",\"calories\":140,\"protein\":32,\"carbs\":0,\"sugar\":0,\"fiber\":0,\"fat\":1.5,\"sodium\":450},{\"id\":\"1a3b6e92-80ad-46bd-97b2-e3ac0c4af69c\",\"date\":\"2026-07-23\",\"name\":\"Scrambled egg, plain\",\"mealType\":\"Breakfast\",\"amount\":5,\"unit\":\"egg\",\"servingAmount\":1,\"servingUnit\":\"egg\",\"calories\":455,\"protein\":31.5,\"carbs\":5,\"sugar\":2,\"fiber\":0,\"fat\":34,\"sodium\":475},{\"id\":\"796947f6-cd88-4ee8-bcc6-f6ce91310f3b\",\"date\":\"2026-07-23\",\"name\":\"Hard-boiled egg\",\"mealType\":\"Lunch\",\"amount\":1,\"unit\":\"egg\",\"servingAmount\":1,\"servingUnit\":\"egg\",\"calories\":78,\"protein\":6.3,\"carbs\":0.6,\"sugar\":0.6,\"fiber\":0,\"fat\":5.3,\"sodium\":62}]"};
+  const snapshot = {};
+  Object.keys(recovered).forEach(function(key) {
+    snapshot[key] = localStorage.getItem(key);
+  });
+  localStorage.setItem(
+    "mzjV13PreRecoveredImportSnapshot",
+    JSON.stringify({ createdAt: new Date().toISOString(), storage: snapshot })
+  );
+
+  Object.entries(recovered).forEach(function(entry) {
+    localStorage.setItem(entry[0], entry[1]);
+  });
+  localStorage.setItem(MIGRATION_KEY, "yes");
+  localStorage.setItem("mzjV13RecoveredDataImportedAt", new Date().toISOString());
+  console.info("My Zepbound Journey: recovered Version 12.2 data imported into Version 13.");
+})();
+</script>
+<script src="v13-controls.js?v=13.0.0-dev.10"></script>
+<script src="app.js?v=13.0.0-dev.10"></script>
+<script src="v13-navigation.js?v=13.0.0-dev.10"></script>
+<script>
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => navigator.serviceWorker.register("./sw.js"));
+    }
+  </script>
+</body>
+</html>

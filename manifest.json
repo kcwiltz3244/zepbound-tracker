@@ -1,10 +1,10 @@
 {
-  "name": "My Zepbound Journey 13.1",
+  "name": "My Zepbound Journey 13.1.1",
   "short_name": "Zepbound Dev",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#0f2747",
   "theme_color": "#2563eb",
   "description": "Version 13 Development with recovered Version 12.2 Zepbound data included for one-time import.",
-  "version": "13.1.0"
+  "version": "13.1.1"
 }

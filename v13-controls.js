@@ -1,6 +1,6 @@
 (function(){
   'use strict';
-  const VERSION='13.1.0';
+  const VERSION='13.1.1';
   const PREFIXES=['mzjV7','mzjV8','mzjV9','mzjV10','mzjV11','mzjV12','mzjV13','zepboundProcess'];
   const CONFIG_KEY='mzjV13CloudConfig';
   const META_KEY='mzjV13FoundationMeta';

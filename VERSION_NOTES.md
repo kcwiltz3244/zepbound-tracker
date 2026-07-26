@@ -1,4 +1,4 @@
-# Version 13.1.0 — Nutrition + Journal Consolidation
+# Version 13.0.0-dev.9 — Nutrition + Journal Consolidation
 
 ## Fixed
 - Migrates recovered Version 12.2 nutrition records from `mzjV81Nutrition` into the Version 13 canonical nutrition store.

@@ -20,3 +20,4 @@
 - This release does not delete or overwrite existing food records.
 - Existing Version 12.2/13 records are copied forward on first load.
 - Cloud synchronization remains disabled until Cloudflare setup is completed.
+-Cloudfare stable production deployment

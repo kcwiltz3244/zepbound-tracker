@@ -1,15 +1,14 @@
-# Version 13.0.0-dev.9 — Nutrition + Journal Consolidation
+# Version 13.1.4 — Search Cache Root Fix
 
-## Fixed
-- Migrates recovered Version 12.2 nutrition records from `mzjV81Nutrition` into the Version 13 canonical nutrition store.
-- Dual-writes nutrition during Development so rollback cannot hide records.
-- Home and Nutrition screens use the same food-log data source.
-- Includes the independent bottom navigation fix for More.
-- Includes Journal access, editor, search, favorites, and timeline.
-- Retains independent Backup, Restore, Cloud Setup, and Diagnostics controls.
-- Adds the navigation script to the service-worker cache and bumps the cache to dev.9.
+This patch fixes the root cause found during code inspection:
 
-## Data safety
-- This release does not delete or overwrite existing food records.
-- Existing Version 12.2/13 records are copied forward on first load.
-- Cloud synchronization remains disabled until Cloudflare setup is completed.
+- `index.html` was still requesting Version 13.0 JavaScript and CSS cache keys.
+- The service worker cached Version 13.1.3 under different URLs than the page requested.
+- A browser could therefore keep running the older food-search code even after a new deployment.
+
+Changes:
+- All page asset URLs now use `?v=13.1.4`.
+- The service worker uses a new cache and network-first, no-store behavior for app code.
+- Everyday local foods are rendered before the online request begins.
+- Online canned, bottled, jarred, and branded results are appended underneath.
+- The food-search badge visibly says `Everyday first · 13.1.4` so the loaded code can be verified.

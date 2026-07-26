@@ -974,28 +974,33 @@ async function v10SearchOnline(){
   const input=document.getElementById("nutritionFoodSearch");
   const query=input.value.trim();
   const status=document.getElementById("onlineFoodSearchStatus");
-  const wrap=document.getElementById("onlineFoodResults");
   if(query.length<2){status.textContent="Type at least two letters first.";input.focus();return}
 
+  const local=v10LocalMatches(query);
   v10RenderCombinedResults(query,null);
-  status.textContent=`Showing everyday foods first. Searching packaged foods for “${query}”…`;
+  status.textContent=local.length
+    ? `Found ${local.length} everyday-food match${local.length===1?"":"es"}. Looking for packaged foods below…`
+    : `No everyday-food match yet. Looking for packaged foods…`;
   try{
     const params=new URLSearchParams({search_terms:query,search_simple:"1",action:"process",json:"1",page_size:"18",fields:"code,product_name,product_name_en,generic_name,generic_name_en,brands,nutriments,image_front_small_url,image_small_url"});
-    const response=await fetch(`${V10_OFF_SEARCH_URL}?${params.toString()}`,{headers:{Accept:"application/json"}});
+    const response=await fetch(`${V10_OFF_SEARCH_URL}?${params.toString()}`,{headers:{Accept:"application/json"},cache:"no-store"});
     if(!response.ok)throw new Error(`Search returned ${response.status}`);
     const data=await response.json();
     const seen=new Set();
     const packagedPenalty=/canned|jarred|bottled|pickled|preserved|in brine|in syrup|with sauce|seasoned/i;
-    const plainBoost=/fresh|raw|plain|whole|uncooked|cooked|steamed|frozen/i;
     v10OnlineFoods=(data.products||[]).map(v10ProductToFood).filter(Boolean).filter(v10FoodHasNutrition)
       .filter(food=>{const key=normalizeFoodText(food.name);if(seen.has(key))return false;seen.add(key);return true})
-      .map(food=>({food,score:v10FoodSearchScore(food,query)+(plainBoost.test(food.name)?12:0)-(packagedPenalty.test(food.name)?30:0)}))
+      .map(food=>({food,score:v10FoodSearchScore(food,query)-(packagedPenalty.test(food.name)?40:0)}))
       .sort((a,b)=>b.score-a.score).map(x=>x.food).slice(0,12);
     v10RenderCombinedResults(query,v10OnlineFoods);
-    status.textContent=`Everyday foods are listed first, followed by ${v10OnlineFoods.length} packaged or branded matches.`;
+    status.textContent=local.length
+      ? `${local.length} everyday-food match${local.length===1?"":"es"} first; packaged foods are listed underneath.`
+      : `No everyday-food match found; showing packaged foods.`;
   }catch(error){
     v10RenderCombinedResults(query,[]);
-    status.textContent="Could not reach the online database. Everyday foods are still available.";
+    status.textContent=local.length
+      ? `${local.length} everyday-food match${local.length===1?"":"es"} available. The packaged-food database is offline.`
+      : "Could not reach the online database.";
   }
 }
 function v10InitSmartFoodSearch(){
@@ -1768,7 +1773,7 @@ initPhotoProgress();
 // Cloudflare Pages frontend + Cloudflare Worker/D1/R2 backend
 // ============================================================
 (function(){
-  const APP_VERSION="13.1.3";
+  const APP_VERSION="13.1.4";
   const CHANNEL="Development";
   const META_KEY="mzjV13FoundationMeta";
   const JOURNAL_KEY="mzjV13ChangeJournal";
@@ -1897,7 +1902,7 @@ initPhotoProgress();
   function updateFoundationBadges(){const el=document.getElementById("v13StatusText");if(el)el.textContent=statusText();const m=getMeta(),last=document.getElementById("v13LastBackup");if(last)last.textContent=`Last sync: ${m.cloud.lastSyncAt?new Date(m.cloud.lastSyncAt).toLocaleString():"Never"} · Last backup: ${m.lastBackupAt?new Date(m.lastBackupAt).toLocaleString():"None"}`}
   function openCloudSetup(){const modal=document.getElementById("v13CloudModal"),c=getConfig();document.getElementById("v13ApiUrl").value=c.apiUrl||"";document.getElementById("v13ApiToken").value=c.token||"";modal.hidden=false}
   async function saveCloudSetup(){const apiUrlValue=document.getElementById("v13ApiUrl").value.trim(),token=document.getElementById("v13ApiToken").value.trim();if(!apiUrlValue||!token){alert("Enter the Worker address and access token.");return}saveConfig({apiUrl:apiUrlValue,token});try{await testConnection();saveMeta({cloud:{status:"connected",lastError:null}});document.getElementById("v13CloudModal").hidden=true;updateFoundationBadges();await syncNow()}catch(err){saveMeta({cloud:{status:"error",lastError:err.message}});alert(`Connection was not accepted.\n\n${err.message}`)}}
-  function injectUI(){const home=document.getElementById("homeView");if(home&&!document.getElementById("v13FoundationCard")){const card=document.createElement("section");card.id="v13FoundationCard";card.className="v13-foundation-card";card.innerHTML=`<div class="v13-foundation-head"><div><span class="v13-dev-badge">VERSION 13.1.3 · COMBINED FOOD RESULTS</span><h2>Synchronization status</h2><p id="v13StatusText">Preparing…</p></div><span class="v13-shield">☁️</span></div><div class="v13-foundation-actions"><button id="v13SyncBtn" type="button">Sync now</button><button id="v13CloudSetupBtn" type="button">Cloud setup</button><button id="v13BackupBtn" type="button">Complete backup</button><button id="v13RestoreBtn" type="button">Restore</button><button id="v13DiagnosticsBtn" type="button">Diagnostics</button><input id="v13RestoreFile" type="file" accept="application/json,.json" hidden></div><small id="v13LastBackup"></small><p class="v13-cloud-note"><strong>Hosting:</strong> Cloudflare Pages. <strong>Data:</strong> private Cloudflare D1. <strong>Photos:</strong> private Cloudflare R2.</p>`;home.insertBefore(card,home.firstElementChild?.nextSibling||home.firstChild)}
+  function injectUI(){const home=document.getElementById("homeView");if(home&&!document.getElementById("v13FoundationCard")){const card=document.createElement("section");card.id="v13FoundationCard";card.className="v13-foundation-card";card.innerHTML=`<div class="v13-foundation-head"><div><span class="v13-dev-badge">VERSION 13.1.4 · SEARCH CACHE FIX</span><h2>Synchronization status</h2><p id="v13StatusText">Preparing…</p></div><span class="v13-shield">☁️</span></div><div class="v13-foundation-actions"><button id="v13SyncBtn" type="button">Sync now</button><button id="v13CloudSetupBtn" type="button">Cloud setup</button><button id="v13BackupBtn" type="button">Complete backup</button><button id="v13RestoreBtn" type="button">Restore</button><button id="v13DiagnosticsBtn" type="button">Diagnostics</button><input id="v13RestoreFile" type="file" accept="application/json,.json" hidden></div><small id="v13LastBackup"></small><p class="v13-cloud-note"><strong>Hosting:</strong> Cloudflare Pages. <strong>Data:</strong> private Cloudflare D1. <strong>Photos:</strong> private Cloudflare R2.</p>`;home.insertBefore(card,home.firstElementChild?.nextSibling||home.firstChild)}
     if(!document.getElementById("v13DiagnosticsModal"))document.body.insertAdjacentHTML("beforeend",`<div class="v13-modal" id="v13DiagnosticsModal" hidden><section><header><div><span class="v13-dev-badge">DEVELOPMENT</span><h2>Version 13 Diagnostics</h2></div><button id="v13CloseDiagnostics" aria-label="Close">×</button></header><div class="v13-diag-grid" id="v13DiagGrid"></div><h3>Recent errors</h3><div class="v13-errors" id="v13ErrorList"></div><button id="v13RefreshDiagnostics">Refresh</button></section></div><div class="v13-modal" id="v13CloudModal" hidden><section><header><div><span class="v13-dev-badge">PRIVATE CONNECTION</span><h2>Cloud setup</h2></div><button id="v13CloseCloud" aria-label="Close">×</button></header><label>Cloudflare Worker address<input id="v13ApiUrl" type="url" placeholder="https://my-zepbound-sync.your-name.workers.dev"></label><label>Private access token<input id="v13ApiToken" type="password" autocomplete="off"></label><p class="v13-cloud-note">Enter the same address and token on the laptop and iPhone. The token stays on that device and is never placed in GitHub.</p><button id="v13SaveCloud">Save and test connection</button></section></div>`);
     document.getElementById("v13SyncBtn")?.addEventListener("click",()=>syncNow());document.getElementById("v13CloudSetupBtn")?.addEventListener("click",openCloudSetup);document.getElementById("v13SaveCloud")?.addEventListener("click",saveCloudSetup);document.getElementById("v13CloseCloud")?.addEventListener("click",()=>document.getElementById("v13CloudModal").hidden=true);document.getElementById("v13BackupBtn")?.addEventListener("click",createBackup);document.getElementById("v13RestoreBtn")?.addEventListener("click",()=>document.getElementById("v13RestoreFile").click());document.getElementById("v13RestoreFile")?.addEventListener("change",e=>restoreBackup(e.target.files[0]));document.getElementById("v13DiagnosticsBtn")?.addEventListener("click",async()=>{document.getElementById("v13DiagnosticsModal").hidden=false;await renderDiagnostics()});document.getElementById("v13CloseDiagnostics")?.addEventListener("click",()=>document.getElementById("v13DiagnosticsModal").hidden=true);document.getElementById("v13RefreshDiagnostics")?.addEventListener("click",renderDiagnostics);window.addEventListener("online",()=>{updateFoundationBadges();syncNow({quiet:true})});window.addEventListener("offline",updateFoundationBadges);updateFoundationBadges();if(configured())setTimeout(()=>syncNow({quiet:true}),800)}
   window.MZJFoundation={version:APP_VERSION,channel:CHANNEL,recordChange,recordPhotoChange,createBackup,restoreBackup,diagnosticSnapshot,syncNow};

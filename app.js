@@ -902,13 +902,15 @@ function v10ApplyFood(food){
   document.getElementById("nutritionAmount")?.focus({preventScroll:true});
   document.getElementById("nutritionFoodForm")?.scrollIntoView({behavior:"smooth",block:"start"});
 }
-function v10FoodCard(food,index,online=false){
+function v10FoodCard(food,index,source=false){
   const image=food.image?`<img src="${esc(food.image)}" alt="" loading="lazy">`:`<span class="food-card-placeholder">🍽️</span>`;
-  return `<button type="button" class="v10-food-card" data-v10-${online?'online':'local'}="${index}">${image}<span class="v10-food-card-copy"><strong>${esc(food.name)}</strong><small>${esc(food.servingLabel||'Serving information')}</small><span>${Math.round(food.calories||0)} cal • ${nutritionRound(food.protein||0)}g protein</span></span><span class="v10-select-arrow">›</span></button>`;
+  const dataSource=source==="restaurant"?"restaurant":source?"online":"local";
+  return `<button type="button" class="v10-food-card" data-v10-${dataSource}="${index}">${image}<span class="v10-food-card-copy"><strong>${esc(food.name)}</strong><small>${esc(food.servingLabel||'Serving information')}</small><span>${Math.round(food.calories||0)} cal • ${nutritionRound(food.protein||0)}g protein</span></span><span class="v10-select-arrow">›</span></button>`;
 }
 function v10BindFoodCards(container){
   container.querySelectorAll("[data-v10-local]").forEach(btn=>btn.addEventListener("click",()=>v10ApplyFood(NUTRITION_FOODS[Number(btn.dataset.v10Local)])));
   container.querySelectorAll("[data-v10-online]").forEach(btn=>btn.addEventListener("click",()=>v10ApplyFood(v10OnlineFoods[Number(btn.dataset.v10Online)])));
+  container.querySelectorAll("[data-v10-restaurant]").forEach(btn=>btn.addEventListener("click",()=>v10ApplyFood(v10RestaurantFoods[Number(btn.dataset.v10Restaurant)])));
 }
 function v10EditDistance(a,b){
   a=normalizeFoodText(a);b=normalizeFoodText(b);
@@ -948,14 +950,40 @@ function v10FoodSearchScore(food,query){
   if(packaged)score-=18;
   return score;
 }
+function v10FoodCategory(food){
+  const text=normalizeFoodText(`${food?.name||""} ${(food?.aliases||[]).join(" ")}`);
+  const packaged=/canned|can\b|jarred|bottled|pickled|preserved|smoked sausage|protein powder|brand|deli|container|packaged/.test(text);
+  return packaged?"packaged":"everyday";
+}
 function v10LocalMatches(query=""){
   const q=query.trim();
   if(!q)return [];
-  return NUTRITION_FOODS.map((food,index)=>({food,index,score:v10FoodSearchScore(food,q)}))
+  return NUTRITION_FOODS.map((food,index)=>({food,index,score:v10FoodSearchScore(food,q),category:v10FoodCategory(food)}))
     .filter(x=>x.score>=0)
     .sort((a,b)=>b.score-a.score||a.index-b.index)
-    .slice(0,10);
+    .slice(0,16);
 }
+function v10RestaurantMatches(query=""){
+  const q=query.trim();
+  if(!q||typeof V11_DINING_ITEMS==="undefined")return [];
+  const normalized=normalizeFoodText(q);
+  return V11_DINING_ITEMS.map((item,index)=>{
+    const food={
+      name:`${item.name} — ${item.restaurant}`,
+      aliases:[item.restaurant,item.name],
+      servingAmount:1,
+      servingUnit:"serving",
+      servingLabel:"1 restaurant serving",
+      calories:item.calories,protein:item.protein,carbs:item.carbs,sugar:item.sugar,
+      fiber:item.fiber,fat:item.fat,sodium:item.sodium,
+      source:"Restaurant"
+    };
+    let score=v10FoodSearchScore(food,q);
+    if(normalizeFoodText(item.restaurant).includes(normalized))score=Math.max(score,88);
+    return {food,index,score};
+  }).filter(x=>x.score>=0).sort((a,b)=>b.score-a.score||a.index-b.index).slice(0,8);
+}
+let v10RestaurantFoods=[];
 function v10RenderCombinedResults(query="",onlineFoods=null){
   const wrap=document.getElementById("nutritionFoodResults");
   const legacyOnlineWrap=document.getElementById("onlineFoodResults");
@@ -963,19 +991,24 @@ function v10RenderCombinedResults(query="",onlineFoods=null){
   if(!wrap)return;
   const q=query.trim();
   if(!q){wrap.innerHTML="";wrap.scrollTop=0;return;}
-  const local=v10LocalMatches(q);
+
+  const matches=v10LocalMatches(q);
+  const everyday=matches.filter(x=>x.category==="everyday").slice(0,8);
+  const packaged=matches.filter(x=>x.category==="packaged").slice(0,6);
+  v10RestaurantFoods=v10RestaurantMatches(q).map(x=>x.food);
   let html="";
-  if(local.length){
-    html+=`<p class="result-section-label">Everyday foods</p>${local.map(x=>v10FoodCard(x.food,x.index,false)).join("")}`;
-  }else{
-    html+='<div class="food-search-empty"><strong>No everyday-food match yet.</strong><span>Packaged results may still appear below, or use manual entry.</span></div>';
+
+  if(everyday.length){
+    html+=`<p class="result-section-label">Fresh & everyday foods</p>${everyday.map(x=>v10FoodCard(x.food,x.index,false)).join("")}`;
   }
-  if(Array.isArray(onlineFoods)){
-    if(onlineFoods.length){
-      html+=`<p class="result-section-label packaged-results-label">Packaged and branded foods</p>${onlineFoods.map((f,i)=>v10FoodCard(f,i,true)).join("")}`;
-    }else{
-      html+='<div class="food-search-empty"><strong>Online packaged-food search is temporarily unavailable.</strong><span>Your everyday foods above are still ready to use.</span></div>';
-    }
+  if(packaged.length){
+    html+=`<p class="result-section-label packaged-results-label">Packaged & prepared foods</p>${packaged.map(x=>v10FoodCard(x.food,x.index,false)).join("")}`;
+  }
+  if(v10RestaurantFoods.length){
+    html+=`<p class="result-section-label restaurant-results-label">Restaurant foods</p>${v10RestaurantFoods.map((f,i)=>v10FoodCard(f,i,"restaurant")).join("")}`;
+  }
+  if(!everyday.length&&!packaged.length&&!v10RestaurantFoods.length){
+    html+='<div class="food-search-empty"><strong>No built-in match yet.</strong><span>Try fewer letters, a simpler food name, or use manual entry below.</span></div>';
   }
   wrap.innerHTML=html;
   wrap.hidden=false;
@@ -1000,7 +1033,7 @@ async function v10SearchOnline(){
   v10RenderCombinedResults(query,null);
   if(status){
     status.textContent=local.length
-      ? `Found ${local.length} built-in food match${local.length===1?"":"es"}. Tap one to load its nutrition.`
+      ? `Found built-in matches organized by food type. Tap one to load its nutrition.`
       : `No built-in match for “${query}.” You can still enter the food manually below.`;
   }
 }
@@ -1011,7 +1044,7 @@ function v10InitSmartFoodSearch(){
   if(!input||!button||input.dataset.unifiedFoodSearch==="yes")return;
   input.dataset.unifiedFoodSearch="yes";
   const badge=document.getElementById("foodSearchSourceBadge");
-  if(badge)badge.textContent="Built-in food search · 13.1.7";
+  if(badge)badge.textContent="Smart categories · 13.1.8";
   input.addEventListener("input",()=>v10RenderLocal(input.value));
   input.addEventListener("keydown",event=>{if(event.key==="Enter"){event.preventDefault();v10SearchOnline()}});
   button.addEventListener("click",v10SearchOnline);

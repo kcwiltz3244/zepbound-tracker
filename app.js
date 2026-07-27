@@ -462,7 +462,7 @@ function renderNutrition(){
 function initNutrition(){
   const date=document.getElementById("nutritionDate");if(!date)return;
   date.value=todayString();date.addEventListener("change",renderNutrition);
-  document.getElementById("nutritionFoodSearch").addEventListener("input",e=>renderNutritionSearch(e.target.value));
+  // Food search is initialized once by v10InitSmartFoodSearch below.
   ["nutritionAmount","nutritionUnit","nutritionCalories","nutritionProtein","nutritionCarbs","nutritionSugar","nutritionFiber","nutritionFat","nutritionSodium"].forEach(id=>{
     const field=document.getElementById(id);
     ["input","change","keyup","blur"].forEach(eventName=>field.addEventListener(eventName,nutritionPreview));
@@ -944,12 +944,12 @@ function v10LocalMatches(query=""){
     .slice(0,10);
 }
 function v10RenderCombinedResults(query="",onlineFoods=null){
-  const localWrap=document.getElementById("nutritionFoodResults");
-  const wrap=document.getElementById("onlineFoodResults");
+  const wrap=document.getElementById("nutritionFoodResults");
+  const legacyOnlineWrap=document.getElementById("onlineFoodResults");
+  if(legacyOnlineWrap){legacyOnlineWrap.innerHTML="";legacyOnlineWrap.hidden=true;}
   if(!wrap)return;
-  if(localWrap){localWrap.innerHTML="";localWrap.style.display="none";}
   const q=query.trim();
-  if(!q){wrap.innerHTML="";return;}
+  if(!q){wrap.innerHTML="";wrap.scrollTop=0;return;}
   const local=v10LocalMatches(q);
   let html="";
   if(local.length){
@@ -961,16 +961,13 @@ function v10RenderCombinedResults(query="",onlineFoods=null){
     if(onlineFoods.length){
       html+=`<p class="result-section-label packaged-results-label">Packaged and branded foods</p>${onlineFoods.map((f,i)=>v10FoodCard(f,i,true)).join("")}`;
     }else{
-      html+='<div class="food-search-empty"><strong>No packaged matches found.</strong></div>';
+      html+='<div class="food-search-empty"><strong>Online packaged-food search is temporarily unavailable.</strong><span>Your everyday foods above are still ready to use.</span></div>';
     }
   }
   wrap.innerHTML=html;
-  // Always return the result panel to the top after a new search.
-  // Mobile browsers preserve scrollTop when innerHTML is replaced, which
-  // made the packaged section appear first even though everyday foods
-  // were correctly rendered above it.
+  wrap.hidden=false;
+  wrap.style.display="";
   wrap.scrollTop=0;
-  requestAnimationFrame(()=>{ wrap.scrollTop=0; });
   v10BindFoodCards(wrap);
 }
 function v10RenderLocal(query=""){
@@ -1012,7 +1009,10 @@ async function v10SearchOnline(){
 function v10InitSmartFoodSearch(){
   const input=document.getElementById("nutritionFoodSearch");
   const button=document.getElementById("onlineFoodSearchBtn");
-  if(!input||!button)return;
+  if(!input||!button||input.dataset.unifiedFoodSearch==="yes")return;
+  input.dataset.unifiedFoodSearch="yes";
+  const badge=document.getElementById("foodSearchSourceBadge");
+  if(badge)badge.textContent="Everyday first · 13.1.6";
   input.addEventListener("input",()=>v10RenderLocal(input.value));
   input.addEventListener("keydown",event=>{if(event.key==="Enter"){event.preventDefault();v10SearchOnline()}});
   button.addEventListener("click",v10SearchOnline);
@@ -1779,7 +1779,7 @@ initPhotoProgress();
 // Cloudflare Pages frontend + Cloudflare Worker/D1/R2 backend
 // ============================================================
 (function(){
-  const APP_VERSION="13.1.5";
+  const APP_VERSION="13.1.6";
   const CHANNEL="Development";
   const META_KEY="mzjV13FoundationMeta";
   const JOURNAL_KEY="mzjV13ChangeJournal";
@@ -1908,7 +1908,7 @@ initPhotoProgress();
   function updateFoundationBadges(){const el=document.getElementById("v13StatusText");if(el)el.textContent=statusText();const m=getMeta(),last=document.getElementById("v13LastBackup");if(last)last.textContent=`Last sync: ${m.cloud.lastSyncAt?new Date(m.cloud.lastSyncAt).toLocaleString():"Never"} · Last backup: ${m.lastBackupAt?new Date(m.lastBackupAt).toLocaleString():"None"}`}
   function openCloudSetup(){const modal=document.getElementById("v13CloudModal"),c=getConfig();document.getElementById("v13ApiUrl").value=c.apiUrl||"";document.getElementById("v13ApiToken").value=c.token||"";modal.hidden=false}
   async function saveCloudSetup(){const apiUrlValue=document.getElementById("v13ApiUrl").value.trim(),token=document.getElementById("v13ApiToken").value.trim();if(!apiUrlValue||!token){alert("Enter the Worker address and access token.");return}saveConfig({apiUrl:apiUrlValue,token});try{await testConnection();saveMeta({cloud:{status:"connected",lastError:null}});document.getElementById("v13CloudModal").hidden=true;updateFoundationBadges();await syncNow()}catch(err){saveMeta({cloud:{status:"error",lastError:err.message}});alert(`Connection was not accepted.\n\n${err.message}`)}}
-  function injectUI(){const home=document.getElementById("homeView");if(home&&!document.getElementById("v13FoundationCard")){const card=document.createElement("section");card.id="v13FoundationCard";card.className="v13-foundation-card";card.innerHTML=`<div class="v13-foundation-head"><div><span class="v13-dev-badge">VERSION 13.1.5 · SEARCH CACHE FIX</span><h2>Synchronization status</h2><p id="v13StatusText">Preparing…</p></div><span class="v13-shield">☁️</span></div><div class="v13-foundation-actions"><button id="v13SyncBtn" type="button">Sync now</button><button id="v13CloudSetupBtn" type="button">Cloud setup</button><button id="v13BackupBtn" type="button">Complete backup</button><button id="v13RestoreBtn" type="button">Restore</button><button id="v13DiagnosticsBtn" type="button">Diagnostics</button><input id="v13RestoreFile" type="file" accept="application/json,.json" hidden></div><small id="v13LastBackup"></small><p class="v13-cloud-note"><strong>Hosting:</strong> Cloudflare Pages. <strong>Data:</strong> private Cloudflare D1. <strong>Photos:</strong> private Cloudflare R2.</p>`;home.insertBefore(card,home.firstElementChild?.nextSibling||home.firstChild)}
+  function injectUI(){const home=document.getElementById("homeView");if(home&&!document.getElementById("v13FoundationCard")){const card=document.createElement("section");card.id="v13FoundationCard";card.className="v13-foundation-card";card.innerHTML=`<div class="v13-foundation-head"><div><span class="v13-dev-badge">VERSION 13.1.6 · UNIFIED FOOD SEARCH</span><h2>Synchronization status</h2><p id="v13StatusText">Preparing…</p></div><span class="v13-shield">☁️</span></div><div class="v13-foundation-actions"><button id="v13SyncBtn" type="button">Sync now</button><button id="v13CloudSetupBtn" type="button">Cloud setup</button><button id="v13BackupBtn" type="button">Complete backup</button><button id="v13RestoreBtn" type="button">Restore</button><button id="v13DiagnosticsBtn" type="button">Diagnostics</button><input id="v13RestoreFile" type="file" accept="application/json,.json" hidden></div><small id="v13LastBackup"></small><p class="v13-cloud-note"><strong>Hosting:</strong> Cloudflare Pages. <strong>Data:</strong> private Cloudflare D1. <strong>Photos:</strong> private Cloudflare R2.</p>`;home.insertBefore(card,home.firstElementChild?.nextSibling||home.firstChild)}
     if(!document.getElementById("v13DiagnosticsModal"))document.body.insertAdjacentHTML("beforeend",`<div class="v13-modal" id="v13DiagnosticsModal" hidden><section><header><div><span class="v13-dev-badge">DEVELOPMENT</span><h2>Version 13 Diagnostics</h2></div><button id="v13CloseDiagnostics" aria-label="Close">×</button></header><div class="v13-diag-grid" id="v13DiagGrid"></div><h3>Recent errors</h3><div class="v13-errors" id="v13ErrorList"></div><button id="v13RefreshDiagnostics">Refresh</button></section></div><div class="v13-modal" id="v13CloudModal" hidden><section><header><div><span class="v13-dev-badge">PRIVATE CONNECTION</span><h2>Cloud setup</h2></div><button id="v13CloseCloud" aria-label="Close">×</button></header><label>Cloudflare Worker address<input id="v13ApiUrl" type="url" placeholder="https://my-zepbound-sync.your-name.workers.dev"></label><label>Private access token<input id="v13ApiToken" type="password" autocomplete="off"></label><p class="v13-cloud-note">Enter the same address and token on the laptop and iPhone. The token stays on that device and is never placed in GitHub.</p><button id="v13SaveCloud">Save and test connection</button></section></div>`);
     document.getElementById("v13SyncBtn")?.addEventListener("click",()=>syncNow());document.getElementById("v13CloudSetupBtn")?.addEventListener("click",openCloudSetup);document.getElementById("v13SaveCloud")?.addEventListener("click",saveCloudSetup);document.getElementById("v13CloseCloud")?.addEventListener("click",()=>document.getElementById("v13CloudModal").hidden=true);document.getElementById("v13BackupBtn")?.addEventListener("click",createBackup);document.getElementById("v13RestoreBtn")?.addEventListener("click",()=>document.getElementById("v13RestoreFile").click());document.getElementById("v13RestoreFile")?.addEventListener("change",e=>restoreBackup(e.target.files[0]));document.getElementById("v13DiagnosticsBtn")?.addEventListener("click",async()=>{document.getElementById("v13DiagnosticsModal").hidden=false;await renderDiagnostics()});document.getElementById("v13CloseDiagnostics")?.addEventListener("click",()=>document.getElementById("v13DiagnosticsModal").hidden=true);document.getElementById("v13RefreshDiagnostics")?.addEventListener("click",renderDiagnostics);window.addEventListener("online",()=>{updateFoundationBadges();syncNow({quiet:true})});window.addEventListener("offline",updateFoundationBadges);updateFoundationBadges();if(configured())setTimeout(()=>syncNow({quiet:true}),800)}
   window.MZJFoundation={version:APP_VERSION,channel:CHANNEL,recordChange,recordPhotoChange,createBackup,restoreBackup,diagnosticSnapshot,syncNow};

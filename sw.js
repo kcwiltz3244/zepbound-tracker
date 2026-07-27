@@ -1,5 +1,5 @@
-const CACHE_NAME = "mzj-v13-1-6";
-const CORE_ASSETS = ["./", "./index.html?v=13.1.6", "./styles.css?v=13.1.6", "./v13-controls.js?v=13.1.6", "./v13-navigation.js?v=13.1.6", "./app.js?v=13.1.6", "./manifest.json?v=13.1.6", "./photo-label-guide.png"];
+const CACHE_NAME = "mzj-v13-1-7";
+const CORE_ASSETS = ["./", "./index.html?v=13.1.7", "./styles.css?v=13.1.7", "./v13-controls.js?v=13.1.7", "./v13-navigation.js?v=13.1.7", "./app.js?v=13.1.7", "./manifest.json?v=13.1.7", "./photo-label-guide.png"];
 self.addEventListener("install",event=>{event.waitUntil(caches.open(CACHE_NAME).then(cache=>cache.addAll(CORE_ASSETS)));self.skipWaiting();});
 self.addEventListener("activate",event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key.startsWith("mzj-")&&key!==CACHE_NAME).map(key=>caches.delete(key)))));self.clients.claim();});
 self.addEventListener("fetch",event=>{
@@ -7,7 +7,7 @@ self.addEventListener("fetch",event=>{
   const url=new URL(event.request.url);
   const isCode=["document","script","style","worker"].includes(event.request.destination)||url.pathname.endsWith(".json");
   if(isCode){
-    event.respondWith(fetch(event.request,{cache:"no-store"}).then(response=>{if(response&&response.ok){const copy=response.clone();caches.open(CACHE_NAME).then(cache=>cache.put(event.request,copy));}return response;}).catch(()=>caches.match(event.request).then(hit=>hit||caches.match("./index.html?v=13.1.6"))));
+    event.respondWith(fetch(event.request,{cache:"no-store"}).then(response=>{if(response&&response.ok){const copy=response.clone();caches.open(CACHE_NAME).then(cache=>cache.put(event.request,copy));}return response;}).catch(()=>caches.match(event.request).then(hit=>hit||caches.match("./index.html?v=13.1.7"))));
     return;
   }
   event.respondWith(caches.match(event.request).then(hit=>hit||fetch(event.request).then(response=>{if(response&&response.ok){const copy=response.clone();caches.open(CACHE_NAME).then(cache=>cache.put(event.request,copy));}return response;})));

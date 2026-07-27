@@ -1,4 +1,17 @@
 
+// Version 13.1.7 safety helper: several panels use this during startup.
+function formatDate(value){
+  if(!value) return "—";
+  const text=String(value);
+  const parts=text.split("-");
+  if(parts.length===3){
+    const d=new Date(Number(parts[0]),Number(parts[1])-1,Number(parts[2]));
+    if(!Number.isNaN(d.getTime())) return d.toLocaleDateString(undefined,{month:"short",day:"numeric",year:"numeric"});
+  }
+  const d=new Date(value);
+  return Number.isNaN(d.getTime())?text:d.toLocaleDateString(undefined,{month:"short",day:"numeric",year:"numeric"});
+}
+
 const KEYS={daily:"mzjV7Daily",wins:"mzjV7Wins",meals:"mzjV7Meals",weights:"mzjV7Weights",settings:"mzjV7Settings",journal:"mzjV7Journal",dayOne:"mzjV8DayOne",futureLetter:"mzjV8FutureLetter",mission:"mzjV8Mission",workouts:"mzjV8Workouts"};
 const defaults={name:"Kevin Wiltz",startDate:new Date().toISOString().split("T")[0],startingWeight:328,waterGoal:80,proteinGoal:100,movementGoal:30,sleepGoal:8};
 const days=["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"];
@@ -975,44 +988,30 @@ function v10RenderLocal(query=""){
 }
 async function v10SearchOnline(){
   const input=document.getElementById("nutritionFoodSearch");
-  const query=input.value.trim();
   const status=document.getElementById("onlineFoodSearchStatus");
-  if(query.length<2){status.textContent="Type at least two letters first.";input.focus();return}
+  const query=(input?.value||"").trim();
+  if(query.length<2){
+    if(status)status.textContent="Type at least two letters first.";
+    input?.focus();
+    return;
+  }
 
   const local=v10LocalMatches(query);
   v10RenderCombinedResults(query,null);
-  status.textContent=local.length
-    ? `Found ${local.length} everyday-food match${local.length===1?"":"es"}. Looking for packaged foods below…`
-    : `No everyday-food match yet. Looking for packaged foods…`;
-  try{
-    const params=new URLSearchParams({search_terms:query,search_simple:"1",action:"process",json:"1",page_size:"18",fields:"code,product_name,product_name_en,generic_name,generic_name_en,brands,nutriments,image_front_small_url,image_small_url"});
-    const response=await fetch(`${V10_OFF_SEARCH_URL}?${params.toString()}`,{headers:{Accept:"application/json"},cache:"no-store"});
-    if(!response.ok)throw new Error(`Search returned ${response.status}`);
-    const data=await response.json();
-    const seen=new Set();
-    const packagedPenalty=/canned|jarred|bottled|pickled|preserved|in brine|in syrup|with sauce|seasoned/i;
-    v10OnlineFoods=(data.products||[]).map(v10ProductToFood).filter(Boolean).filter(v10FoodHasNutrition)
-      .filter(food=>{const key=normalizeFoodText(food.name);if(seen.has(key))return false;seen.add(key);return true})
-      .map(food=>({food,score:v10FoodSearchScore(food,query)-(packagedPenalty.test(food.name)?40:0)}))
-      .sort((a,b)=>b.score-a.score).map(x=>x.food).slice(0,12);
-    v10RenderCombinedResults(query,v10OnlineFoods);
+  if(status){
     status.textContent=local.length
-      ? `${local.length} everyday-food match${local.length===1?"":"es"} first; packaged foods are listed underneath.`
-      : `No everyday-food match found; showing packaged foods.`;
-  }catch(error){
-    v10RenderCombinedResults(query,[]);
-    status.textContent=local.length
-      ? `${local.length} everyday-food match${local.length===1?"":"es"} available. The packaged-food database is offline.`
-      : "Could not reach the online database.";
+      ? `Found ${local.length} built-in food match${local.length===1?"":"es"}. Tap one to load its nutrition.`
+      : `No built-in match for “${query}.” You can still enter the food manually below.`;
   }
 }
+
 function v10InitSmartFoodSearch(){
   const input=document.getElementById("nutritionFoodSearch");
   const button=document.getElementById("onlineFoodSearchBtn");
   if(!input||!button||input.dataset.unifiedFoodSearch==="yes")return;
   input.dataset.unifiedFoodSearch="yes";
   const badge=document.getElementById("foodSearchSourceBadge");
-  if(badge)badge.textContent="Everyday first · 13.1.6";
+  if(badge)badge.textContent="Built-in food search · 13.1.7";
   input.addEventListener("input",()=>v10RenderLocal(input.value));
   input.addEventListener("keydown",event=>{if(event.key==="Enter"){event.preventDefault();v10SearchOnline()}});
   button.addEventListener("click",v10SearchOnline);

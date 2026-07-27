@@ -342,7 +342,17 @@ const NUTRITION_FOODS=[
 {name:"Protein shake",aliases:["protein shake","shake"],servingAmount:1,servingUnit:"shake",servingLabel:"1 prepared shake",calories:160,protein:30,carbs:6,sugar:2,fiber:1,fat:3,sodium:210},
 {name:"Almonds",aliases:["almonds","nuts"],servingAmount:1,servingUnit:"oz",servingLabel:"1 oz",calories:164,protein:6,carbs:6.1,sugar:1.2,fiber:3.5,fat:14.2,sodium:0},
 {name:"Peanut butter",aliases:["peanut butter"],servingAmount:2,servingUnit:"tbsp",servingLabel:"2 tablespoons",calories:190,protein:7,carbs:7,sugar:3,fiber:2,fat:16,sodium:140},
-{name:"Avocado",aliases:["avocado"],servingAmount:.5,servingUnit:"piece",servingLabel:"1/2 medium avocado",calories:120,protein:1.5,carbs:6.4,sugar:.3,fiber:5,fat:11,sodium:5}
+{name:"Avocado",aliases:["avocado"],servingAmount:.5,servingUnit:"piece",servingLabel:"1/2 medium avocado",calories:120,protein:1.5,carbs:6.4,sugar:.3,fiber:5,fat:11,sodium:5},
+{name:"Green beans, fresh, cooked",aliases:["green beans","fresh green beans","string beans","snap beans","vegetable"],servingAmount:1,servingUnit:"cup",servingLabel:"1 cup cooked",calories:44,protein:2.4,carbs:10,sugar:3.5,fiber:4, fat:.4,sodium:2},
+{name:"Green beans, canned, drained",aliases:["green beans","canned green beans","string beans"],servingAmount:1,servingUnit:"cup",servingLabel:"1 cup drained",calories:36,protein:1.8,carbs:8,sugar:3,fiber:3.5,fat:.2,sodium:350},
+{name:"Cucumber, raw, sliced",aliases:["cucumber","fresh cucumber","cucumber slices","vegetable"],servingAmount:1,servingUnit:"cup",servingLabel:"1 cup sliced",calories:16,protein:.7,carbs:3.8,sugar:1.7,fiber:.5,fat:.1,sodium:2},
+{name:"Cucumber salad",aliases:["cucumber","cucumber salad","marinated cucumber"],servingAmount:1,servingUnit:"cup",servingLabel:"1 cup",calories:70,protein:1,carbs:10,sugar:6,fiber:1.5,fat:3,sodium:300},
+{name:"Smoked sausage, pork and beef",aliases:["sausage","smoked sausage","beef sausage","pork sausage","link sausage"],servingAmount:3,servingUnit:"oz",servingLabel:"3 oz cooked",calories:290,protein:12,carbs:4,sugar:1,fiber:0,fat:25,sodium:780},
+{name:"Turkey sausage link",aliases:["sausage","turkey sausage","breakfast sausage","sausage link"],servingAmount:2,servingUnit:"piece",servingLabel:"2 links",calories:120,protein:10,carbs:2,sugar:1,fiber:0,fat:8,sodium:500},
+{name:"Breakfast sausage, pork",aliases:["sausage","breakfast sausage","pork sausage","sausage patty"],servingAmount:2,servingUnit:"oz",servingLabel:"2 oz cooked",calories:190,protein:9,carbs:1,sugar:0,fiber:0,fat:17,sodium:450},
+{name:"Italian sausage, cooked",aliases:["sausage","italian sausage","pork sausage"],servingAmount:3,servingUnit:"oz",servingLabel:"3 oz cooked",calories:260,protein:14,carbs:2,sugar:1,fiber:0,fat:22,sodium:650},
+{name:"Watermelon, diced",aliases:["watermelon","melon","fruit"],servingAmount:1,servingUnit:"cup",servingLabel:"1 cup diced",calories:46,protein:.9,carbs:11.5,sugar:9.4,fiber:.6,fat:.2,sodium:2},
+{name:"Dymatize ISO100 protein powder",aliases:["dymatize","iso100","protein powder","vanilla protein"],servingAmount:1,servingUnit:"serving",servingLabel:"1 scoop",calories:120,protein:25,carbs:2,sugar:1,fiber:0,fat:.5,sodium:160}
 ];
 let nutritionEntries=loadNutritionEntries();
 const nutritionNutrients=["calories","protein","carbs","sugar","fiber","fat","sodium"];
@@ -413,8 +423,10 @@ function nutritionPreview(){
 }
 function renderNutritionSearch(query=""){
   const wrap=document.getElementById("nutritionFoodResults");if(!wrap)return;
-  const q=query.trim().toLowerCase();
-  const results=NUTRITION_FOODS.filter(f=>!q||f.name.toLowerCase().includes(q)||(f.aliases||[]).some(a=>a.includes(q))).slice(0,12);
+  const normalize=value=>String(value||"").toLowerCase().replace(/[^a-z0-9\s]/g," ").replace(/\s+/g," ").trim();
+  const q=normalize(query),terms=q.split(" ").filter(Boolean);
+  const scored=NUTRITION_FOODS.map((f,index)=>{const name=normalize(f.name),aliases=(f.aliases||[]).map(normalize),haystack=[name,...aliases].join(" ");let score=0;if(!q)score=1;else{if(name===q)score+=100;if(aliases.includes(q))score+=90;if(name.startsWith(q))score+=50;if(haystack.includes(q))score+=30;terms.forEach(t=>{if(name.split(" ").includes(t))score+=12;else if(haystack.includes(t))score+=5})}return {f,index,score}}).filter(x=>x.score>0).sort((a,b)=>b.score-a.score||a.index-b.index);
+  const results=scored.slice(0,16).map(x=>x.f);
   wrap.innerHTML=results.map(f=>`<button type="button" class="nutrition-food-result" data-food-index="${NUTRITION_FOODS.indexOf(f)}"><span><strong>${esc(f.name)}</strong><small>${esc(f.servingLabel)}</small></span><span>${f.calories} cal • ${f.protein}g protein</span></button>`).join("");
   wrap.querySelectorAll("[data-food-index]").forEach(b=>b.addEventListener("click",()=>{
     const f=NUTRITION_FOODS[Number(b.dataset.foodIndex)];
@@ -885,39 +897,116 @@ function v10BindFoodCards(container){
   container.querySelectorAll("[data-v10-local]").forEach(btn=>btn.addEventListener("click",()=>v10ApplyFood(NUTRITION_FOODS[Number(btn.dataset.v10Local)])));
   container.querySelectorAll("[data-v10-online]").forEach(btn=>btn.addEventListener("click",()=>v10ApplyFood(v10OnlineFoods[Number(btn.dataset.v10Online)])));
 }
-function v10RenderLocal(query=""){
-  const wrap=document.getElementById("nutritionFoodResults");if(!wrap)return;
-  const q=query.trim().toLowerCase();
-  if(!q){wrap.innerHTML="";return}
-  const matches=NUTRITION_FOODS.filter(f=>f.name.toLowerCase().includes(q)||(f.aliases||[]).some(a=>a.includes(q))).slice(0,8);
-  wrap.innerHTML=matches.length?`<p class="result-section-label">Quick local matches</p>${matches.map(f=>v10FoodCard(f,NUTRITION_FOODS.indexOf(f),false)).join("")}`:"";
+function v10EditDistance(a,b){
+  a=normalizeFoodText(a);b=normalizeFoodText(b);
+  const row=Array.from({length:b.length+1},(_,i)=>i);
+  for(let i=1;i<=a.length;i++){
+    let prev=row[0];row[0]=i;
+    for(let j=1;j<=b.length;j++){
+      const temp=row[j];
+      row[j]=Math.min(row[j]+1,row[j-1]+1,prev+(a[i-1]===b[j-1]?0:1));
+      prev=temp;
+    }
+  }
+  return row[b.length];
+}
+function v10FoodSearchScore(food,query){
+  const q=normalizeFoodText(query);if(!q)return -1;
+  const name=normalizeFoodText(food.name);
+  const aliases=(food.aliases||[]).map(normalizeFoodText);
+  const haystacks=[name,...aliases];
+  let score=-1;
+  if(name===q)score=120;
+  else if(aliases.includes(q))score=110;
+  else if(name.startsWith(q))score=95;
+  else if(aliases.some(a=>a.startsWith(q)))score=90;
+  else if(name.includes(q))score=80;
+  else if(aliases.some(a=>a.includes(q)))score=75;
+  else {
+    const words=q.split(' ').filter(Boolean);
+    const matched=words.filter(w=>haystacks.some(h=>h.includes(w))).length;
+    if(matched)score=45+matched*8;
+    if(q.length>=4&&haystacks.some(h=>h.split(' ').some(w=>v10EditDistance(w,q)<=1)))score=Math.max(score,65);
+  }
+  if(score<0)return score;
+  const packaged=/canned|jarred|bottled|pickled|preserved|in sauce|with sauce|brand|restaurant/i.test(food.name);
+  const everyday=/fresh|raw|plain|cooked|steamed|baked|grilled|roasted/i.test(food.name);
+  if(everyday)score+=18;
+  if(packaged)score-=18;
+  return score;
+}
+function v10LocalMatches(query=""){
+  const q=query.trim();
+  if(!q)return [];
+  return NUTRITION_FOODS.map((food,index)=>({food,index,score:v10FoodSearchScore(food,q)}))
+    .filter(x=>x.score>=0)
+    .sort((a,b)=>b.score-a.score||a.index-b.index)
+    .slice(0,10);
+}
+function v10RenderCombinedResults(query="",onlineFoods=null){
+  const localWrap=document.getElementById("nutritionFoodResults");
+  const wrap=document.getElementById("onlineFoodResults");
+  if(!wrap)return;
+  if(localWrap){localWrap.innerHTML="";localWrap.style.display="none";}
+  const q=query.trim();
+  if(!q){wrap.innerHTML="";return;}
+  const local=v10LocalMatches(q);
+  let html="";
+  if(local.length){
+    html+=`<p class="result-section-label">Everyday foods</p>${local.map(x=>v10FoodCard(x.food,x.index,false)).join("")}`;
+  }else{
+    html+='<div class="food-search-empty"><strong>No everyday-food match yet.</strong><span>Packaged results may still appear below, or use manual entry.</span></div>';
+  }
+  if(Array.isArray(onlineFoods)){
+    if(onlineFoods.length){
+      html+=`<p class="result-section-label packaged-results-label">Packaged and branded foods</p>${onlineFoods.map((f,i)=>v10FoodCard(f,i,true)).join("")}`;
+    }else{
+      html+='<div class="food-search-empty"><strong>No packaged matches found.</strong></div>';
+    }
+  }
+  wrap.innerHTML=html;
+  // Always return the result panel to the top after a new search.
+  // Mobile browsers preserve scrollTop when innerHTML is replaced, which
+  // made the packaged section appear first even though everyday foods
+  // were correctly rendered above it.
+  wrap.scrollTop=0;
+  requestAnimationFrame(()=>{ wrap.scrollTop=0; });
   v10BindFoodCards(wrap);
+}
+function v10RenderLocal(query=""){
+  v10RenderCombinedResults(query,null);
 }
 async function v10SearchOnline(){
   const input=document.getElementById("nutritionFoodSearch");
   const query=input.value.trim();
   const status=document.getElementById("onlineFoodSearchStatus");
-  const wrap=document.getElementById("onlineFoodResults");
   if(query.length<2){status.textContent="Type at least two letters first.";input.focus();return}
-  status.textContent=`Searching the larger food database for “${query}”…`;
-  wrap.innerHTML='<div class="food-search-loading">Searching…</div>';
+
+  const local=v10LocalMatches(query);
+  v10RenderCombinedResults(query,null);
+  status.textContent=local.length
+    ? `Found ${local.length} everyday-food match${local.length===1?"":"es"}. Looking for packaged foods below…`
+    : `No everyday-food match yet. Looking for packaged foods…`;
   try{
     const params=new URLSearchParams({search_terms:query,search_simple:"1",action:"process",json:"1",page_size:"18",fields:"code,product_name,product_name_en,generic_name,generic_name_en,brands,nutriments,image_front_small_url,image_small_url"});
-    const response=await fetch(`${V10_OFF_SEARCH_URL}?${params.toString()}`,{headers:{Accept:"application/json"}});
+    const response=await fetch(`${V10_OFF_SEARCH_URL}?${params.toString()}`,{headers:{Accept:"application/json"},cache:"no-store"});
     if(!response.ok)throw new Error(`Search returned ${response.status}`);
     const data=await response.json();
     const seen=new Set();
-    v10OnlineFoods=(data.products||[]).map(v10ProductToFood).filter(Boolean).filter(v10FoodHasNutrition).filter(food=>{const key=food.name.toLowerCase();if(seen.has(key))return false;seen.add(key);return true}).slice(0,12);
-    if(!v10OnlineFoods.length){
-      wrap.innerHTML='<div class="food-search-empty"><strong>No usable online matches found.</strong><span>Try a brand name, a more specific description, or use manual nutrition entry.</span></div>';
-      status.textContent="No online matches with nutrition values were found.";return;
-    }
-    wrap.innerHTML=`<p class="result-section-label">Online food database</p>${v10OnlineFoods.map((f,i)=>v10FoodCard(f,i,true)).join("")}`;
-    status.textContent=`Found ${v10OnlineFoods.length} foods. Tap the closest match.`;
-    v10BindFoodCards(wrap);
+    const packagedPenalty=/canned|jarred|bottled|pickled|preserved|in brine|in syrup|with sauce|seasoned/i;
+    v10OnlineFoods=(data.products||[]).map(v10ProductToFood).filter(Boolean).filter(v10FoodHasNutrition)
+      .filter(food=>{const key=normalizeFoodText(food.name);if(seen.has(key))return false;seen.add(key);return true})
+      .map(food=>({food,score:v10FoodSearchScore(food,query)-(packagedPenalty.test(food.name)?40:0)}))
+      .sort((a,b)=>b.score-a.score).map(x=>x.food).slice(0,12);
+    v10RenderCombinedResults(query,v10OnlineFoods);
+    status.textContent=local.length
+      ? `${local.length} everyday-food match${local.length===1?"":"es"} first; packaged foods are listed underneath.`
+      : `No everyday-food match found; showing packaged foods.`;
   }catch(error){
-    wrap.innerHTML='<div class="food-search-empty"><strong>Online search is temporarily unavailable.</strong><span>Your built-in foods and manual entry still work.</span></div>';
-    status.textContent="Could not reach the online database. Check the connection and try again.";
+    v10RenderCombinedResults(query,[]);
+    status.textContent=local.length
+      ? `${local.length} everyday-food match${local.length===1?"":"es"} available. The packaged-food database is offline.`
+      : "Could not reach the online database.";
   }
 }
 function v10InitSmartFoodSearch(){
@@ -1690,7 +1779,7 @@ initPhotoProgress();
 // Cloudflare Pages frontend + Cloudflare Worker/D1/R2 backend
 // ============================================================
 (function(){
-  const APP_VERSION="13.0.0-dev.9";
+  const APP_VERSION="13.1.5";
   const CHANNEL="Development";
   const META_KEY="mzjV13FoundationMeta";
   const JOURNAL_KEY="mzjV13ChangeJournal";
@@ -1819,7 +1908,7 @@ initPhotoProgress();
   function updateFoundationBadges(){const el=document.getElementById("v13StatusText");if(el)el.textContent=statusText();const m=getMeta(),last=document.getElementById("v13LastBackup");if(last)last.textContent=`Last sync: ${m.cloud.lastSyncAt?new Date(m.cloud.lastSyncAt).toLocaleString():"Never"} · Last backup: ${m.lastBackupAt?new Date(m.lastBackupAt).toLocaleString():"None"}`}
   function openCloudSetup(){const modal=document.getElementById("v13CloudModal"),c=getConfig();document.getElementById("v13ApiUrl").value=c.apiUrl||"";document.getElementById("v13ApiToken").value=c.token||"";modal.hidden=false}
   async function saveCloudSetup(){const apiUrlValue=document.getElementById("v13ApiUrl").value.trim(),token=document.getElementById("v13ApiToken").value.trim();if(!apiUrlValue||!token){alert("Enter the Worker address and access token.");return}saveConfig({apiUrl:apiUrlValue,token});try{await testConnection();saveMeta({cloud:{status:"connected",lastError:null}});document.getElementById("v13CloudModal").hidden=true;updateFoundationBadges();await syncNow()}catch(err){saveMeta({cloud:{status:"error",lastError:err.message}});alert(`Connection was not accepted.\n\n${err.message}`)}}
-  function injectUI(){const home=document.getElementById("homeView");if(home&&!document.getElementById("v13FoundationCard")){const card=document.createElement("section");card.id="v13FoundationCard";card.className="v13-foundation-card";card.innerHTML=`<div class="v13-foundation-head"><div><span class="v13-dev-badge">VERSION 13.0 · CLOUDFLARE DEVELOPMENT</span><h2>Synchronization status</h2><p id="v13StatusText">Preparing…</p></div><span class="v13-shield">☁️</span></div><div class="v13-foundation-actions"><button id="v13SyncBtn" type="button">Sync now</button><button id="v13CloudSetupBtn" type="button">Cloud setup</button><button id="v13BackupBtn" type="button">Complete backup</button><button id="v13RestoreBtn" type="button">Restore</button><button id="v13DiagnosticsBtn" type="button">Diagnostics</button><input id="v13RestoreFile" type="file" accept="application/json,.json" hidden></div><small id="v13LastBackup"></small><p class="v13-cloud-note"><strong>Hosting:</strong> Cloudflare Pages. <strong>Data:</strong> private Cloudflare D1. <strong>Photos:</strong> private Cloudflare R2.</p>`;home.insertBefore(card,home.firstElementChild?.nextSibling||home.firstChild)}
+  function injectUI(){const home=document.getElementById("homeView");if(home&&!document.getElementById("v13FoundationCard")){const card=document.createElement("section");card.id="v13FoundationCard";card.className="v13-foundation-card";card.innerHTML=`<div class="v13-foundation-head"><div><span class="v13-dev-badge">VERSION 13.1.5 · SEARCH CACHE FIX</span><h2>Synchronization status</h2><p id="v13StatusText">Preparing…</p></div><span class="v13-shield">☁️</span></div><div class="v13-foundation-actions"><button id="v13SyncBtn" type="button">Sync now</button><button id="v13CloudSetupBtn" type="button">Cloud setup</button><button id="v13BackupBtn" type="button">Complete backup</button><button id="v13RestoreBtn" type="button">Restore</button><button id="v13DiagnosticsBtn" type="button">Diagnostics</button><input id="v13RestoreFile" type="file" accept="application/json,.json" hidden></div><small id="v13LastBackup"></small><p class="v13-cloud-note"><strong>Hosting:</strong> Cloudflare Pages. <strong>Data:</strong> private Cloudflare D1. <strong>Photos:</strong> private Cloudflare R2.</p>`;home.insertBefore(card,home.firstElementChild?.nextSibling||home.firstChild)}
     if(!document.getElementById("v13DiagnosticsModal"))document.body.insertAdjacentHTML("beforeend",`<div class="v13-modal" id="v13DiagnosticsModal" hidden><section><header><div><span class="v13-dev-badge">DEVELOPMENT</span><h2>Version 13 Diagnostics</h2></div><button id="v13CloseDiagnostics" aria-label="Close">×</button></header><div class="v13-diag-grid" id="v13DiagGrid"></div><h3>Recent errors</h3><div class="v13-errors" id="v13ErrorList"></div><button id="v13RefreshDiagnostics">Refresh</button></section></div><div class="v13-modal" id="v13CloudModal" hidden><section><header><div><span class="v13-dev-badge">PRIVATE CONNECTION</span><h2>Cloud setup</h2></div><button id="v13CloseCloud" aria-label="Close">×</button></header><label>Cloudflare Worker address<input id="v13ApiUrl" type="url" placeholder="https://my-zepbound-sync.your-name.workers.dev"></label><label>Private access token<input id="v13ApiToken" type="password" autocomplete="off"></label><p class="v13-cloud-note">Enter the same address and token on the laptop and iPhone. The token stays on that device and is never placed in GitHub.</p><button id="v13SaveCloud">Save and test connection</button></section></div>`);
     document.getElementById("v13SyncBtn")?.addEventListener("click",()=>syncNow());document.getElementById("v13CloudSetupBtn")?.addEventListener("click",openCloudSetup);document.getElementById("v13SaveCloud")?.addEventListener("click",saveCloudSetup);document.getElementById("v13CloseCloud")?.addEventListener("click",()=>document.getElementById("v13CloudModal").hidden=true);document.getElementById("v13BackupBtn")?.addEventListener("click",createBackup);document.getElementById("v13RestoreBtn")?.addEventListener("click",()=>document.getElementById("v13RestoreFile").click());document.getElementById("v13RestoreFile")?.addEventListener("change",e=>restoreBackup(e.target.files[0]));document.getElementById("v13DiagnosticsBtn")?.addEventListener("click",async()=>{document.getElementById("v13DiagnosticsModal").hidden=false;await renderDiagnostics()});document.getElementById("v13CloseDiagnostics")?.addEventListener("click",()=>document.getElementById("v13DiagnosticsModal").hidden=true);document.getElementById("v13RefreshDiagnostics")?.addEventListener("click",renderDiagnostics);window.addEventListener("online",()=>{updateFoundationBadges();syncNow({quiet:true})});window.addEventListener("offline",updateFoundationBadges);updateFoundationBadges();if(configured())setTimeout(()=>syncNow({quiet:true}),800)}
   window.MZJFoundation={version:APP_VERSION,channel:CHANNEL,recordChange,recordPhotoChange,createBackup,restoreBackup,diagnosticSnapshot,syncNow};

@@ -1044,7 +1044,7 @@ function v10InitSmartFoodSearch(){
   if(!input||!button||input.dataset.unifiedFoodSearch==="yes")return;
   input.dataset.unifiedFoodSearch="yes";
   const badge=document.getElementById("foodSearchSourceBadge");
-  if(badge)badge.textContent="Smart categories · 13.1.8";
+  if(badge)badge.textContent="Smart categories · 13.2";
   input.addEventListener("input",()=>v10RenderLocal(input.value));
   input.addEventListener("keydown",event=>{if(event.key==="Enter"){event.preventDefault();v10SearchOnline()}});
   button.addEventListener("click",v10SearchOnline);

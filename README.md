@@ -32,7 +32,7 @@
 <header class="topbar">
 <div>
 <p class="brand-kicker">My Zepbound Journey</p>
-<h1 id="greeting">Good morning, Kevin Wiltz</h1>
+<h1 id="greeting">Good morning, Kevin </h1>
 </div>
 <button aria-label="Open settings" class="icon-button" id="settingsBtn">⚙️</button>
 </header>

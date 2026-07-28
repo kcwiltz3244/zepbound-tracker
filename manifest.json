@@ -64,3 +64,18 @@ Use test records only:
 7. Compare diagnostics on both devices.
 
 Do not move Version 13.0 to Stable until the entire testing checklist passes.
+
+
+## Enable the complete USDA food search (Version 13.3)
+
+USDA FoodData Central requires a free API key. Keep it in the Worker, never in the website files.
+
+1. Request a free FoodData Central API key from the USDA API signup page.
+2. Open a terminal inside `cloudflare-worker`.
+3. Run: `npx wrangler secret put USDA_API_KEY`
+4. Paste the USDA key when prompted.
+5. Redeploy: `npm run deploy`
+6. In the app, confirm **Cloud setup** is connected to that Worker.
+7. Search for `steak`, `beef`, `apple`, or another food and tap **Search all foods**.
+
+Without the secret, the Worker uses USDA's limited `DEMO_KEY`, which is suitable only for brief testing.

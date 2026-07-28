@@ -1,20 +1,14 @@
 (function(){
   'use strict';
-  const VERSION='13.0.0-dev.11';
+  const VERSION='13.1.1';
   const PREFIXES=['mzjV7','mzjV8','mzjV9','mzjV10','mzjV11','mzjV12','mzjV13','zepboundProcess'];
   const CONFIG_KEY='mzjV13CloudConfig';
   const META_KEY='mzjV13FoundationMeta';
-  const JOURNAL_KEY='mzjV13ChangeJournal';
-  const CLOCK_KEY='mzjV13CloudClock';
-  const DEVICE_KEY='mzjV13DeviceId';
-  const INTERNAL_KEYS=new Set([CONFIG_KEY,META_KEY,JOURNAL_KEY,CLOCK_KEY,DEVICE_KEY,'mzjV13Errors']);
-  const isSyncableKey=key=>typeof key==='string'&&PREFIXES.some(p=>key.startsWith(p))&&!INTERNAL_KEYS.has(key);
-  let applyingCloud=false;
   const PHOTO_DB='mzjProgressPhotos';
   const PHOTO_STORE='photos';
   const $=id=>document.getElementById(id);
   const parse=(v,f=null)=>{try{return JSON.parse(v)}catch{return f}};
-  const appKeys=()=>Object.keys(localStorage).filter(isSyncableKey).sort();
+  const appKeys=()=>Object.keys(localStorage).filter(k=>PREFIXES.some(p=>k.startsWith(p))&&!['mzjV13CloudConfig','mzjV13FoundationMeta','mzjV13ChangeJournal','mzjV13Errors','mzjV13CloudClock'].includes(k)).sort();
   function setStatus(text){if($('v13StatusText'))$('v13StatusText').textContent=text;}
   function download(name,data,type='application/json'){
     const url=URL.createObjectURL(new Blob([data],{type}));
@@ -35,79 +29,7 @@
   function diagnostics(){ensureModals();const config=parse(localStorage.getItem(CONFIG_KEY),{})||{};const meta=parse(localStorage.getItem(META_KEY),{})||{};const rows=[['App version',VERSION],['Connection',navigator.onLine?'Online':'Offline'],['Cloud configured',config.apiUrl&&config.token?'Yes':'No'],['Data sections',appKeys().length],['Last backup',meta.lastBackupAt?new Date(meta.lastBackupAt).toLocaleString():'None'],['Service worker',navigator.serviceWorker?.controller?'Active':'Waiting']];$('v13DiagGrid').innerHTML=rows.map(([a,b])=>`<article><small>${a}</small><strong>${String(b)}</strong></article>`).join('');$('v13ErrorList').innerHTML='<p>Safety controls are operating independently of the main app script.</p>';$('v13DiagnosticsModal').hidden=false;}
   function openCloud(){ensureModals();const c=parse(localStorage.getItem(CONFIG_KEY),{})||{};$('v13ApiUrl').value=c.apiUrl||'';$('v13ApiToken').value=c.token||'';$('v13CloudModal').hidden=false;}
   async function saveCloud(){const apiUrl=$('v13ApiUrl').value.trim().replace(/\/$/,'');const token=$('v13ApiToken').value.trim();if(!apiUrl||!token){alert('Enter the Worker address and access token.');return;}try{const r=await fetch(apiUrl+'/api/health',{headers:{Authorization:'Bearer '+token}});if(!r.ok)throw new Error(`Connection failed (${r.status})`);localStorage.setItem(CONFIG_KEY,JSON.stringify({apiUrl,token}));$('v13CloudModal').hidden=true;setStatus('Cloud connected · ready to synchronize');alert('Cloud connection accepted.');}catch(e){alert(`Connection was not accepted.\n\n${e.message}`);}}
-  function deviceId(){let id=localStorage.getItem(DEVICE_KEY);if(!id){id=(crypto.randomUUID?crypto.randomUUID():'device-'+Date.now()+'-'+Math.random().toString(36).slice(2));originalSetItem.call(localStorage,DEVICE_KEY,id);}return id;}
-  function readJournal(){const j=parse(localStorage.getItem(JOURNAL_KEY),{})||{};for(const key of Object.keys(j)){if(!isSyncableKey(key))delete j[key];}return j;}
-  function writeJournal(j){originalSetItem.call(localStorage,JOURNAL_KEY,JSON.stringify(j));}
-  function readClock(){const c=parse(localStorage.getItem(CLOCK_KEY),{})||{};for(const key of Object.keys(c)){if(!isSyncableKey(key))delete c[key];}return c;}
-  function writeClock(c){originalSetItem.call(localStorage,CLOCK_KEY,JSON.stringify(c));}
-  function recordChange(key,value,deleted=false){if(applyingCloud||!isSyncableKey(key))return;const j=readJournal();j[key]={key,value:deleted?null:(typeof value==='string'?parse(value,value):value),updatedAt:new Date().toISOString(),deviceId:deviceId(),deleted:Boolean(deleted)};writeJournal(j);}
-  const originalSetItem=Storage.prototype.setItem;
-  const originalRemoveItem=Storage.prototype.removeItem;
-  if(!window.__mzjV13StorageWrapped){
-    Storage.prototype.setItem=function(key,value){originalSetItem.call(this,key,value);if(this===localStorage)recordChange(String(key),value,false);};
-    Storage.prototype.removeItem=function(key){originalRemoveItem.call(this,key);if(this===localStorage)recordChange(String(key),null,true);};
-    window.__mzjV13StorageWrapped=true;
-  }
-  async function api(c,path,options={}){const headers={...(options.headers||{}),Authorization:'Bearer '+c.token};if(options.body&&!headers['Content-Type'])headers['Content-Type']='application/json';const r=await fetch(c.apiUrl+path,{...options,headers});if(!r.ok){let detail='';try{detail=(await r.json()).detail||''}catch{}throw new Error(`Cloud request failed (${r.status})${detail?': '+detail:''}`);}if(r.status===204)return null;return r.json();}
-  async function sync(){
-    const c=parse(localStorage.getItem(CONFIG_KEY),{})||{};
-    if(!c.apiUrl||!c.token){openCloud();return;}
-    const btn=$('v13SyncBtn');if(btn){btn.disabled=true;btn.textContent='Synchronizing…';}
-    setStatus('Synchronizing with Cloudflare…');
-    try{
-      let cloud=((await api(c,'/api/records')).records||[]).filter(r=>isSyncableKey(r.key));
-      const cloudMap=Object.fromEntries(cloud.map(r=>[r.key,r]));
-      const clock=readClock();
-      let journal=readJournal();
-      applyingCloud=true;
-      try{
-        for(const rec of cloud){
-          const pending=journal[rec.key];
-          const localStamp=clock[rec.key]||'';
-          if(pending)continue;
-          if(!localStamp||rec.updated_at>localStamp){
-            if(rec.deleted)originalRemoveItem.call(localStorage,rec.key);
-            else originalSetItem.call(localStorage,rec.key,typeof rec.value==='string'?rec.value:JSON.stringify(rec.value));
-            clock[rec.key]=rec.updated_at;
-          }
-        }
-      }finally{applyingCloud=false;}
-      for(const key of appKeys()){
-        if(!cloudMap[key]&&!journal[key]){
-          const raw=localStorage.getItem(key);
-          journal[key]={key,value:parse(raw,raw),updatedAt:new Date().toISOString(),deviceId:deviceId(),deleted:false};
-        }
-      }
-      writeJournal(journal);
-      for(const [key,item] of Object.entries(journal)){
-        await api(c,'/api/records',{method:'POST',body:JSON.stringify(item)});
-        clock[key]=item.updatedAt;
-        delete journal[key];
-        writeJournal(journal);
-      }
-      writeClock(clock);
-      cloud=((await api(c,'/api/records')).records||[]).filter(r=>isSyncableKey(r.key));
-      applyingCloud=true;
-      try{
-        for(const rec of cloud){
-          if(rec.deleted)originalRemoveItem.call(localStorage,rec.key);
-          else originalSetItem.call(localStorage,rec.key,typeof rec.value==='string'?rec.value:JSON.stringify(rec.value));
-          clock[rec.key]=rec.updated_at;
-        }
-      }finally{applyingCloud=false;}
-      writeClock(clock);
-      setStatus(`Synchronized · ${cloud.length} cloud records`);
-      alert(`Synchronization completed.
-
-${cloud.length} data sections are stored in Cloudflare.`);
-      setTimeout(()=>location.reload(),250);
-    }catch(e){console.error('Sync failed',e);setStatus('Synchronization error · local data remains safe');alert(`Synchronization stopped safely.
-
-${e.message}
-
-Your information remains on this device.`);}finally{if(btn){btn.disabled=false;btn.textContent='Sync now';}}
-  }
-  window.MZJFoundation={...(window.MZJFoundation||{}),version:VERSION,recordChange,syncNow:sync};
+  async function sync(){const c=parse(localStorage.getItem(CONFIG_KEY),{})||{};if(!c.apiUrl||!c.token){openCloud();return;}if(window.MZJFoundation&&typeof window.MZJFoundation.syncNow==='function'){await window.MZJFoundation.syncNow();return;}alert('Cloud connection is saved, but the full synchronization engine did not load. Your data remains safe on this device.');}
   function bind(){ensureModals();setStatus((parse(localStorage.getItem(CONFIG_KEY),{})||{}).apiUrl?'Cloud configured · ready':'Cloud connection needs setup');const pairs=[['v13BackupBtn',()=>makeBackup()],['v13RestoreBtn',()=>$('v13RestoreFile')?.click()],['v13DiagnosticsBtn',diagnostics],['v13CloudSetupBtn',openCloud],['v13SyncBtn',sync],['v13CloseDiagnostics',()=>{$('v13DiagnosticsModal').hidden=true}],['v13RefreshDiagnostics',diagnostics],['v13CloseCloud',()=>{$('v13CloudModal').hidden=true}],['v13SaveCloud',saveCloud]];for(const [id,fn] of pairs){const el=$(id);if(el&&!el.dataset.v13Bound){el.addEventListener('click',fn);el.dataset.v13Bound='yes';}}const input=$('v13RestoreFile');if(input&&!input.dataset.v13Bound){input.addEventListener('change',e=>restoreFile(e.target.files?.[0]));input.dataset.v13Bound='yes';}}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',bind);else bind();
   window.V13SafetyControls={makeBackup,restoreFile,diagnostics};

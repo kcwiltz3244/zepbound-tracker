@@ -1,23 +1,7 @@
-# Version 13.0.0-dev.10
+# Version 13.3.1 — Complete Food Search + Journal Safeguard
 
-- Fixed recovered nutrition being hidden by an empty Version 13 storage array.
-- Merges Version 12.2 and Version 13 nutrition records by record ID.
-- Hardened More and Journal navigation with event delegation and a Journal fallback button.
-- Updated service-worker cache to dev.10.
-
-# Version 13.0.0-dev.9 — Nutrition + Journal Consolidation
-
-## Fixed
-- Migrates recovered Version 12.2 nutrition records from `mzjV81Nutrition` into the Version 13 canonical nutrition store.
-- Dual-writes nutrition during Development so rollback cannot hide records.
-- Home and Nutrition screens use the same food-log data source.
-- Includes the independent bottom navigation fix for More.
-- Includes Journal access, editor, search, favorites, and timeline.
-- Retains independent Backup, Restore, Cloud Setup, and Diagnostics controls.
-- Adds the navigation script to the service-worker cache and bumps the cache to dev.9.
-
-## Data safety
-- This release does not delete or overwrite existing food records.
-- Existing Version 12.2/13 records are copied forward on first load.
-- Cloud synchronization remains disabled until Cloudflare setup is completed.
--Cloudfare stable production deployment
+- Keeps USDA FoodData Central and Open Food Facts online search.
+- Preserves every food-journal date found in either the Version 13 or legacy nutrition storage copy.
+- Merges entries from both copies without discarding unique records.
+- Creates a one-time pre-merge safety snapshot under `mzjV1331NutritionSafetySnapshot`.
+- Continues dual-writing nutrition entries for safe rollback.

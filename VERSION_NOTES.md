@@ -7,7 +7,7 @@
 - Added automatic synchronization, offline pending journal, Sync Now, cloud setup, and expanded diagnostics.
 - Added timestamp-based conflict handling at the data-section level.
 - Retained complete local backup and restore.
-- No Cloudflare Pages deployment is used.
+- No Cloudflare Pages deployment is used..
 
 ## Development limitation
 

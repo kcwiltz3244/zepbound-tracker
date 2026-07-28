@@ -11,4 +11,4 @@ Changes:
 - The service worker uses a new cache and network-first, no-store behavior for app code.
 - Everyday local foods are rendered before the online request begins.
 - Online canned, bottled, jarred, and branded results are appended underneath.
-- The food-search badge visibly says `Everyday first · 13.1.5` so the loaded code can be verified.
+- The food-search badge visibly says `Everyday first · 13.1.5` so the loaded code can be verified..

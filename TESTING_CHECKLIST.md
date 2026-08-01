@@ -1,24 +1,12 @@
-# Version 13.0 All-Cloudflare Development — Test Checklist
+# Version 13.2 Stable Testing Checklist
 
-## Home cards
-- Update Today opens Daily Check-in
-- Log Food opens Nutrition entry
-- Weigh In opens Weight entry
-- Weekly Photo opens the photo picker
-- Exercise opens the fitness routine
-- Eat Out Smart opens restaurant search
-- Zepbound summary opens the Zepbound Center
-
-## Navigation
-- Home, Nutrition, Progress, and Fitness bottom buttons work
-- More opens the full menu
-- Every More menu item opens correctly
-- Every Return Home button returns to the top of Home
-
-## Regression checks
-- Add food and confirm Today and Last 7 Days update
-- Search built-in foods and online foods
-- Log an injection
-- Save a dose-effectiveness check-in
-- Select and save a weekly progress photo
-- Close and reopen the app and confirm saved information remains
+1. Open the production Pages address.
+2. Confirm the Home badge says `VERSION 13.2 · STABLE`.
+3. Open Nutrition and confirm the search badge says `Smart categories · 13.2`.
+4. Search `cuc` and confirm cucumber results appear immediately.
+5. Search `green beans` and confirm everyday results appear before packaged results.
+6. Confirm saved meals appear without the “No food entered” message underneath.
+7. Tap Sync now and confirm all data sections are stored in Cloudflare.
+8. Close and reopen the phone app.
+9. Confirm nutrition, weight, and settings remain present.
+10. Create a Complete backup after all checks pass.

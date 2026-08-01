@@ -1,4 +1,11 @@
-# My Zepbound Journey 13.0 Development
+# My Zepbound Journey — Version 13.2 Stable
 
-Version 13.0.0-dev.9 combines the recovered-nutrition compatibility fix with the working More and Journal navigation. Upload every file in this folder together so `index.html`, scripts, manifest, and service worker remain matched.
-Restore working Version 13.2 production trigger
+This is the stable baseline following the Version 13.1 food-search and deployment repairs.
+
+Production branch: `cloudflare-stable`
+
+Core deployment files:
+- `index.html`
+- `app.js`
+- `styles.css`
+- `sw.js`

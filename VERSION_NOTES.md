@@ -1,23 +1,17 @@
-# Version 13.0.0-dev.10
+# My Zepbound Journey — Version 13.2 Stable
 
-- Fixed recovered nutrition being hidden by an empty Version 13 storage array.
-- Merges Version 12.2 and Version 13 nutrition records by record ID.
-- Hardened More and Journal navigation with event delegation and a Journal fallback button.
-- Updated service-worker cache to dev.10.
+Version 13.2 establishes the current stable baseline.
 
-# Version 13.0.0-dev.9 — Nutrition + Journal Consolidation
+## Included
+- Working categorized built-in food search
+- Fresh and everyday foods shown first
+- Packaged and restaurant results separated
+- Cloudflare synchronization retained
+- Existing local data and backup compatibility retained
+- Missing `formatDate` startup error remains fixed
+- Food-log empty message now stays hidden when entries exist
+- Consistent Version 13.2 labels and service-worker cache
 
-## Fixed
-- Migrates recovered Version 12.2 nutrition records from `mzjV81Nutrition` into the Version 13 canonical nutrition store.
-- Dual-writes nutrition during Development so rollback cannot hide records.
-- Home and Nutrition screens use the same food-log data source.
-- Includes the independent bottom navigation fix for More.
-- Includes Journal access, editor, search, favorites, and timeline.
-- Retains independent Backup, Restore, Cloud Setup, and Diagnostics controls.
-- Adds the navigation script to the service-worker cache and bumps the cache to dev.9.
-
-## Data safety
-- This release does not delete or overwrite existing food records.
-- Existing Version 12.2/13 records are copied forward on first load.
-- Cloud synchronization remains disabled until Cloudflare setup is completed.
--Cloudfare stable production deployment
+## Deployment
+Upload `app.js`, `index.html`, `styles.css`, and `sw.js` to the `cloudflare-stable` branch.
+Do not delete the existing files first; replace them during upload.
